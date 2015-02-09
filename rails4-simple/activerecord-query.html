@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | ActiveRecord Query Interface - 数据表操作</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./activerecord-query.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="activerecord-query-interface---">ActiveRecord Query Interface - 数据表操作</h1>
+
+<blockquote>
+  <p>A person does not really understand something until after teaching it to a computer. – Donald Knuth</p>
+</blockquote>
+
+<p>这一章将介绍更多<em>ActiveRecord</em>的<em>CRUD</em>方式。</p>
+
+<h2 id="section">自订数据表名称或主键栏位</h2>
+
+<p>我们在<a href="environments-and-bundler.html">环境设定与Bundler</a>一章曾提及<em>Rails</em>的命名惯例，数据表的名称预设就是<em>Model</em>类别名称的复数小写，例如<em>Event</em>的数据表是<em>events</em>、<em>EventCategory</em>的数据表是<em>event_categories</em>。不过英文博大精深，<em>Rails</em>转出来的复数不一定是正确的英文单字，这时候你可以修改<code>config/initializers/inflections.rb</code>进行订正。</p>
+
+<p>如果你的数据表不使用这个命名惯例，例如连接到旧的数据库，或是主键栏位不是<code>id</code>，也可以手动指定：</p>
+
+<pre><code>class Category &lt; ActiveRecord::Base
+  self.table_name = "your_table_name"
+  self.primary_key = "your_primary_key_name"
+end
+</code></pre>
+
+<h2 id="section-1">新增</h2>
+
+<p><em>ActiveRecord</em>提供了四种<em>API</em>，分别是save、save!、create和create!：</p>
+
+<pre><code>&gt; a = Category.new( :name =&gt; 'Ruby', :position =&gt; 1 )
+&gt; a.save
+
+&gt; b = Category.new( :name =&gt; 'Perl', :position =&gt; 2 )
+&gt; b.save!
+
+&gt; Category.create( :name =&gt; 'Python', :position =&gt; 3 )
+&gt; c = Category.create!( :name =&gt; 'PHP', :position =&gt; 4 )
+</code></pre>
+
+<p>其中<em>create</em>和<em>create!</em>就等于<code>new</code>完就<em>save</em>和<em>save!</em>，有无惊嘆号的差别在于<em>validate</em>资料验证不正确的动作，无惊嘆号版本会回传布林值(true或false)，有惊嘆号版本则是验证错误会丢出例外。</p>
+
+<p>何时使用惊嘆号版本呢？save和create通常用在会处理回传布林值(true/false)的情况下(例如在 controller 裡面根据成功失败决定 render 或 redirect)，否则在预期应该会储存成功的情况下，请用 save!或create! 来处理，这样一旦碰到储存失败的情形，才好追踪 bug。</p>
+
+<p>通过<code>:validate =&gt; false</code>参数可以略过验证</p>
+
+<pre><code>&gt; c.save( :validate =&gt; false )
+</code></pre>
+
+<h3 id="newrecord">new_record?</h3>
+
+<p>这个方法可以知道对象是否已经存在于数据库：</p>
+
+<pre><code>&gt; c.new_record?
+=&gt; false
+&gt; c.persisted?
+=&gt; true
+</code></pre>
+
+<h2 id="section-2">如何查询</h2>
+
+<p>ActiveRecord 使用了 Arel 技术来实作查询功能，你可以自由组合 where、limit、select、order 等条件。</p>
+
+<blockquote>
+  <p>Arel 是 relational algebra” library。但根据 2.0 实作者 tenderlove 的说法，也可以说是一种 SQL compiler。 http://engineering.attinteractive.com/2010/12/architecture-of-arel-2-0/</p>
+</blockquote>
+
+<h3 id="first-last--all">first, last 和 all</h3>
+
+<p>这三个方法可以分别拿出数据库中的第一笔、最后一笔及全部的资料：</p>
+
+<pre><code>c1 = Category.first
+c2 = Category.last
+categories = Category.all # 这会是一个阵列
+</code></pre>
+
+<blockquote>
+  <p>如果资料量较多，请不要在正式上线环境中执行.all 把所有资料拿出来，这样会耗费非常多的内存。请用分页或缩小查询范围。</p>
+</blockquote>
+
+<h3 id="find">find</h3>
+
+<p>已知资料的主键 ID 的值的话，可以使用 find 方法：</p>
+
+<pre><code>c3 = Category.find(1)
+c4 = Category.find(2)
+</code></pre>
+
+<p>find 也可以接受阵列参数，这样就会一次找寻多个并回传阵列：</p>
+
+<pre><code>arr = Category.find([1,2])
+# 或是
+arr = Category.find(1,2)
+</code></pre>
+
+<blockquote>
+  <p>如果找不到资料的话，会丢 ActiveRecord::RecordNotFound 例外。如果是 find_by_id 就不会丢出例外，而是回传 nil。</p>
+</blockquote>
+
+<h3 id="reload">reload</h3>
+
+<p>这个方法可以将对象从数据库裡重新载入一次：</p>
+
+<pre><code>&gt; e = Event.first
+&gt; e.name = "test"
+&gt; e.reload
+</code></pre>
+
+<h3 id="pluck">pluck</h3>
+
+<p>这个方法可以非常快速的捞出指定栏位的资料：</p>
+
+<pre><code>Event.pluck(:name)
+=&gt; ["foo", "bar"]
+Category.pluck(:id, :name)
+=&gt; [ [1, "Tech"], [2, "Business"] ]
+</code></pre>
+
+<h3 id="findbysql">find_by_sql</h3>
+
+<p>如果需要手动撰写 SQL，可以使用<code>find_by_sql</code>和<code>count_by_sql</code>，例如：</p>
+
+<pre><code>c8 = Category.find_by_sql("select * from categories")
+</code></pre>
+
+<p>不过需要用到的机会应该很少。</p>
+
+<h3 id="where-">where 查询条件</h3>
+
+<p>where 可以非常弹性的组合出 SQL 查询，例如：</p>
+
+<pre><code>c9 = Category.where( :name =&gt; 'Ruby', :position =&gt; 1 )
+c10 = Category.where( [ "name = ? or position = ?", 'Ruby', 2] )
+</code></pre>
+
+<p>其中参数有两种写法，一种是 Hash，另一种是 Array。前者的写法虽然比较简洁，但是就没办法写出 or 的查询。注意到不要使用字串写法，例如</p>
+
+<pre><code>Category.where("name = #{params[:name]}") # 请不要这样写
+</code></pre>
+
+<p>这是因为字串写法会有 SQL injection 的安全性问题，请改用阵列写法。</p>
+
+<h3 id="limit">limit</h3>
+
+<p>limit 可以限制笔数</p>
+
+<pre><code>c = Category.limit(5).all
+c.size # 5
+</code></pre>
+
+<h3 id="order">order</h3>
+
+<p>order 可以设定排序条件</p>
+
+<pre><code>Category.order("position")
+Category.order("position DESC")
+Category.order("position DESC, name ASC")
+</code></pre>
+
+<p>如果要消去<em>order</em>条件，可以用<code>reorder</code>：</p>
+
+<pre><code>Category.order("position").reorder("name") # 改用 name 排序
+Category.order("position").reorder(nil) # 取消所有排序
+</code></pre>
+
+<h3 id="offset">offset</h3>
+
+<p>offset 可以设定忽略前几笔不取出，通常用于资料分页：</p>
+
+<pre><code>c = Category.limit(2)
+c.first.id # 1
+c = Category.limit(2).offset(3)
+c.first.id # 4
+</code></pre>
+
+<h3 id="select">select</h3>
+
+<p>预设的 SQL 查询会取出资料的所有栏位，有时候你可能不需要所有资料，为了效能我们可以只取出其中特定栏位：</p>
+
+<pre><code>Category.select("id, name")
+</code></pre>
+
+<blockquote>
+  <p>例如栏位中有 Binary 资料时，你不会希望每次都读取出庞大的 Binary 资料占用内存，而只希望在使用者要下载的时候才读取出来。</p>
+</blockquote>
+
+<h3 id="readonly">readonly</h3>
+
+<pre><code>c = Category.readonly.first
+</code></pre>
+
+<p>如此查询出来的<code>c</code>就无法修改或删除，不然会丢出<code>ActiveRecord::ReadOnlyRecord</code>例外。</p>
+
+<h3 id="group--having">group 和 having</h3>
+
+<p><code>group</code>运用了数据库的<code>group_by</code>功能，让我们可以将计算后的结果依照某一个栏位分组后回传，例如说今天我有一批订单，裡面有分店的销售金额，我希望能这些金额全部加总起来变成的各分店销售总金额，这时候我就可以这麼做：</p>
+
+<pre><code>Order.select("store_name, sum(sales)").group("store")
+</code></pre>
+
+<p>这样会执行类似这样的<em>SQL</em>:</p>
+
+<pre><code>SELECT store_name, sum(sales) FROM orders GROUP BY store_name
+</code></pre>
+
+<p><code>having</code>则是让<code>group</code>可以再增加条件，例如我们想为上面的查询增加条件是找出业绩销售超过10000的分店，那么我可以这麼下：</p>
+
+<pre><code>Order.select("store_name, sum(sales)").group("store").having("sum(sales) &gt; ?", 10000)
+</code></pre>
+
+<p>所执行的<em>SQL</em>便会是:</p>
+
+<pre><code>SELECT store_name, sum(sales) FROM orders GROUP BY store_name HAVING sum(sales) &gt; 10000
+</code></pre>
+
+<h3 id="section-3">串接写法</h3>
+
+<p>以上的 where, order , limit,  offset, joins, select 等等，都可以自由串接起来组合出最终的 SQL 条件：</p>
+
+<pre><code>c12 = Category.where( :name =&gt; 'Ruby' ).order("id desc").limit(3)
+</code></pre>
+
+<h3 id="findeach-">find_each 批次处理</h3>
+
+<p>如果资料量很大，但是又需要全部拿出来处理，可以使用 find_each 批次处理</p>
+
+<pre><code>Category.where("position &gt; 1").find_each do |category|
+    category.do_some_thing
+end
+</code></pre>
+
+<p>预设会批次捞 1000 笔，如果需要设定可以加上 :batch_size 参数。</p>
+
+<h3 id="section-4">重新载入</h3>
+
+<p>如果已经读取的 AR 资料，需要重新载入，可以用 reload 方法：</p>
+
+<pre><code>p = Category.first
+p.reload
+</code></pre>
+
+<h2 id="section-5">更新</h2>
+
+<p>更新一个<em>ActiveRecord</em>对象：</p>
+
+<pre><code>c13 = Category.first
+c13.update(attributes)
+c13.update!(attributes)
+c13.update_column(attribute_name, value)
+c13.update_columns(attributes)
+</code></pre>
+
+<blockquote>
+  <p>注意 update_column 会略过 validation 资料验证
+注意 mass assign 安全性问题，详见安全性一章。</p>
+</blockquote>
+
+<p>我们也可以用<code>update_all(updates, conditions=nil, options={})</code>来一次更新数据库的多笔资料：</p>
+
+<pre><code>&gt; Category.update_all( { :name =&gt; "New Name" }, "position &gt; 1" )
+</code></pre>
+
+<h3 id="increment--decrement">increment 和 decrement</h3>
+
+<p>数字栏位可以使用<code>increment</code>和<code>decrement</code>方法，也有<code>increment!</code>和<code>decrement!</code>立即存进数据库的用法。</p>
+
+<h3 id="toggle">toggle</h3>
+
+<p><em>Boolean</em>栏位可以使用<code>toggle</code>方法，同样也有<code>toggle!</code></p>
+
+<h2 id="section-6">删除</h2>
+
+<p>一种是先抓到该对象，然后删除：</p>
+
+<pre><code>c12 = Category.first
+c12.destroy
+</code></pre>
+
+<p>另一种是直接对类别呼叫删除，传入 ID 或条件：</p>
+
+<pre><code>Category.delete(2)
+Category.delete([2,3,4])
+Category.delete_all(conditions = nil)
+Category.destroy_all(conditions = nil)
+</code></pre>
+
+<p>delete 不会有 callback 回呼，destroy 有 callback 回呼。什么是回呼详见下一章。</p>
+
+<h2 id="section-7">统计方法</h2>
+
+<pre><code>Category.count
+Category.average(:position)
+Category.maximum(:position)
+Category.minimum(:position)
+Category.sum(:position)
+</code></pre>
+
+<p>其中我们可以利用上述的 where 条件缩小范围，例如：</p>
+
+<pre><code>Category.where( :name =&gt; "Ruby").count
+</code></pre>
+
+<h2 id="scopes-">Scopes 作用域</h2>
+
+<p><em>Model Scopes</em>是一项非常酷的功能，它可以将常用的查询条件宣告起来，让程式变得乾净易读，更厉害的是可以串接使用。例如，我们编辑<em>app/models/event.rb</em>，加上两个<em>Scopes</em>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    scope :open_public, -&gt; { where( :is_public =&gt; true ) }
+    scope :recent_three_days, -&gt; { where(["created_at &gt; ? ", Time.now - 3.days ]) }
+end
+
+&gt; Event.create( :name =&gt; "public event", :is_public =&gt; true )
+&gt; Event.create( :name =&gt; "private event", :is_public =&gt; false )
+&gt; Event.create( :name =&gt; "private event", :is_public =&gt; true )
+
+&gt; Event.open_public
+&gt; Event.open_public.recent_three_days
+</code></pre>
+
+<blockquote>
+  <p><code>-&gt; {...}</code>是Ruby语法，等同于<code>Proc.new{...}</code>或<code>lambda{...}</code>，用来建立一个匿名方法对象</p>
+</blockquote>
+
+<p>串接的顺序没有影响的，都会一併套用。我们也可以串接在<em>has_many</em>关联后：</p>
+
+<pre><code>&gt; user.events.open_public.recent_three_days
+</code></pre>
+
+<p>接着，我们可以设定一个预设的<em>Scope</em>，通常会拿来设定排序：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    default_scope -&gt; { order('id DESC') }
+end
+</code></pre>
+
+<p><code>unscoped</code>方法可以暂时取消预设的<em>default_scope</em>：</p>
+
+<pre><code>Event.unscoped do
+    Event.all
+    # SELECT * FROM events
+end
+</code></pre>
+
+<p>最后，<em>Scope</em>也可以接受参数，例如：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    scope :recent, -&gt; { |date| where(["created_at &gt; ? ", date ]) }
+
+    # 等同于 scope :recent, lambda{ |date| where(["created_at &gt; ? ", date ]) }
+    # 或 scope :recent, Proc.new{ |t| where(["created_at &gt; ? ", t ]) }
+end
+
+Event.recent( Time.now - 7.days )
+</code></pre>
+
+<p>不过，笔者会推荐上述这种带有参数的<em>Scope</em>，改成如下的类别方法，可以比较明确看清楚参数是什么，特别是你想给预设值的时候：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    def self.recent(t=Time.now)
+        where(["created_at &gt; ? ", t ])
+    end
+end
+
+Event.recent( Time.now - 7.days )
+</code></pre>
+
+<p>这样的效果是一样的，也是一样可以和其他<em>Scope</em>做串接。</p>
+
+<p><code>all</code>方法可以将<em>Model</em>转成可以串接的形式，方便依照参数组合出不同查询，例如</p>
+
+<pre><code>fruits = Fruit.all
+fruits = fruits.where(:colour =&gt; 'red') if options[:red_only]
+fruits = fruits.limit(10) if limited?
+</code></pre>
+
+<!--
+TODO: unscoped, scoping, create_with
+<http://blog.plataformatec.com.br/2010/07/new-active-record-scoping-syntax/>
+-->
+
+<blockquote>
+  <p>可以呼叫<code>to_sql</code>方法观察实际<em>ORM</em>转出来的<em>SQL</em>，例如<code>Event.open_public.recent_three_days.to_sql</code></p>
+</blockquote>
+
+<h2 id="virtual-attribute">虚拟属性(Virtual Attribute)</h2>
+
+<p>有时候表单裡操作的属性资料，不一定和数据库的栏位完全对应。例如数据表分成<em>first_name</em>和<em>last_name</em>两个栏位好了，但是表单输入和显示的时候，只需要一个属性叫做<em>full_name</em>，这时候你就可以在<em>model</em>裡面定义这样的方法：</p>
+
+<pre><code>def full_name
+    "#{self.first_name} #{self.last_name}"
+end
+
+def full_name=(value)
+    self.first_name, self.last_name = value.to_s.split(" ", 2)
+end
+</code></pre>
+
+<h2 id="section-8">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

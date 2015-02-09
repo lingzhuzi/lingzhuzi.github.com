@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 錦囊妙計</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/rails-recipes.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="section">錦囊妙計</h1>
+
+<blockquote>
+  <p>When you choose a language, you’re choosing more than a set of technical trade-offs—you’re choosing a community. - Joshua Bloch</p>
+</blockquote>
+
+<p>這一章介紹一些常見的<em>Rails</em>疑難雜症問題，以及常用的<em>RubyGem</em>套件。更多熱門套件可以參考 <a href="http://ruby-toolbox.com/">The Ruby Toolbox</a></p>
+
+<h2 id="better-errors">Better Errors</h2>
+
+<p><a href="https://github.com/charliesome/better_errors">better_errors</a>可以替換掉<em>Rails</em>內建的錯誤畫面，提供開發時期更好除錯的介面。</p>
+
+<h2 id="rake">Rake</h2>
+
+<p><a href="http://rake.rubyforge.org/">Rake</a> 是一套類似 Make 的 Builder 工具，讓我們可以撰寫一些腳本任務，並且很方便設定各個任務的相依性。在 Rails 之中就內建了許多 rake 指令，除了你已經使用過的 rake db:migrate 之外，還有例如：</p>
+
+<pre><code>rake db:migrate
+rake db:drop
+rake tmp:clear
+rake notes
+</code></pre>
+
+<p>你可以輸入 rake -T 看到所有的 rake 指令。而要在 Rails 環境中撰寫 Rake，請將附檔名為 .rake 的檔案放在 lib/tasks 目錄下即可，例如：</p>
+
+<p>/lib/tasks/dev.rake</p>
+
+<pre><code>namespace :dev do
+
+  desc "Rebuild system"
+  task :build =&gt; ["tmp:clear", "log:clear", "db:drop", "db:create", "db:migrate", :setup ]
+
+  desc "Setup system data"
+  task :setup =&gt; :environment do
+      puts "Create system user"
+      u = User.new( :login =&gt; "root", :password =&gt; "password", :email =&gt; "root@example.com", :name =&gt; "管理員")
+      u.is_admin = true
+      u.save!
+  end
+end
+</code></pre>
+
+<p>透過執行 rake dev:build，就會自動清除 log 檔案，砍掉資料庫，執行 migrate，然後執行 rake dev:setup 建立一個使用者。</p>
+
+<p>其他常見的使用情境包括：1. 修正上線的資料，這樣部署到<em>Production</em>後，可以用來執行 2. 建立開發用的假資料 3. 搭配排成工具使用，例如每天凌晨三點寄出通知信、每週一產生報表等等</p>
+
+<p>更多介紹可以參考 <a href="http://codequietly.com/2010/6/rake-tasks-101">http://codequietly.com/2010/6/rake-tasks-101</a> 和 <a href="http://jasonseifer.com/2010/04/06/rake-tutorial">http://jasonseifer.com/2010/04/06/rake-tutorial</a> 兩篇文章。</p>
+
+<h2 id="section-1">排程工具</h2>
+
+<p>如果您有週期性的任務需要執行，除了可以透過<em>Linux</em>的<em>crontab</em>設定去執行<em>rake</em>腳本。例如輸入<em>crontab -e</em>加入：</p>
+
+<pre><code>0 2 * * * cd /home/your_project/current/ &amp;&amp; RAILS_ENV=production /usr/local/bin/rake cron:daily
+</code></pre>
+
+<p>就是每天凌晨兩點執行<em>rake cron:daily</em>這個任務。</p>
+
+<p>或是你可以安裝<em><a href="https://github.com/javan/whenever">whenever</a></em>這個 gem，就可以用<em>Ruby</em>的語法來定義週期性的任務，可以很方便的設定伺服器上的<em>cron</em>排程。</p>
+
+<h2 id="activerecord-">ActiveRecord 加強搜尋</h2>
+
+<p><a href="https://github.com/activerecord-hackery/ransack">Ransack</a>可以很快的針對<em>ActiveRecord</em>做出排序和複雜的條件搜尋。</p>
+
+<h2 id="yaml">YAML</h2>
+
+<p>Rails 的資料庫設定檔 database.yml 是用一種叫 : <a href="http://www.yaml.org/">YAML Ain’t Markup Language</a> 的格式所撰寫，檔案打開來，看起來就像一般的 plain 設定檔，非常容易修改。</p>
+
+<p>YAML 的設計首要目標就是要讓使用者容易看懂，可以和 script 語言搭配良好。用途有 資料序列化 data serialization、設定檔 configuration settings、log files、Internet messaging、filtering 等。網站上已知有支援的 script 語言有 Python,Ruby,Java,PHP,Perl,Javascript 等。</p>
+
+<pre><code>require ‘yaml’
+
+ps2 = YAML.load_file(‘example.yaml’)
+ps2.each do |it|
+  puts it.inspect
+end
+</code></pre>
+
+<h2 id="json">JSON</h2>
+
+<p>Rails 內建就有 <a href="http://caboo.se/doc/classes/ActiveSupport/JSON.html">ActiveSupport JSON</a>，用法如下：</p>
+
+<pre><code>ActiveSupport::JSON.encode( [ {:a =&gt; 1 , :b =&gt; 2 } , "c", "d" ] )
+=&gt; "[{\"a\":1,\"b\":2},\"c\",\"d\"]"
+
+ActiveSupport::JSON.decode( "[{\"a\":1,\"b\":2},\"c\",\"d\"]" )
+=&gt; [{"a"=&gt;1, "b"=&gt;2}, "c", "d"]
+</code></pre>
+
+<p><a href="http://github.com/brianmario/yajl-ruby">yajl-ruby</a> 則是一套底層用C，比較快很多的 JSON parser，建議可以讓<em>Rails</em>底層改用這套函式庫，請在<code>Gemfile</code>檔案中加入</p>
+
+<pre><code>gem 'yajl-ruby', :require =&gt; 'yajl'
+</code></pre>
+
+<h2 id="xml">XML</h2>
+
+<p>Rails 內建使用 Ruby 的 XML 函式庫 <a href="http://builder.rubyforge.org/">Builder</a></p>
+
+<p><a href="http://github.com/tenderlove/nokogiri">Nokogiri</a> 是一套基於 <a href="http://xmlsoft.org/">libxml2</a> 的函式庫，效能較佳。可參考 <a href="http://www.engineyard.com/blog/2010/getting-started-with-nokogiri/">Getting Started with Nokogiri</a> 一文介紹用法。</p>
+
+<p>如果要替換 Rails 內建的 XML 函式庫，請在<code>Gemfile</code>檔案中加入	</p>
+
+<pre><code>gem 'nokogiri'
+</code></pre>
+
+<blockquote>
+  <p>有些函式庫為了執行效率，底層會改用 C 的函式庫，適合於正式上線環境，缺點是需要編譯，在一些特殊環境可能無法運作，例如最新版的 Nokogiri 就不支援 Windows 了。而純 Ruby 實作的版本就沒有這個問題。</p>
+</blockquote>
+
+<h2 id="http">處理 HTTP</h2>
+
+<p>請參考 <a href="http://ihower.tw/blog/archives/2941">HTTP client</a> 這篇文章。推薦 <a href="https://github.com/nahi/httpclient">httpclient</a> 或 <a href="https://github.com/lostisland/faraday">faraday</a>。</p>
+
+<h2 id="pdf">PDF</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/sandal/prawn">Prawn</a> 可以產生 PDF，支援 Unicode。</li>
+  <li>
+<a href="http://thinkrelevance.com/blog/2010/06/15/rethinking-pdf-creation-in-ruby.html">PDFKit</a> 則是另一個有趣的產生方式，透過 HTML/CSS 轉 PDF。</li>
+  <li>
+<a href="http://www.princexml.com/">Prince</a> 是一套商用方案，將 HTML/CSS 轉 PDF</li>
+</ul>
+
+<h2 id="csv">CSV</h2>
+
+<p><em>Ruby</em>就有內建這個函式庫了，只需要<code>require "csv"</code>即可使用。</p>
+
+<h2 id="admin-">Admin 介面</h2>
+
+<ul>
+  <li><a href="http://activeadmin.info/">ActiveAdmin</a></li>
+  <li><a href="https://github.com/sferik/rails_admin">RailsAdmin</a></li>
+</ul>
+
+<h2 id="section-2">表單</h2>
+
+<p>除了用<em>Rails</em>內建的表單<em>Helper</em>，也有一些提供表單設計更方便的套件：</p>
+
+<ul>
+  <li><a href="https://github.com/plataformatec/simple_form">simple_form</a></li>
+  <li><a href="https://github.com/justinfrench/formtastic">formtastic</a></li>
+</ul>
+
+<h2 id="section-3">分頁</h2>
+
+<ul>
+  <li><a href="https://github.com/mislav/will_paginate">will_paginate</a></li>
+  <li><a href="https://github.com/amatsuda/kaminari">kaminari</a></li>
+</ul>
+
+<h2 id="section-4">檔案上傳</h2>
+
+<p>有兩套選擇：</p>
+
+<ul>
+  <li>
+<a href="http://github.com/thoughtbot/paperclip">Paperclip</a> 是目前使用上最為方便的檔案上傳 plugin。</li>
+  <li><a href="https://github.com/jnicklas/carrierwave">CarrierWave</a></li>
+</ul>
+
+<h2 id="acts-as-">acts as 系列</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/rails/acts_as_list">ActsAsList</a> 幫 ActiveRecord 加上列表操作功能。</li>
+  <li>
+<a href="http://github.com/rails/acts_as_tree">ActsAsTree</a> 幫 ActiveRecord 加上樹狀操作功能。</li>
+  <li>
+<a href="http://github.com/mbleigh/acts-as-taggable-on">acts-as-taggable-on</a> 製作 Tag 功能。</li>
+  <li><a href="http://asciicasts.com/episodes/262-trees-with-ancestry">http://asciicasts.com/episodes/262-trees-with-ancestry</a></li>
+</ul>
+
+<h2 id="section-5">如何畫圖表</h2>
+
+<p>使用 <a href="http://googlecharts.rubyforge.org/">GoogleCharts</a> 是最簡單的方式。
+如果您使用 jQuery，<a href="http://code.google.com/p/flot/">flot</a> 是一套不錯的圖表工具。</p>
+
+<h2 id="section-6">有限狀態機</h2>
+
+<ul>
+  <li><a href="http://github.com/rubyist/aasm">aasm</a></li>
+</ul>
+
+<h2 id="recapache">Recapache</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/ambethia/recaptcha">Recaptcha</a> 是做 captcha 最簡單快速的方式。</li>
+</ul>
+
+<h2 id="annotatemodels">annotate_models</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/ctran/annotate_models">AnnotateModels</a> 可以幫助您將資料庫格式註解在 model 檔案中。</li>
+</ul>
+
+<h2 id="section-7">全文搜尋</h2>
+
+<p>請參考效能與快取一章的全文搜尋一節。</p>
+
+<h2 id="section-8">自動備份</h2>
+
+<ul>
+  <li><a href="https://github.com/meskyanichi/backup">https://github.com/meskyanichi/backup</a></li>
+</ul>
+
+<p>可以搭配 whenever 就可以定期備份了</p>
+
+<!--
+
+## Soft Deletion
+
+## Versioning
+
+-->
+
+<h2 id="rails">升級<em>Rails</em>
+</h2>
+
+<p>小版號的升級，通常透過以下步驟即可完成：</p>
+
+<ul>
+  <li>修改<code>Gemfile</code>的<em>Rails</em>版本： <code>gem 'rails', '3.1.1'</code>
+</li>
+  <li>執行<code>bundle update</code>
+</li>
+  <li>執行<code>rake rails:update</code> 會嘗試更新<em>Rails</em>自己產生的檔案，例如<em>config/boot.rb</em>，請一一手動檢查。</li>
+</ul>
+
+<p>升級前，也請參閱官方公告的升級注意事項。</p>
+
+<h2 id="activerecord--1">如何變更 ActiveRecord 預設的資料表和主鍵名稱</h2>
+
+<p>如果要將<em>Rails</em>沿用上舊有的資料庫上，就會發生的資料表名稱和主鍵名稱不是 Rails 預設慣例的情況，也就是表格名稱不是<em>Model</em>名稱的複數型，主鍵不叫<em>id</em>。這時候我們可以手動設定過，例如以下 Model 預設的資料表和主鍵是<em>legacy_comments</em>和<em>id</em>，但是我們想要改成<em>comment</em>和<em>comment_id</em>：</p>
+
+<pre><code>class LegacyComment &lt; ActeveRecord::Base
+    self.table_name = :comment
+    self.primary_key = :comment_id
+end
+</code></pre>
+
+<h2 id="section-9">其他</h2>
+
+<ul>
+  <li><a href="http://asciicasts.com/episodes/255-undo-with-papertrail">http://asciicasts.com/episodes/255-undo-with-papertrail</a></li>
+  <li><a href="http://intridea.com/2011/5/13/rails3-gems">http://intridea.com/2011/5/13/rails3-gems</a></li>
+  <li><a href="http://erik.debill.org/2011/12/04/rake-for-rails-developers">http://erik.debill.org/2011/12/04/rake-for-rails-developers</a></li>
+</ul>
+
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

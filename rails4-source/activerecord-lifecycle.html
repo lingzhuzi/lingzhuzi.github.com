@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | ActiveRecord - 資料驗證及回呼</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/activerecord-lifecycle.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="activerecord---">ActiveRecord - 資料驗證及回呼</h1>
+
+<blockquote>
+  <p>I’m not a great programmer; I’m just a good programmer with great habits. - Kent Beck</p>
+</blockquote>
+
+<p>這一章我們探討一個<em>ActiveRecord Model</em>的生命週期，包括了儲存時的資料驗證，以及不同階段的回呼機制。</p>
+
+<h2 id="validation-">Validation 資料驗證</h2>
+
+<p>ActiveRecord 的 Validation 驗證功能，透過 Rails 提供的方法，你可以設定資料的規則來檢查資料的正確性。如果驗證失敗，就無法存進資料庫。</p>
+
+<p>那在什麼時候會觸發這個行為呢？<em>Rails</em>在儲存的時候，會自動呼叫<em>model</em>物件的<code>valid?</code>方法進行驗證，並將驗證結果放在<code>errors</code>裡面。所以我們前一章可以看到</p>
+
+<pre><code>&gt; e = Event.new
+&gt; e.errors # 目前還是空的
+&gt; e.errors.empty? # true
+&gt; e.valid? # 進行驗證
+&gt; e.errors.empty? # false
+&gt; e.errors.full_messages # 拿到所有驗證失敗的訊息
+</code></pre>
+
+<blockquote>
+  <p>和 Database integrity 不同，這裡是在應用層設計驗證功能，好處是撰寫程式非常容易，Rails 已經整合進 HTML 表單的使用者介面。但是如果你的資料庫不只有 Rails 讀取，那你除了靠 ActiveRecord 之外，也必須要 DB 層實作 integrity 才能確保資料的正確性。</p>
+</blockquote>
+
+<h3 id="section">確保必填</h3>
+
+<p>validates_presence_of 是最常用的規則，用來檢查資料為非 nil 或空字串。</p>
+
+<pre><code>class Person &lt; ActiveRecord::Base
+ validates_presence_of :name
+ validates_presence_of :login
+ validates_presence_of :email
+end
+</code></pre>
+
+<p>你也可以合併成一行</p>
+
+<pre><code>class Person &lt; ActiveRecord::Base
+ validates_presence_of :name, :login, :email
+end
+</code></pre>
+
+<h3 id="section-1">確保字串長度</h3>
+
+<p>validates_length_of 會檢查字串的長度</p>
+
+<pre><code>class Person &lt; ActiveRecord::Base
+  validates_length_of :name, :minimum =&gt; 2 # 最少 2
+  validates_length_of :bio, :maximum =&gt; 500 # 最多 500
+  validates_length_of :password, :in =&gt; 6..20 # 介於 6~20
+  validates_length_of :registration_number, :is =&gt; 6 # 剛好 6
+end
+</code></pre>
+
+<h3 id="section-2">確保數字</h3>
+
+<p>validates_numericality_of 會檢查必須是一個數字，以及數字的大小</p>
+
+<pre><code>class Player &lt; ActiveRecord::Base
+  validates_numericality_of :points
+  validates_numericality_of :games_played, :only_integer =&gt; true # 必須是整數
+  validates_numericality_of :age, :greater_than =&gt; 18
+end
+</code></pre>
+
+<p>除了 greater_than，還有 greater_than_or_equal_to, equal_to, less_than, less_than_or_equal_to 等參數可以使用。</p>
+
+<h3 id="section-3">確保唯一</h3>
+
+<p>檢查資料在資料表中必須唯一。:scope 參數可以設定範圍，例如底下的 :scope =&gt; :year 表示，在 Holiday 資料表中，相同 year 的 name 必須唯一。</p>
+
+<pre><code>class Account &lt; ActiveRecord::Base
+  validates_uniqueness_of :email
+end
+
+class Holiday &lt; ActiveRecord::Base
+  validates_uniqueness_of :name, :scope =&gt; :year
+end
+</code></pre>
+
+<p>另外還有個參數是 :case_sensitive 預設是 true，表示要區分大小寫。</p>
+
+<blockquote>
+  <p>這條規則並沒有辦法百分百確定唯一，如果很接近的時間內有多個 Rails processes 一起更新資料庫，就有可能發生重複的情況。比較保險的作法是資料庫也要設定唯一性。</p>
+</blockquote>
+
+<h3 id="section-4">確保格式正確</h3>
+
+<p>透過正規表示法檢查資料的格式是否正確，例如可以用來檢查 Email、URL 網址、郵遞區號、手機號碼等等格式的正確性。</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+    validates_format_of :email, :with =&gt; /\A([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})\z/i
+    validates_format_of :url, :with =&gt;  /(^$)|(^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(([0-9]{1,5})?\/.*)?$)/ix
+end
+</code></pre>
+
+<blockquote>
+  <p>正規表示法(regular expression)是一種用來比較字串非常有效率的方式，讀者可以利用 <a href="http://rubular.com/">Rubular</a> 進行練習。</p>
+</blockquote>
+
+<h3 id="section-5">確保資料只能是某些值</h3>
+
+<p>用來檢查資料必須只能某些值，例如以下的 status 只能是 pending 或 sent。</p>
+
+<pre><code>class Message &lt; ActiveRecord::Base
+    validates_inclusion_of :status, :in =&gt; ["pending", "sent"]
+end
+</code></pre>
+
+<p>另外還有較少用到的 validates_exclusion_of 則是確保資料一定不會是某些值。</p>
+
+<h3 id="section-6">其他</h3>
+
+<pre><code>validates_acceptance_of :terms_of_service
+</code></pre>
+
+<p>用來讓使用者必須核選一個 checkbox 方塊，例如已閱讀使用者條款</p>
+
+<pre><code>validates_confirmation_of :password
+</code></pre>
+
+<p>用在需要讓使用者在表單輸入兩次的情況，例如密碼確認。</p>
+
+<h3 id="section-7">可共用的驗證參數</h3>
+
+<p>以下這些參數都可以用在套用在上述的驗證方法上：</p>
+
+<h4 id="allownil">allow_nil</h4>
+
+<p>允許資料是 nil。也就是如果資料是 nil，那就略過這個檢查。</p>
+
+<pre><code>class Coffee &lt; ActiveRecord::Base
+  validates_inclusion_of :size, :in =&gt; %w(small medium large), :message =&gt; "%{value} is not a valid size", :allow_nil =&gt; true
+end
+</code></pre>
+
+<h4 id="allowblank">allow_blank</h4>
+
+<p>允許資料是 nil 或空字串。</p>
+
+<pre><code>class Topic &lt; ActiveRecord::Base
+  validates_length_of :title, :is =&gt; 5, :allow_blank =&gt; true
+end
+
+Topic.create("title" =&gt; "").valid? # =&gt; true
+Topic.create("title" =&gt; nil).valid? # =&gt; true
+</code></pre>
+
+<h4 id="message">message</h4>
+
+<p>設定驗證錯誤時的訊息，若沒有提供則會用 Rails 內建的訊息。</p>
+
+<pre><code>class Account &lt; ActiveRecord::Base
+  validates_uniqueness_of :email, :message =&gt; "你的 Email 重複了"
+end
+</code></pre>
+
+<h4 id="on">on</h4>
+
+<p>可以設定只有新建立(:create)或只有更新時(:update)才驗證。預設值是都要檢查(:save)。</p>
+
+<pre><code>class Account &lt; ActiveRecord::Base
+  validates_uniqueness_of :email, :on =&gt; :create
+end
+</code></pre>
+
+<h4 id="if-unless">if, unless</h4>
+
+<p>可以設定只有某些條件下才進行驗證</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+  validates_presence_of :description, :if =&gt; :normal_user?
+
+  def normal_user?
+      !self.user.try(:admin?)
+  end
+end
+</code></pre>
+
+<h3 id="section-8">整合寫法</h3>
+
+<p>在 Rails3 之後支援以下的整合寫法：</p>
+
+<pre><code>validates :name,  :presence =&gt; true,
+                  :length =&gt; {:minimum =&gt; 1, :maximum =&gt; 254}
+
+validates :email, :presence =&gt; true,
+                  :length =&gt; {:minimum =&gt; 3, :maximum =&gt; 254},
+                  :uniqueness =&gt; true,
+                  :email =&gt; true
+</code></pre>
+
+<p>如果需要客製化錯誤訊息的話：</p>
+
+<pre><code>validates :name,  :presence =&gt; { :message =&gt; "不能空白" } ,
+                  :length =&gt; {:minimum =&gt; 1, :maximum =&gt; 254, :message =&gt; "長度不正確" }
+</code></pre>
+
+<h3 id="validation">如何自定 validation？</h3>
+
+<p>使用 validate 方法傳入一個同名方法的 Symbol 即可。</p>
+
+<pre><code>validate :my_validation
+
+private
+
+def my_validation
+    if name =~ /foo/
+        errors[:name] &lt;&lt; "can not be foo"
+    elsif name =~ /bar/
+        errors[:name] &lt;&lt; "can not be bar"
+    elsif name == 'xxx'
+        errors[:base] &lt;&lt; "can not be xxx"
+  	end
+end
+</code></pre>
+
+<p>在你的驗證方法之中，你會使用到 errors 來將錯誤訊息放進去，如果這個錯誤是因為某一屬性造成，我們就用那個屬性當做 errors 的 key，例如本例的 :name。如果原因不特別屬於某一個屬性，照慣例會用 :base。</p>
+
+<h3 id="section-9">資料庫層級的驗證</h3>
+
+<p>在本章開頭就有提到，<em>Rails</em>的驗證只是在應用層輸入資料時做檢查，沒有辦法保證資料庫裡面的資料一定是正確的。如果您想要在這方面嚴謹一些，可以在<em>migration</em>新增欄位時，加上<code>:null =&gt; false</code>確保有值、<code>:limit</code>參數限制長度，或是透過<em>Unique Key</em>確保唯一性，例如：</p>
+
+<pre><code>        create_table :registrations do |t|
+          t.string :name, :null =&gt; false, :limit =&gt; 100
+          t.integer :serial
+          t.timestamps
+        end
+
+        add_index :registrations, :serial, :unique =&gt; true
+</code></pre>
+
+<p>這樣資料庫就會確認<em>name</em>必須有值(不能是<em>NULL</em>)，長度不能大於<em>100 bytes</em>。<em>serial</em>是唯一的。</p>
+
+<h3 id="section-10">忽略資料驗證</h3>
+
+<p>透過<code>:validate</code>參數我們可以在<code>save</code>時忽略資料驗證：</p>
+
+<pre><code>&gt; event.save( :validate =&gt; false )
+</code></pre>
+
+<p>如果透過<code>update_column</code>更新特定欄位的值，也會忽略資料驗證：</p>
+
+<pre><code>&gt; event.update_column( :name , nil )
+</code></pre>
+
+<h2 id="callback">回呼 Callback</h2>
+
+<p>在介紹過驗證之後，接下來讓我們來看看回呼。回呼可以在<em>Model</em>資料的生命週期，掛載事件上去，例如我們可以在資料儲存進資料庫前，做一些修正，或是再儲存成功之後，做一些其他動作。回呼大致可以分成三類：</p>
+
+<ol>
+  <li>在<em>Validation</em>驗證前後</li>
+  <li>在儲存進資料庫前後</li>
+  <li>在從資料庫移除前後</li>
+</ol>
+
+<p>以下是當一個物件儲存時的流程，其中<em>1~7</em>就是回呼可以觸發的時機：</p>
+
+<ul>
+  <li>(-) save</li>
+  <li>(-) valid</li>
+  <li>(1) before_validation</li>
+  <li>(-) validate</li>
+  <li>(2) after_validation</li>
+  <li>(3) before_save</li>
+  <li>(4) before_create</li>
+  <li>(-) create</li>
+  <li>(5) after_create</li>
+  <li>(6) after_save</li>
+  <li>(7) after_commit</li>
+</ul>
+
+<p>來看幾個使用情境範例</p>
+
+<h3 id="beforevalidation"><code>before_validation</code></h3>
+
+<p>常用來清理資料或設定預設值：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+
+  before_validation :setup_defaults
+
+  protected
+
+  def setup_defaults
+    self.name.try(:strip!) # 把前後空白去除
+  	 self.description = self.name if self.description.blank?
+    self.is_public ||= true
+  end
+end
+</code></pre>
+
+<h3 id="aftersave"><code>after_save</code></h3>
+
+<p>常用來觸發去相關聯資料的方法或資料：</p>
+
+<pre><code>class Attendee &lt; ActiveRecord::Base
+
+	belongs_to :event
+  after_save :check_event_status!
+
+  protected
+
+  def check_event_status!
+    self.event.check_event_status!
+  end
+end
+</code></pre>
+
+<h3 id="afterdestroy"><code>after_destroy</code></h3>
+
+<p>可以用來清理乾淨相關聯的資料</p>
+
+<h3 id="section-11">其他注意事項</h3>
+
+<ul>
+  <li>回呼的方法一般會放在<code>protected</code>或<code>private</code>下，確保從<em>Model</em>外部是無法呼叫的。</li>
+  <li>
+<code>before_validation</code>和<code>before_save</code>的差別在於後者不會經過<em>Validation</em>資料驗證。</li>
+  <li>請避免<code>before_</code>開頭的回呼方法中，最後運算的結果不小心回傳<code>false</code>。這樣會中斷儲存程序。如果不確定的話，請回傳<code>return true</code>。這算是常見的地雷，而且不容易除錯(你會發現資料莫名地無法儲存成功)。</li>
+</ul>
+
+<p>其中<code>after_rollback</code>和<code>after_commit</code>這兩個回呼和<em>Transaction</em>交易有關。<em>Rollback</em>指的是在<em>transaction</em>區塊中發生例外時，<em>Rails</em>會將原先<em>transaction</em>中已經被執行的所有資料操作回復到執行<em>transaction</em>前的狀態，<code>after_rollback</code>就是讓你在<em>rollback</em>完成時所觸發的回呼，而<code>after_commit</code>是指在<em>transaction</em>完成後才觸發的回呼，關於<em>transaction</em>的部份請參考<em>ActiveRecord</em>進階功能一章的交易一節。</p>
+
+<h2 id="section-12">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/active_record_validations.html">Active Record Validations</a></li>
+  <li><a href="http://guides.rubyonrails.org/active_record_callbacks.html">Active Record Callbacks</a></li>
+</ul>
+
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

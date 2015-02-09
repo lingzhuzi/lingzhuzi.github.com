@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | 网站部署</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./deployment.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="section">网站部署</h1>
+
+<blockquote>
+  <p>How long would it take your organization to deploy a change (to production) that involves just one single line of code? Do you do this on a repeatable, reliable basis? - Mary Poppendieck</p>
+</blockquote>
+
+<p>终于要脱离开发阶段，要把完成的<em>Ruby on Rails</em>应用程式拿来出上线见人了。在<code>rails server</code>指令中，其实是使用一套叫做<em>WEBrick</em>的服务器，这是一套纯<em>Ruby</em>实作的<em>HTTP</em>服务器。虽然开发时拿来用很方便，但是它的效能并不适合作为正式环境来使用。因此，我们在这一章将介绍几种在<em>Linux</em>上实际作为<em>Production</em>用途的部署方案。</p>
+
+<blockquote>
+  <p>虽然<em>Rails</em>在<em>Windows</em>平台上也可以执行开发，但是如第二章作业系统一节所说，<em>Ruby</em>在<em>Windows</em>平台上资源较少，效能也不如在<em>Unix-like</em>系统上，因此很少人拿来当做<em>Production</em>服务器用途。</p>
+</blockquote>
+
+<h2 id="ruby-on-rails-">Ruby on Rails 主机代管服务</h2>
+
+<p>在这云端时代，在线上租用服务器是最经济实惠的选择，常见的选择包括：</p>
+
+<h3 id="iaas-infrastructure-as-a-service">IaaS 类型(Infrastructure as a Service)</h3>
+
+<p>你可以获得一整台的<em>root</em>权限，常见的厂商包括：</p>
+
+<ul>
+  <li>
+<a href="https://www.linode.com/">Linode</a> 东京有机房</li>
+  <li>
+<a href="https://www.digitalocean.com/">DigitalOcean</a> 新加坡有机房</li>
+  <li>
+<a href="http://aws.amazon.com/ec2/">Amazon EC2</a> 东京、新加坡有机房</li>
+  <li>
+<a href="http://azure.microsoft.com/zh-tw/services/virtual-machines/">Microsoft Azure 虚拟机器</a> 香港和新加坡有机房</li>
+  <li>
+<a href="https://cloud.google.com/compute/">Google Cloud Compute Engine</a> 台湾有机房</li>
+</ul>
+
+<p><em>VPS(Virtual Private Server)</em>出身的<em>Linode</em>和<em>DigitalOcean</em>因为价格非常便宜，一个月只需要美金五块、十块起跳，机房离台湾也近，所以成为装机的高C/P值首选。<em>Amazon</em>、<em>Microsoft</em>和<em>Google</em>则以丰富的云端生态系见长，除了虚拟主机之外，它还有提供数据库、档案储存和<em>NoSQL</em>数据库等等各式各样的代管服务。</p>
+
+<h3 id="paas-platform-as-a-service">PaaS 类型(Platform as a Service)</h3>
+
+<p><em>PaaS</em>则是固定的执行环境，只支持特定的程式语言或框架，支持<em>Ruby</em>的有：</p>
+
+<ul>
+  <li><a href="http://heroku.com/">Heroku</a></li>
+  <li><a href="https://ace.ng.bluemix.net/">Bluemix</a></li>
+  <li><a href="https://www.openshift.com">Openshift</a></li>
+  <li><a href="http://www.pivotal.io/">Pivotal</a></li>
+  <li><a href="http://www.hpcloud.com/">HP Public Cloud</a></li>
+</ul>
+
+<p>不过这些<em>PaaS</em>价格贵的多，而且大多只有在美国有机房，笔者通常只是拿他们的免费方案试玩。</p>
+
+<h2 id="ruby">安装系统和编译Ruby</h2>
+
+<p>租到一台虚拟机之后，你应该可以使用<em>SSH</em>登入。以下则是在<em>Ubuntu 14.04</em>上安装系统和<em>Ruby</em>的指令：</p>
+
+<pre><code>sudo apt-get update
+sudo apt-get upgrade -y
+sudo dpkg-reconfigure tzdata
+
+sudo apt-get install -y build-essential git-core bison openssl libreadline6-dev curl zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3  autoconf libc6-dev libpcre3-dev curl libcurl4-nss-dev libxml2-dev libxslt-dev imagemagick nodejs
+
+wget http://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.5.tar.gz
+tar xvfz ruby-2.1.5.tar.gz
+cd ruby-2.1.5
+./configure
+make
+sudo make install
+</code></pre>
+
+<blockquote>
+  <p>请将<em>2.1.5</em>换成最新的<em>Ruby</em>版本</p>
+</blockquote>
+
+<h2 id="mysql">安装MySQL</h2>
+
+<p>以下是安装<em>MySQL</em>的指令，过程中会提示你输入<em>root</em>密码。</p>
+
+<pre><code>sudo apt-get install mysql-common mysql-client libmysqlclient-dev mysql-server
+sudo gem install mysql2 --no-ri --no-rdoc
+mysql -u root -p
+CREATE DATABASE your_production_db_name CHARACTER SET utf8;
+</code></pre>
+
+<p>最后一步是手动建立一个数据库，等会<em>Rails</em>会用到。</p>
+
+<h2 id="nginx--passenger">Nginx + Passenger</h2>
+
+<p><em><a href="https://www.phusionpassenger.com/">Passenger</a></em>是目前部署<em>Ruby on Rails</em>最好用、设定最简单的方式，它是一套<em>Apache</em>和<em>Nginx</em>的扩充模组，可以直接支持<em>Rails</em>或任何<em>Rack</em>应用程式。</p>
+
+<blockquote>
+  <p><em>Passenger</em>不支持<em>Windows</em>平台</p>
+</blockquote>
+
+<p>以下我们选择使用<em><a href="http://nginx.org/">Nginx</a></em>是目前最流行的网站服务器之一，相较于<em>Apache</em>虽然功能较少，但运作效率非常优秀。要让<em>Nginx</em>装上<em>Passgener</em>不需要先装<em>Nginx</em>，只需要执行以下指令：</p>
+
+<pre><code>$ sudo gem install bundler passenger --no-ri --no-rdoc
+$ sudo passenger-install-nginx-module
+</code></pre>
+
+<p>这是因为<em>Passenger</em>必须与<em>Nginx</em>一起编译的关係，所以<em>Passenger</em>的安装指令就包括了安装<em>Nginx</em>。接着我们设定 Nginx 啟动脚本：</p>
+
+<pre><code>wget -O init-deb.sh http://www.linode.com/docs/assets/1139-init-deb.sh
+sudo mv init-deb.sh /etc/init.d/nginx
+sudo chmod +x /etc/init.d/nginx
+sudo /usr/sbin/update-rc.d -f nginx defaults
+</code></pre>
+
+<p><em>Nginx</em>啟动用法：</p>
+
+<pre><code>sudo /etc/init.d/nginx start 啟动Nginx，打开浏览器指向 Server IP 可以看到 Welcome to nginx!
+sudo /etc/init.d/nginx stop
+sudo /etc/init.d/nginx restart
+</code></pre>
+
+<p>要设定<em>Rails</em>应用程式请编辑<em>/opt/nginx/conf/nginx.conf</em>这个设定，将<em>server</em>那段改写成如下：</p>
+
+<pre><code>server {
+    listen       80;
+    server_name  www.yourhost.com;
+    root /somewhere/public;
+    passenger_enabled on;
+}
+</code></pre>
+
+<p>注意到<code>root </code>是指向<code>public</code>这个静态档案的目录。设定好之后，执行<code>sudo /etc/init.d/nginx restart</code>便会啟用。如果之后你的<em>Rails</em>有任何修改要重新载入，但是并不想把<em>Nginx</em>整个重开，请在你的<em>Rails</em>应用程式目录下执行<code>touch tmp/restart.txt</code>即可，这样<em>Passenger</em>就会知道要重新载入<em>Rails</em>，而不需要重开<em>Nginx</em>。</p>
+
+<p>我们稍候会再回头来调整这个<em>Nginx</em>设定。</p>
+
+<blockquote>
+  <p><em>Passenger</em>预设的<em>Rails</em>运行环境是<em>production</em>。在<em>production</em>环境下操作<em>Rails</em>指令有些必须加上环境变数，例如<code>rake db:migrate RAILS_ENV=production</code>或是主控台<code>rails console production</code></p>
+</blockquote>
+
+<h2 id="section-1">自动化部署</h2>
+
+<p>决定应用程式服务器之后，接下来我们来讨论你要如何把程式部署上去？最常见的作法，不就是开个<em>FTP</em>或用<em>SFTP</em>上传上去不就好了？再不然<em>SSH</em>进去，从版本控制系统更新下来也可以。但是你有没有想过这部署的过程，其实是每次都重复一再执行的步骤(除非你部署完之后，就不需要再继续开发和升级)，随者时间的演进，这个过程常常会有各种定制的指令需要要执行，例如安装设定档、更新啟动某个<em>Daemon</em>、清除快取等等。因此，好的实务作法是自动化部署这个动作，只要执行一个指令，就自动更新上去并重新啟动服务器。这样也可以大大避免漏做了什么部署步骤的可能性。</p>
+
+<h3 id="section-2">设定服务器部署使用者</h3>
+
+<p>习惯上我们会在服务器上开一个专门的帐号，用来放<em>Rails</em>应用程式，指令如下：</p>
+
+<pre><code>sudo adduser --disabled-password deploy
+sudo su deploy
+ssh-keygen -t rsa
+复制本机的 ~/.ssh/id_rsa.pub 到 /home/deploy/.ssh/authorized_keys
+chmod 644 /home/deploy/.ssh/authorized_keys
+chown deploy:deploy /home/deploy/.ssh/authorized_keys
+</code></pre>
+
+<p>这样本机就可以直接<em>ssh deploy@{your server ip}</em>登入无须密码。</p>
+
+<h3 id="section-3">设定部署脚本</h3>
+
+<p><em><a href="http://capistranorb.com/">Capistrano</a></em>是<em>Rails</em>社群中最常使用的部署工具。首先，我们在本地端安装这个<em>Gem</em>：</p>
+
+<pre><code>gem install capistrano
+</code></pre>
+
+<p>然后在<em>Gemfile</em>中加上：</p>
+
+<pre><code>gem 'capistrano-rails', :group =&gt; :development
+gem 'capistrano-passenger'', :group =&gt; :development
+</code></pre>
+
+<p>在你的<em>Rails</em>专案目录下执行：</p>
+
+<pre><code>cap install
+</code></pre>
+
+<p>这样就会产生几个档案，首先编辑<em>Capfile</em>加入：</p>
+
+<pre><code>require 'capistrano/rails'
+require 'capistrano/passenger'
+</code></pre>
+
+<p>编辑<em>config/deploy.rb</em>，请替换以下的<em>application</em>名称和<em>git repo</em>网址：</p>
+
+<ul>
+  <li>加上一行 <code>ssh-add</code> # need this to make key-forwarding work</li>
+  <li>set :application, ‘rails-exercise’</li>
+  <li>set :repo_url, ‘git@github.com:ihower/rails-exercise.git’</li>
+  <li>打开 ask :branch</li>
+  <li>打开 set :deploy_to, ‘/home/deploy/rails-exercise’</li>
+  <li>加上 set :keep_releases, 5</li>
+  <li>打开 set :linked_files, %w{config/database.yml config/secrets.yml}</li>
+  <li>打开 set :linked_dirs</li>
+</ul>
+
+<blockquote>
+  <p>其中的<code>ssh-add</code>可以参考<a href="http://ihower.tw/blog/archives/7837">SSH agent forwarding 的应用</a>的说明。</p>
+</blockquote>
+
+<p>编辑<em>config/deploy/production.rb</em>将 example.com 换成服务器的<em>IP</em>或网域。</p>
+
+<p>本机执行<code>cap deploy:check</code>，就会自动登入远端的服务器，在登入的帐号下新建<em>current</em>、<em>releases</em>和<em>shared</em>这三个目录，<em>releases</em>是每次部署的纪录，而<em>current</em>目录则是用<em>symbolic link</em>指向<em>releases</em>目录下最新的版本。</p>
+
+<p>因为我们不希望将数据库的帐号密码和<em>cookie secret key</em>也放进版本控制系统，所以会将存有正确帐号密码的<em>database.yml</em>和<em>secrets.yml</em>档案预先放在服务器的<em>shared/config</em>目录下，自动部署时会覆盖过去。</p>
+
+<ul>
+  <li>本机执行 rake secret 产生的 key 放到远端服务器的 shared/config/secrets.yml</li>
+  <li>远端服务器设定好 shared/config/database.yml</li>
+</ul>
+
+<p>到此终于可以部署了，执行<code>cap production deploy</code>就可以了。</p>
+
+<h3 id="nginx-">Nginx 完整设定</h3>
+
+<p>上述的<em>Nginx</em>我们将<em>server</em>设定直接写在<em>nginx.conf</em>中，通常我们会拆开：</p>
+
+<p>编辑 /opt/nginx/conf/nginx.conf 在 http 裡面加上 <code>include /opt/nginx/conf/vhost/*.conf</code>;</p>
+
+<p>新增 /opt/nginx/conf/vhost/your_domain.conf，记得修改正确的<code>root</code>和<code>server_name</code>：</p>
+
+<pre><code>server {
+    listen 80;
+    server_name exercise.ihower.tw;
+    root /home/deploy/rails-exercise/current//public;
+    passenger_enabled on;
+
+    passenger_min_instances 1;
+    passenger_show_version_in_header off;
+    server_tokens       off;
+
+    location ~ ^/assets/ {
+        expires 1y;
+        add_header Cache-Control public;
+        add_header ETag "";
+        break;
+    }
+}
+</code></pre>
+
+<p>以上设定包括关闭在<em>Header</em>中显示服务器版本信息、设定<em>Assets</em>静态档案成为永不过期(Rails的Assets Pipeline会加上版本号，所以不需要担心)、设定<em>Passenger</em>至少开一个<em>Process</em>。</p>
+
+<p>编辑<em>nginx.conf</em></p>
+
+<pre><code>worker_processes  auto;
+events {
+    worker_connections  4096;
+    use epoll;
+}
+
+http {
+    # .....
+    client_max_body_size 100m;
+
+    gzip                on;
+    gzip_disable        "msie6";
+}
+</code></pre>
+
+<p>以上设定包括自动调整<em>Nginx</em>使用多少<em>process</em>(跟主机有多少CPU核有关)、打开<em>gzip</em>压缩(可以大大减少网页下载时间)、设定档案上传可以到<em>100mb</em>(预设只有1Mb超小气的，上传一张图片就爆了)。</p>
+
+<p>最后重开<code>sudo /etc/init.d/nginx restart</code></p>
+
+<h2 id="log">处理<em>Log</em>档案</h2>
+
+<p>网站持续运作，<em>log</em>目录下的<em>production.log</em>可是会越长越肥，因此需要定期整理备份，这里有几种方法，一种是修改<em>config/environments/production.rb</em>的设定：</p>
+
+<pre><code>config.logger = Logger.new(config.paths["log"].first, 'daily') # 或 weekly,monthly
+</code></pre>
+
+<p>或是</p>
+
+<pre><code>config.logger = Logger.new(config.paths["log"].first, 10, 10*1024*1024) # 10 megabytes
+</code></pre>
+
+<p>不然，你也可以使用<em>Linux</em>内建的<em><a href="http://ihower.tw/blog/archives/3565">logrotate</a></em>工具。</p>
+
+<h2 id="section-4">主机安全加强</h2>
+
+<p>参考<a href="http://blog.dharanasoft.com/2011/06/09/securing-your-ubuntu-vps/">Securing your Ubuntu VPS for hosting a Rails Application</a>可以作一些基本的防护，包括：</p>
+
+<ul>
+  <li>另开一个使用者有 sudo 权限，可以用 public key 登入</li>
+  <li>设定 root 帐号不可以 SSH 登入，也不允许密码登入，只能用 public key</li>
+  <li>设定防火墙 iptable 只允许 80, 443, 22 port</li>
+</ul>
+
+<h2 id="section-5">处理错误例外</h2>
+
+<p>虽然我们努力避免，但总是程式总有出错的时候，一个上<em>Production</em>的专业 Rails app 绝不会痴痴地等待使用者告诉你网站炸了，而是要能够主动通知及纪录下这个错误例外(exception)，好让我可以 trace error、fixed bug 甚至在发生错误没多久就可以通知苦主发生了什么事情。</p>
+
+<p>最基本我们可以安装<em><a href="https://github.com/smartinez87/exception_notification">Exception Notifier</a></em>，这个套件会在发生例外时寄 email 通知你(们)。</p>
+
+<p>或是使用第三方服务，例如：</p>
+
+<ul>
+  <li><a href="https://airbrake.io/">Airbrake</a></li>
+  <li><a href="https://getsentry.com/">Sentry</a></li>
+  <li><a href="https://www.honeybadger.io/">Honeybadger</a></li>
+</ul>
+
+<p>这些第三方服务可以在网站发生例外错误的时候自动将错误信息收集起来。并且提供了还蛮不错的后台可以浏览。这个解法安装最简单，功能又很够用，还可以统计及追踪例外处理的情况，我个人十分推荐使用第三方服务。</p>
+
+<h2 id="section-6">效能监控</h2>
+
+<p>除了自己安装一些主机效能监控软件之外，也很常见使用专门的第三方服务：</p>
+
+<ul>
+  <li><a href="http://www.newrelic.com/">NewRelic</a></li>
+  <li><a href="http://www.scoutapp.com">Scout</a></li>
+</ul>
+
+<h2 id="reverse-proxy-apachenginx--thinunicornpuma">补充一：反向代理(Reverse proxy)模型 Apache/Nginx + Thin/Unicorn/Puma</h2>
+
+<p>除了<em>Passenger</em>之外，还有另一种反向代理<em>(Reverse proxy)</em>的运作方式，它分成<em>Web</em>服务器和应用程式服务器，图示如下：</p>
+
+<p><img src="images/deployment-proxy-diagram.jpg" alt="Proxy diagram"></p>
+
+<p>其中<em>Web</em>服务器可以是<em>Apache</em>、<em>Nginx</em>，但是它除了提供静态档案之外，其餘的任务就只是做<em>reverse proxy</em>将<em>request</em>分发到应用程式服务器。</p>
+
+<p>而应用程式服务器负责执行<em>Ruby on Rails</em>程式，这有几个选择：</p>
+
+<ul>
+  <li>Unicorn <a href="http://unicorn.bogomips.org/">http://unicorn.bogomips.org/</a> (Multi-processed 模型)</li>
+  <li>Thin <a href="http://code.macournoyer.com/thin/">http://code.macournoyer.com/thin/</a> (Evented-driven 模型)</li>
+  <li>Puma <a href="http://puma.io/">http://puma.io/</a> (Multi-threaded 模型)</li>
+</ul>
+
+<p>相较于<em>Passenger</em>，设定上会比较复杂，不过好好调校可以获得更好的效能。</p>
+
+<h2 id="eventmachine">补充二：EventMachine和多执行序模型</h2>
+
+<p><em>Passenger</em>和<em>Unicorn</em>都是属于<em>Multi-process</em>的模型，每一个<em>Process</em>是一个完整的<em>Rails app</em>使用一个<em>CPU core</em>。这种模型的优点是应用程式撰写容易，不用管执行序是否安全的问题(<em>Thread-safety</em>)问题，而且如果每个<em>Request</em>都没有<em>I/O blocking</em>，利用的<em>CPU</em>效率就是最好的，因为不像<em>Thread</em>有<em>Context switch</em>。但是，最大的缺点是如果碰到<em>I/O blocking</em>(太容易了，最基本的连接数据库就是一种相较于CPU是很慢的I/O操作)，能同时负担的连线就很容易受到限制。因此在这种模型下，开发都会建议你监控每个<em>HTTP request</em>的执行时间在某个ms标準以下(例如20ms)，太久的操作就会建议是改用<em>Background job</em>，这就是为了可以确定服务器的执行效率。因此虽然”同时”连线线就等于能用的<em>Process</em>数量(例如最基本512 mb的主机上，通常可以开3个<em>Rails process</em>，但是因为每个连线都控制在<em>20ms</em>以下，所以每秒鐘能处理的<em>requests</em>数量还是十分惊人，足以应用绝大部分的应用场景。</p>
+
+<p>这个无法应用的场景，就是大量的<em>HTTP</em>持续连线需求了，例如聊天室，每个使用者连线持续占用<em>Process</em>，而大多时间都在等待，导致服务器能同时提供的连线非常有限。</p>
+
+<p>要对应这种需求，一般人可能直觉联想到的方案就是使用<em>Multi-threaded</em>了，虽然<em>Rails</em>本身有支持了<code>config.threadsafe!</code>模式，但是<em>Multi-threaded</em>的模型在<em>Rails</em>社群中其实并不流行，撇开<em>multi thread</em>程式的复杂性不谈，主因应是对付这种<em>concurrency</em>需求，最有效的方案不是<em>Multi-threaded</em>，而是<em>Evented-driven</em>的 <a href="http://en.wikipedia.org/wiki/Reactor_pattern">Reactor Pattern</a>。<em>Thread</em>再怎麼便宜，同时开成千上万个也是会痛的，而<em>Reactor pattern</em>是一个无穷<em>loop</em>，无论有多少连线，只有在有事件发生时，才会让CPU做事。<em>Ruby</em>中实作此模型最出名的函式库就叫做<em><a href="https://github.com/eventmachine/eventmachine">EventMachine</a></em>。</p>
+
+<p>要让<em>Rails</em>採用<em>evented-driven</em>架构，除了要用<em>Thin server</em>(使用<em>EventMachine</em>)之外，所有有关<em>I/O</em>操作的函式库都要换用<em>evented</em>版本，例如<em>HTTP client</em>等等，不然也是功亏一簣。如何设定，可以参考这一个<em>Demo app</em> <a href="https://github.com/igrigorik/async-rails">https://github.com/igrigorik/async-rails</a></p>
+
+<p>不过，因为<em>Rails</em>的设计并不是以<em>Evented</em>模型为最高指导原则，所以实务上比较多人会偏好採用更轻量，更以<em>Evented</em>为原则的框架来专门处理需要大量非同步连线的情景，例如：</p>
+
+<ul>
+  <li>Goliath <a href="http://postrank-labs.github.com/goliath/">http://postrank-labs.github.com/goliath/</a>
+</li>
+  <li>Cramp <a href="https://github.com/lifo/cramp">https://github.com/lifo/cramp</a>
+</li>
+</ul>
+
+<p>其他语言的<em>Evented</em>框架包括<em><a href="http://nodejs.org/">Node.js</a></em>、<em><a href="http://www.jboss.org/netty">Netty</a></em>等。</p>
+
+<p>更多讨论可以参考：</p>
+
+<ul>
+  <li><a href="http://blog.phusion.nl/2010/06/09/does-rails-performance-need-an-overhaul/">Does Rails Performance Need an Overhaul?</a></li>
+  <li><a href="http://merbist.com/2011/02/22/concurrency-in-ruby-explained/">Ruby concurrency explained</a></li>
+  <li><a href="http://stackoverflow.com/questions/4113299/ruby-on-rails-server-options/4113570#4113570">Ruby on Rails Server options</a></li>
+</ul>
+
+<p>另一方面，Rails 的走向则是对 Multi-threaded 模式有越来越多的支持，例如 Rails 4 的 Live Streaming 功能: <a href="http://blog.phusion.nl/2012/08/03/why-rails-4-live-streaming-is-a-big-deal/">Why Rails 4 Live Streaming is a big deal</a>。</p>
+
+<p>总而言之，<em>Multi-Process</em> 还是最不用烦恼的模型，除非您对<em>Multi-Threaded</em>或<em>Event-Drivened</em>模型有比较深入的了解，知道如何撰写<em>Thread-Safe</em>的程式、知道<em>Evented-driven</em>的原理和限制，否则笔者还是保守建议使用<em>Milti-Process</em>模型的<em>Ruby</em>服务器。</p>
+
+<h2 id="section-7">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://rubyonrails.org/deploy">Deploying Ruby on Rails is easy</a></li>
+  <li><a href="https://blog.engineyard.com/2014/ruby-app-server-arena-pt2">App Server Arena: Part 2, A Comparison of Popular Ruby Application Servers</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

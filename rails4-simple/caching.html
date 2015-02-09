@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | 快取</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./caching.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="section">快取</h1>
+
+<blockquote>
+  <p>No code is faster than no code. - Merb core tenet</p>
+</blockquote>
+
+<p>关于快取，有句话是这样说的：<em>“There are only two hard things in Computer Science: cache invalidation and naming things” by Phil Karlton</em>。在电脑硬件和软件架构中，有非常多的设计都是围绕在快取系统上，越快的效能代表可用的空间越少，这是成本效益。例如个人电脑上的<em>CPU</em>的快取分成<em>L1</em>、<em>L2</em>、<em>L3</em>，然后是内存、最后是硬碟空间，这之间的存取速度和可用空间差了好几个数量级，前者对后者来说，就是一种快取层。而资料一旦被放到快取，就要去处理资料的<em>Consistent</em>一致性问题。设计网站应用程式也是一样的道理，将运算过后的结果快取起来，下次要用不计算直接读取就会比较快。但是什么时候快取资料过期了需要重新运算呢？这就是令人头痛的<em>cache invalidation</em>问题。</p>
+
+<p>我们在上一章努力避免缓慢的数据库<em>SQL</em>查询，但是如果效能需要再进一步提昇，就需要用到快取机制来减少读取数据库，以及利用<em>View</em>快取节省样板<em>rendering</em>时间。</p>
+
+<p>关于实作快取，有几点观念:</p>
+
+<ul>
+  <li>快取处太多，程式会变复杂，增加维护的难度</li>
+  <li>快取会增加除错难度，资料不再只有唯一的数据库版本</li>
+  <li>快取如果没写好，可能会产生资料不一致的<em>Bug</em>、时间显示相关的<em>Bug</em>等等</li>
+  <li>快取增加了写程式的难度，像是<em>Expire</em>过期资料、资料的安全性(放在快取层的资料也需要被保护注意安全)</li>
+  <li>会增加撰写<em>UI</em>的难度，因为快取相关的程式可能会混在样本中</li>
+</ul>
+
+<p><em>Rails</em>内建了快取功能，可以让我们将<em>SQL</em>结果或是<em>HTML</em>结果放到<em>Cache Store</em>中，这样下一次就不需要重新运算，大幅提高效能。</p>
+
+<h2 id="cache-store">Cache Store</h2>
+
+<p><em>Rails</em>提供了几种不同的<em>Cache Store</em>可以选择，预设的<em>memory_store</em>只适合单机开发，而且重啟<em>Rails</em>快取资料就不见了。因此正式上线的网站会推荐使用<em><a href="http://memcached.org/">Memcached</a></em>。它是一套<em>Name-Value Pair(NVP)</em>分散式内存快取系统，当你有多个<em>Rails</em>服务器的时候，也可以很方便的共用快取资料。</p>
+
+<p>使用<em>Mac</em>的话，可以用<em>Homebrew</em>安装<em>Memcached</em>：</p>
+
+<pre><code>$ brew install memcached
+</code></pre>
+
+<p>编辑<em>Gemfile</em>加上<em>memcached</em>的函式库</p>
+
+<pre><code>gem "dalli"
+</code></pre>
+
+<p>编辑<em>config/environments/development.rb</em>和<em>production.rb</em>加上</p>
+
+<pre><code>config.cache_store = :mem_cache_store
+</code></pre>
+
+<blockquote>
+  <p>快取在开发模式下是关闭的，为了测快取功能可以暂时将<em>confog/environments/development.rb</em>裡面的<code>config.action_controller.perform_caching</code>暂时改成<code>true</code>，记得测完改回<code>false</code>即可。</p>
+</blockquote>
+
+<p>使用<em>memcached</em>做快取的基本模式就是，先查看有没有<em>key-value</em>，有就把快取资料读出来，没有就运算结果后存到<em>memcached</em>快取数据库中(你应该假设就算快取系统关闭，你的系统也可以正常执行)。注意到它并不是<em>persistent data store</em>，只要一关掉<em>memcahed</em>重开，裡面的资料就会通通不见。另一个特性是它使用<em><a href="http://en.wikipedia.org/wiki/Cache_algorithms">LRU</a></em>快取演算法(预设是64MB)，当快取的资料超过设定的内存容量时，就是自动清除太久没有使用的资料，这个特性等会我们会看到非常实用。</p>
+
+<p>更深入的<em>memcached</em>用法可以参考笔者<a href="http://ihower.tw/blog/archives/1768">如何使用 memcached 做快取</a>一文。</p>
+
+<h2 id="view-">View 快取</h2>
+
+<p><em>Fragment caching</em>可以只快取<em>HTML</em>中的一小段元素，我们可以自由选择要快取的区块，例如侧栏或是选单等等，让我们有最大的弹性。也因为这种快取发生在<em>View</em>中，所以我们必须把快取程式放进<em>View</em>中，用<code>cache</code>包起来要快取的<em>Template</em>：</p>
+
+<pre><code>&lt;% cache [@events] do %&gt;
+  All events:
+	&lt;% @events.each do |event| %&gt;
+		&lt;%= event.name %&gt;
+	&lt;% end %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p><code>cache</code>的参数是拿来当作快取<em>Key</em>的对象或名称，我们也可以多加一些名称来识别。<em>Rails</em>会自动将<em>ActiveRecord</em>对象的最后更新时间、你给的定制名称，加上<em>Template</em>的内容杂凑自动产生出一个快取<em>Key</em>。</p>
+
+<pre><code>&lt;% cache [:popular, @events] do %&gt;
+  All popular events:
+&lt;% end %&gt;
+</code></pre>
+
+<h3 id="section-1">更新快取的策略</h3>
+
+<p>用了快取，就还要学会怎麼处理过期资料，也就是在资料过期之后，将对应的快取资料清除。<em>Rails</em>採用的策略非常聪明，就是利用<em>LRU</em>快取演算法的特性，根据当时情境来动态命名快取<em>Key</em>，从而避免手动清除快取的动作，反正快取内存一满，没用到的快取资料就会自动被清除掉。</p>
+
+<p>实际看看<em>Rails</em>产生出来的快取<em>Key</em>吧，例如<code>cache [@event]</code>会产生出以下的快取<em>Key</em></p>
+
+<pre><code>views/events/3-20141130131120000000000/366bcee2ae9bd3aa0738785aea6ec97d
+</code></pre>
+
+<p>其中<code>3</code>是<em>Event ID</em>、<code>20141130131120000000000</code>是这个<em>Event</em>的最后更新时间、<code>366bcee2ae9bd3aa0738785aea6ec97d</code>是这个<em>Template</em>内容的杂凑。也就是如果资料有更新，或是<em>Template</em>有改动，那么产生出来的快取<em>Key</em>就会不一样，产生出新的快取资料。至于旧的快取资料就不管了，反正满了就会被<em>LRU</em>自动清掉。</p>
+
+<p>如果放一个<em>ActiveRecord</em>阵列呢，例如<code>cache [:list, @events]</code>，会产生出以下的快取<em>Key</em>：</p>
+
+<pre><code>views/list/events/3-20141130131120000000000/events/4-20141111035115000000000/events/7-20141130131005000000000/events/8-20141111035115000000000/events/9-20141111035115000000000/bbce07d6df6dd28670ad114790c47484
+</code></pre>
+
+<p><em>Rails</em>会将所有的最后更新时间都串在一起，只要其中一个最后更新有改，整个快取资料就会重新产生。</p>
+
+<p>这一招当然也不是万能，例如如果你的资料跟当时语系又有关係，那你就得把语系这个变数也设定到快取<em>Key</em>，例如</p>
+
+<pre><code>&lt;% cache [:list, @events, I18n.locale] %&gt;
+</code></pre>
+
+<p>当然，我们也可以找地方手动清除快取，例如放到<em>update action</em>之中：</p>
+
+<pre><code>expire_fragment(:popular_events)
+</code></pre>
+
+<blockquote>
+  <p>用<em>rake tmp:clear</em>指令可以清空全部快取</p>
+</blockquote>
+
+<p>另一种快取更新的策略是设定<em>Time-based expired</em>，例如设定两小时后自动过期：</p>
+
+<pre><code>&lt;% cache :popular_events, :expire_in =&gt; 2.hours do %&gt;
+</code></pre>
+
+<h3 id="key">调校快取<em>Key</em>
+</h3>
+
+<p>做<em>View</em>快取的一个目的就是节省<em>SQL</em>的查询量，所以实测的一个重点，就是要观察实际到底发出哪些<em>SQL</em>查询。在上述的范例中，<em>Rails</em>用了<em>ActiveRecord</em>的最后更新时间来产生快取<em>Key</em>，因此实际上它还是发出<em>SQL</em>查询来抓到最后更新时间。这部份我们可以做进一步的改进，特别是<code>cache(@events)</code>群集的部分，我们可以用自订快取<em>Key</em>的方式来改善<em>SQL</em>的效率，例如：</p>
+
+<pre><code># helper
+def cache_key_for_events(page)
+  count          = Event.count
+  max_updated_at = Event.maximum(:updated_at).try(:utc).try(:to_s, :number)
+  "events/all-#{count}-#{max_updated_at}-#{page}"
+end
+
+&lt;% cache cache_key_for_events(params[:page]) do %&gt;
+</code></pre>
+
+<p>这样就实际的<em>SQL</em>查询就会从：</p>
+
+<pre><code>SELECT  `events`.* FROM `events` LIMIT 10 OFFSET 0
+</code></pre>
+
+<p>变成比较有效率的：</p>
+
+<pre><code>SELECT COUNT(*) FROM `events`
+SELECT MAX(`events`.`updated_at`) AS max_id FROM `events`
+</code></pre>
+
+<p>另外要注意是因为有<em>ActiveRecord</em>的<em>Lazy Load</em>特性，所以写在<em>Controller Action</em>裡的<em>ActiveRecord Query</em>才不会立即送出，而是到真正使用的时候(也就是在<em>Fragment cache</em>范围裡)才会实际发出<em>SQL</em>查询。如果真没有办法利用到<em>Lazy Load</em>的特性，例如不是<em>ActiveRecord</em>的情况，则可以手动使用<code>fragment_exist?</code>方法在<em>Action</em>裡面检查是不是已经有快取，有的话就不要执行，例如：</p>
+
+<pre><code>def show
+  @event = Event.find(params[:id])
+  unless fragment_exist?(@event)
+    @result = SomeExpenseQuery.execute(@event)
+  end
+end
+
+# show.html.erb
+
+&lt;% cache @event do %&gt;
+  &lt;%= @event.name %&gt;
+  &lt;%= @result %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h3 id="russian-doll">
+<em>Russian Doll</em>快取策略</h3>
+
+<p>上述<code>cache [:list, @events]</code>的范例中，如果其中一笔资料有更新，会造成整组<code>@events</code>快取资料都要重新计算，这一点很没效率。<em>Rails</em>支持<em>nested</em>的叠套方式让我们可以重用(<em>reuse</em>)其中的快取资料，例如：</p>
+
+<pre><code>&lt;% cache [:list, @events] %&gt;
+	All events:
+	&lt;% @events.each do |event| %&gt;
+		&lt;% cache event do %&gt;
+			&lt;%= event.name %&gt;
+		&lt;% end %&gt;
+	&lt;% end %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>如果其中一笔<em>event</em>有更新，最外围的快取也会一起更新，但是它不会笨笨的重算每一个小<em>event</em>的快取，只会重算有更新的<em>event</em>而已，其他<em>event</em>则会沿用已经有的快取资料。</p>
+
+<h3 id="activerecord-touch-">ActiveRecord Touch 属性</h3>
+
+<p>被当作快取<em>Key</em>的<em>ActiveRecord</em>对象的最后更新时间<code>updated_at</code>，在一对一或一对多的关係中，预设并不会根据底下的对象而自动更新。例如以下的例子中，如果有新的<em>attendee</em>进来，并不会自动更新该<em>event</em>的最后更新时间，会导致这整个快取不会被更新到。</p>
+
+<pre><code>&lt;% cache event do %&gt;
+  &lt;%= event.name %&gt;
+  &lt;%= event.attendees.last.try(:name) %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>解决的办法是使用<em>Touch</em>属性：</p>
+
+<pre><code>class Attendee &lt; ActiveRecord::Base
+	belongs_to :event, :touch =&gt; true
+	# ...
+end
+</code></pre>
+
+<p>这样的话，在新增或编辑<em>attendee</em>后，<em>Rails</em>就会知道要去更新<em>event</em>的最后更新时间，进而重新更新的这份快取了。</p>
+
+<h2 id="section-2">快取资料</h2>
+
+<p>上述的作法都是将最后的<em>HTML</em>结果快取起来，但是有时候如果形式有很多种，例如同时提供<em>HTML</em>、<em>JSON</em>、<em>XML</em>等，或是有其他程式也想利用同一份快取，这时候我们可以考虑快取资料(字串、阵列或杂凑的基本形式)，而不是最后的<em>HTML</em>：</p>
+
+<pre><code>Rails.cache.read("city")   # =&gt; nil
+Rails.cache.write("city", "Duckburgh")
+Rails.cache.read("city")   # =&gt; "Duckburgh"
+
+Rails.cache.fetch("#{id}-data") do
+  Book.sum(:amount, :conditions =&gt; { :category_id =&gt; self.category_ids } )
+end
+</code></pre>
+
+<p><code>write</code>和<code>fetch</code>支持<code>expires_in</code>参数可以设定时效。</p>
+
+<h2 id="http">使用<em>HTTP</em>快取</h2>
+
+<p>在<em>HTTP 1.1</em>规格中定义了<em>Cache-Control</em>、<em>ETag</em>和<em>Last-Modified</em>等<em>Headers</em>可以更细微的设定用户端和服务器之间要如何快取，<em>Rails</em>也有语法可以很方便的支持。这在大型网站的架构中，会搭配<em>HTTP</em>快取服务器，来获得最大的效益。例如<em><a href="https://www.varnish-cache.org/">Varnish</a></em>或<em><a href="http://www.squid-cache.org/">Squid</a></em>。</p>
+
+<h3 id="http-cache-control">HTTP Cache-Control</h3>
+
+<p>使用<code>expires_in</code>和<code>expires_now</code>方法。</p>
+
+<h3 id="http-etag--last-modified">HTTP ETag 和 Last-Modified</h3>
+
+<p>使用<code>fresh_when</code>和<code>stale?</code>方法，当判断<em>response</em>内容没有更新的时候，只回传<em>HTTP 304 Not Modified</em>。</p>
+
+<h2 id="section-3">其他线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/caching_with_rails.html">Caching with Rails: An overview</a></li>
+  <li><a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching">Google Developers: HTTP 快取</a></li>
+</ul>
+
+<!--
+
+* Advanced Caching in Rails [http://broadcastingadam.com/2011/05/advanced_caching_in_rails](http://broadcastingadam.com/2011/05/advanced_caching_in_rails)
+* Scaling Rails Series [http://railslab.newrelic.com/scaling-rails](http://railslab.newrelic.com/scaling-rails)
+* [Advanced Caching in Rails: Revised](http://www.broadcastingadam.com/2012/07/advanced_caching_revised/)
+* http://railscasts.com/?tag_id=18
+
+-->
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

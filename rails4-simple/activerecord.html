@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | ActiveRecord - 基本操作与关联设计</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./activerecord.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="activerecord---">ActiveRecord - 基本操作与关联设计</h1>
+
+<blockquote>
+  <p>All problems in computer science can be solved by another level of indirection(abstraction) - David Wheeler
+…except for the problem of too many layers of indirection. - Kevlin Henney’s corollary</p>
+</blockquote>
+
+<blockquote>
+  <p>请注意本章内容衔接前两章，请先完成前两章内容。</p>
+</blockquote>
+
+<h2 id="orm-">ORM 与抽象渗漏法则</h2>
+
+<p>ORM (Object-relational mapping ) 是一种对映设关联式资料与对象资料的程式技术。对象导向和从数学理论发展出来的关联式数据库，有著显著的区别，而 ORM 正是解决这个不匹配问题所产生的工具。它可以让你使用对象导向语法来操作关联式数据库，非常容易使用、撰码十分有效率，不需要撰写繁琐的SQL语法，同时也增加了程式码维护性。</p>
+
+<p>不过，有些熟悉 SQL 语法的程式设计师反对使用这样的机制，因为直接撰写 SQL 可以确保操作数据库的执行效率，毕竟有些时候 ORM 产生出来的 SQL 效率不是最佳解，而你却不一定有经验能够意识到什么时候需要担心或处理这个问题。</p>
+
+<p>知名软件人 Joel Spolsky (他有两本中文翻译书值得推荐：约耳趣谈软件和约耳续谈软件，悦知出版) 有个理论：<a href="http://local.joelonsoftware.com/wiki/The_Joel_on_Software_Translation_Project:%E6%8A%BD%E8%B1%A1%E6%BB%B2%E6%BC%8F%E6%B3%95%E5%89%87">抽象渗漏法则</a>：所有重大的抽象机制在某种程式上都是有漏洞的。有非常多程式设计其实都是在建立抽象机制，C 语言简化了组合组言的繁杂、动态语言如 Ruby 简化了 C 语言、TCP 协定简化了 IP 通讯协定，甚至车子的挡风玻璃跟雨刷也简化了下雨的事实。</p>
+
+<p>但是这些抽象机制或多或少都会力有未及的地方，用 C 语言撰写的 Linux 核心也包括少量组合语言、部分 Ruby 套件用 C 语言撰写扩充来增加效能、保证信息会抵达 TCP 信息，碰到 IP 封包在路由器上随机遗失的时候，你也只会觉得速度很慢、即使有挡风玻璃跟雨刷，开车还是必须小心路滑。</p>
+
+<p>当某人发明一套神奇可以大幅提升效率的新程式工具时，就会听到很多人说：「应该先学会如何手动进行，然后才用这个神奇的工具来节省时间。」任何抽象机制都有漏洞，而唯一能完美处理漏洞的方法，就是只去弄懂该抽象原理以及所隐藏的东西。这是否表示我们应该永远只应该使用比较低阶的工具呢？不是这样的。而是应该依照不同的情境，选择效益最大的抽象化工具。以商务逻辑为多的 Web 应用程式，选择动态语言开发就相对合适，用 C 语言开发固然执行效率极高，但是完成相同的功能却需要极高的人月开发时数。如果是作业系统，使用无法随意控制内存分配的动态语言也显然不是个好主意。</p>
+
+<p>能够意识到什么时候抽象化工具会产生渗漏，正是”有纯熟经验”的程式设计师和”新手”设计师之间的差别。ORM 虽然替我们节省了工作的时间，不过对资深的程式设计师来说，学习 SQL 的时间还是省不掉的。这一切都似乎表示，即使我们拥有愈来愈高阶的程式设计工具，抽象化也做得愈来愈好，要成为一个由高阶到低阶都纯熟的程式设计专家是愈来愈困难了(也越来越稀有及宝贵)。</p>
+
+<h2 id="model">建立新 Model</h2>
+
+<p>首先，让我们再示范如何建立一个 Model：</p>
+
+<pre><code>rails g model category
+</code></pre>
+
+<p>这个指令会产生几个档案</p>
+
+<pre><code>category.rb
+category_test.rb
+categories.yml
+xxxxxxxx_create_categories.rb
+</code></pre>
+
+<p>打开 xxxxxxxx_create_categories.rb 你可以看到数据表的定义，让我们加上几个栏位吧，除了建立<code>categiries</code>表，同时也帮<em>events</em>加上一个外部键让两个表可以关连起来，在后一章会用到：</p>
+
+<pre><code>class CreateCategories &lt; ActiveRecord::Migration
+  def change
+    create_table :categories do |t|
+      t.string :name
+      t.integer :position
+      t.timestamps
+    end
+
+    add_column :events, :category_id, :integer
+    add_index :events, :category_id
+  end
+end
+</code></pre>
+
+<p>接着执行以下指令便会产生出数据库数据表</p>
+
+<pre><code>bin/rake db:migrate
+</code></pre>
+
+<p>db:migrate 指令会将上述的 Ruby 程式变成以下 SQL 执行。</p>
+
+<pre><code>CREATE TABLE categories (
+"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+"name" varchar(255) DEFAULT NULL,
+"position" int(4) DEFAULT NULL,
+"created_at" datetime DEFAULT NULL,
+"updated_at" datetime DEFAULT NULL);
+</code></pre>
+
+<p>接着我们打开 category.rb 你可以看到</p>
+
+<pre><code>class Category &lt; ActiveRecord::Base
+end
+</code></pre>
+
+<p>这是一个继承 ActiveRecord::Base 的 Category 类别，你不需要定义这个<em>Model</em>有哪些栏位，<em>Rails</em>会自动根据数据表纲要决定这个<em>Model</em>有哪些属性。</p>
+
+<p>我们在学习 Ruby 的时候提过 irb 这个互动工具，而 Rails 也提供了特殊的 irb 介面叫做 console，让我们可以直接与 Rails 程式互动：</p>
+
+<pre><code>bin/rails console (可以简写成 bin/rails c)
+</code></pre>
+
+<p>通过 console，我们可以轻易的练习操作 ActiveRecord。</p>
+
+<!--
+
+> TODO: 需要重写一段导论
+> Part 1 Basic 那章有非常基本的 Query 示范(可能需要改好一点)
+> Part 2 Query 那章则有完整的 Query 教学
+> 这里需要介于中间的介绍版本:
+
+### ActiveRecord 的特点
+
+1. 宣告风格
+
+2. 查询串接
+
+3. 惯例胜于设计
+
+-->
+
+<h2 id="section">数据表关联设计</h2>
+
+<p><em>ActiveRecord</em>可以用<em>Associations</em>来定义数据表之间的关联性，这是最被大家眼睛一亮<em>ORM</em>功能。到目前为止我们用了<em>ActiveRecord</em>来操作基本的数据库<em>CRUD</em>，但是还没充分发挥关联式数据库的特性，那就是通过<em>primary key</em>和<em>foreign keys</em>将数据表互相关连起来。</p>
+
+<blockquote>
+  <p><em>Primary Key</em>主键是一张数据表可以用来唯一识别的栏位，而<em>Foreign Key</em>外部键则是用来指向别张数据表的<em>Primary Key</em>，如此便可以产生数据表之间的关联关係。了解如何设计正规化关联式数据库请参考附录基础。</p>
+</blockquote>
+
+<p><em>Primary Key</em>这个栏位在<em>Rails</em>中，照惯例叫做<em>id</em>，型别是整数且递增。而<em>Foreign Key</em>栏位照惯例会叫做<code>{model_name}_id</code>，型别是整数。</p>
+
+<h3 id="one-to-many">一对多关联<em>one-to-many</em>
+</h3>
+
+<p><img src="images/activerecord-relationships-has_many_diagram.png" alt="has_one diagram"></p>
+
+<p>一对多关联算是最常用的，延续<em>Part1</em>的<em>Event Model</em>范例，一个<em>Event</em>拥有很多<em>Attendee</em>。我们来新增<em>Attendee Model</em>：</p>
+
+<pre><code>rails g model attendee name:string event_id:integer
+</code></pre>
+
+<p>执行<code>bin/rake db:migrate</code>产生<em>attendees</em>数据表。</p>
+
+<p>分别编辑<em>app/models/event.rb</em>和<em>app/models/attendee.rb</em>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :attendees # 复数
+    #...
+end
+
+class Attendee &lt; ActiveRecord::Base
+    belongs_to :event # 单数
+end
+</code></pre>
+
+<p>同样地，<em>belongs_to</em>和<em>has_many</em>这两个方法，会分别动态新增一些方法到<em>Attendee</em>和<em>Event Model</em>上，让我们进入<code>rails console</code>实际操作数据库看看：</p>
+
+<h4 id="attendeeevent">范例一，建立<em>Attendee</em>对象并关联到<em>Event</em>:</h4>
+
+<pre><code>e = Event.first
+a = Attendee.new( :name =&gt; 'ihower', :event =&gt; e )
+# 或 a = Attendee.new( :name =&gt; 'ihower', :event_id =&gt; e.id )
+a.save
+e.attendees # 这是阵列
+e.attendees.size
+Attendee.first.event
+</code></pre>
+
+<h4 id="eventattendee">范例二，从<em>Event</em>对象中建立一个<em>Attendee</em>:</h4>
+
+<pre><code>e = Event.first
+a = e.attendees.build( :name =&gt; 'ihower' )
+a.save
+e.attendees
+</code></pre>
+
+<h4 id="eventattendee-1">范例三，直接从<em>Event</em>对象中建立一个<em>Attendee</em>:</h4>
+
+<pre><code>e = Event.first
+a = e.attendees.create( :name =&gt; 'ihower' )
+e.attendees
+</code></pre>
+
+<h4 id="attendeeevent-1">范例四，先建立<em>Attendee</em>对象再放到<em>Event</em>中:</h4>
+
+<pre><code>e = Event.first
+a = Attendee.create( :name =&gt; 'ihower' )
+e.attendees &lt;&lt; a
+e.attendees
+</code></pre>
+
+<h4 id="eventattendee-2">范例五，根据特定的<em>Event</em>查询<em>Attendee</em>
+</h4>
+
+<pre><code>e = Event.first
+e.id # 1
+a = e.attendees.find(3)
+attendees = e.attendees.where( :name =&gt; 'ihower' )
+</code></pre>
+
+<p>这样就可以写出限定在某个<em>Event</em>下的条件查询，用这种写法可以避免一些安全性问题，不会让没有权限的使用者搜寻到别的<em>Event</em>的<em>Attendee</em>。</p>
+
+<h4 id="section-1">范例六，删除</h4>
+
+<pre><code>e = Event.first
+e.attendees.destroy_all # 一笔一笔删除 e 的 attendee，并触发 attendee 的 destroy 回呼
+e.attendees.delete_all # 一次砍掉 e 的所有 attendees，不会触发个别 attendee 的 destroy 回呼
+</code></pre>
+
+<blockquote>
+  <p>有个口诀可以记起来：有<em>Foreign Key</em>的<em>Model</em>，就是设定<code>belongs_to</code>的Model。</p>
+</blockquote>
+
+<p>学到这里，还记得上一章建立的<code>Category</code>吗？它也要跟<code>Event</code>是一对多的关係，让我们补上程式吧：</p>
+
+<pre><code>class Category &lt; ActiveRecord::Base
+    has_many :events
+end
+
+class Event &lt; ActiveRecord::Base
+  belongs_to :category
+  # ...
+end
+</code></pre>
+
+<h3 id="one-to-one">一对一关联<em>one-to-one</em>
+</h3>
+
+<p><img src="images/activerecord-relationships-has_one_diagram.png" alt="has_one diagram"></p>
+
+<p>一对一关联算是一对多关联的一种特例情况。假设一个<em>Event</em>拥有一个<em>Location</em>。来新增一个<em>Location Model</em>，其中的<em>event_id</em>就是外部键栏位：</p>
+
+<pre><code>rails g model location name:string event_id:integer
+</code></pre>
+
+<p>执行<code>bin/rake db:migrate</code>产生<em>locations</em>数据表。</p>
+
+<p>分别编辑<em>app/models/event.rb</em>和<em>app/models/location.rb</em>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_one :location # 单数
+    #...
+end
+
+class Location &lt; ActiveRecord::Base
+    belongs_to :event # 单数
+end
+</code></pre>
+
+<p><em>belongs_to</em>和<em>has_one</em>这两个方法，会分别动态新增一些方法到<em>Location</em>和<em>Event Model</em>上，让我们进入<code>rails console</code>实际操作数据库看看，通过<em>Associations</em>你会发现操作关联的对象非常直觉：</p>
+
+<h4 id="locationevent">范例一，建立<em>Location</em>对象并关联到<em>Event</em>：</h4>
+
+<pre><code>e = Event.first
+l = Location.new( :name =&gt; 'Hsinchu', :event =&gt; e )
+# 等同于 l = Location.new( :name =&gt; 'Hsinchu', :event_id =&gt; e.id )
+l.save
+e.location
+l.event
+</code></pre>
+
+<blockquote>
+  <p><code>Event.first</code>会捞出<em>events table</em>的第一笔资料，如果你第一笔还在，那就会是<code>Event.find(1)</code>。同理，<code>Event.last</code>会捞出最后一笔。</p>
+</blockquote>
+
+<h4 id="eventlocation">范例二，从<em>Event</em>对象中建立一个<em>Location</em>：</h4>
+
+<pre><code>e = Event.first
+l = e.build_location( :name =&gt; 'Hsinchu' )
+l.save
+e.location
+l.event
+</code></pre>
+
+<h4 id="eventlocation-1">范例三，直接从<em>Event</em>对象中建立一个<em>Location</em>：</h4>
+
+<pre><code>e = Event.first
+l = e.create_location( :name =&gt; 'Hsinchu' )
+e.location
+l.event
+</code></pre>
+
+<h3 id="many-to-many">多对多关联<em>many-to-many</em>
+</h3>
+
+<p><img src="images/activerecord-relationships-many_to_many_1_diagram.png" alt="has_one diagram"></p>
+
+<p><img src="images/activerecord-relationships-many_to_many_2_diagram.png" alt="has_one diagram"></p>
+
+<p>另一种常见的关联模式则是多对多，一笔资料互相拥有多笔资料，例如一个<em>Event</em>有多个<em>Group</em>，一个<em>Group</em>有多个<em>Event</em>。多对多关联的实作必须多一个额外关联用的数据表(又做作<em>Join table</em>)，让我们来建立<em>Group Model</em>和关联用的<em>EventGroupship Model</em>，其中后者定义了两个<em>Foreign Keys</em>：</p>
+
+<pre><code>rails g model group name:string
+rails g model event_groupship event_id:integer group_id:integer
+</code></pre>
+
+<p>执行<code>bin/rake db:migrate</code>产生这两个数据表。</p>
+
+<p>分别编辑<em>app/models/event.rb</em>、<em>app/models/group.rb</em>和<em>app/models/event_groupship.rb</em>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :event_groupships
+    has_many :groups, :through =&gt; :event_groupships
+end
+
+class EventGroupship &lt; ActiveRecord::Base
+    belongs_to :event
+    belongs_to :group
+end
+
+class Group &lt; ActiveRecord::Base
+    has_many :event_groupships
+    has_many :events, :through =&gt; :event_groupships
+end
+</code></pre>
+
+<blockquote>
+  <p>这个<em>Join table</em>笔者的命名习惯会是<em>ship</em>结尾，用以凸显它的关联性质。另外，除了定义<em>Foreign Keys</em>之外，你也可以自由定义一些额外的栏位，例如记录是哪位使用者建立关联。</p>
+</blockquote>
+
+<p><em>blongs_to</em>和<em>has_many</em>我们见过了，这里多一种<em>has_many :through</em>方法，可以神奇地把<em>Event</em>和<em>Group</em>关联起来，让我们进入<code>rails console</code>实际操作数据库看看：</p>
+
+<h4 id="section-2">范例，建立双向关联记录:</h4>
+
+<pre><code>g = Group.create( :name =&gt; 'ruby taiwan' )
+e1 = Event.first
+e2 = Event.create( :name =&gt; 'ruby tuesday' )
+EventGroupship.create( :event =&gt; e1, :group =&gt; g )
+EventGroupship.create( :event =&gt; e2, :group =&gt; g )
+g.events
+e1.groups
+e2.groups
+</code></pre>
+
+<blockquote>
+  <p><em>Rails</em>还有一种旧式的<em>has_and_belongs_to_many</em>方法也可以建立多对多关係，不过已经很少使用，在此略过不提。</p>
+</blockquote>
+
+<h3 id="section-3">关连的参数</h3>
+
+<p>以上的关联方法<em>blongs_to</em>、<em>has_one</em>和<em>has_many</em>都还有一些可以定制的参数，让我们来介绍最常用的两个参数：</p>
+
+<h4 id="order">order</h4>
+
+<p><code>has_many</code>可以通过<code>:order</code>参数指定顺序：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :attendees, :order =&gt; "id desc"
+    #...
+end
+</code></pre>
+
+<h4 id="dependent">dependent</h4>
+
+<p>可以设定当对象删除时，也会顺便删除它的<code>has_many</code>对象：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :attendees, :dependent =&gt; :destroy
+ end
+</code></pre>
+
+<p><code>:dependent</code>可以有三种不同的删除方式，分别是：</p>
+
+<ul>
+  <li>
+<code>:destroy</code> 会执行<em>attendee</em>的<em>destroy</em>回呼</li>
+  <li>
+<code>:delete</code> 不会执行<em>attendee</em>的<em>destroy</em>回呼</li>
+  <li>
+<code>:nullify</code> 这是预设值，不会帮忙删除<em>attendee</em>
+</li>
+</ul>
+
+<blockquote>
+  <p>要不要执行<em>attendee</em>的删除回呼效率相差不少，如果需要的话，必须一笔笔把<em>attendee</em>读取出来变成<em>attendee</em>对象，然后呼叫它的<em>destroy</em>。如果用<code>:delete</code>的话，只需要一个<em>SQL</em>语句就可以删除全部<em>attendee</em>。</p>
+</blockquote>
+
+<h2 id="section-4">线上参考资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/active_record_basics.html">Active Record Basics</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：05 Feb 2015
+</p>
+</div>
+</div>
+</body>
+</html>

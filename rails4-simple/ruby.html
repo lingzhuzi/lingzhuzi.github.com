@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Ruby 程式语言入门</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/ruby.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="ruby-">Ruby 程式语言入门</h1>
+
+<blockquote>
+  <p>Actually, I’m trying to make Ruby natural, not simple. Ruby is simple in appearance, but is very complex inside, just like our human body. - Matz, Ruby 发明人</p>
+</blockquote>
+
+<p><em>Ruby</em>是个美丽、灵巧而且方便又实用的程式语言，而<em>Ruby on Rails</em>正是 Ruby 程式语言爆发成长的催化剂。在了解<em>Ruby on Rails</em>的程式之前，学习<em>Ruby</em>程式语言是最重要的基础功课之一，我们在这一章节将快速带过一些基本的语法，网络上也有<em>Ruby Taiwan</em>社群所翻译的文章可以一读：</p>
+
+<ul>
+  <li>
+<em>Ruby</em>中文官方网站：<a href="http://www.ruby-lang.org/zh_TW/about/">Ruby简介</a>
+</li>
+  <li>
+<em>Ruby</em>中文官方网站：<a href="http://www.ruby-lang.org/zh_TW/documentation/quickstart/">二十分鐘Ruby体验</a>
+</li>
+  <li>
+<em>Ruby</em>中文官方网站：<a href="http://www.ruby-lang.org/zh_TW/documentation/ruby-from-other-languages/">从其他程式语言到Ruby</a>
+</li>
+  <li><a href="http://guides.ruby.tw/ruby/">Ruby使用手册</a></li>
+</ul>
+
+<p>免费的英文资源也很多，我推荐以下三个教学网站作为练习之用：</p>
+
+<ul>
+  <li>
+<a href="http://www.gotealeaf.com/books/ruby">Introduction to Programming with Ruby by Tealeaf Academy</a> 除了入门的内容，还包括完整练习题和解答</li>
+  <li>
+<a href="http://ruby.learncodethehardway.org/book/">Learn Ruby the Hard Way</a> 以习题为主的教材</li>
+  <li>
+<a href="http://www.codecademy.com/en/tracks/ruby">Codecademy</a> 从做中学的线上互动教学</li>
+</ul>
+
+<h2 id="ruby">各种<em>Ruby</em>实作</h2>
+
+<p>除了用<em>C</em>语言实作的官方版本<a href="http://ruby-lang.org/"><em>Ruby</em></a>(又叫做<em>CRuby</em>或<em>MRI, Matz’s Ruby Interpreter</em>)，也有其他不同实作的<em>Ruby</em>环境。这些实作都以<em><a href="http://rubyspec.org/">RubySpec</a></em>作为其语法的标準：</p>
+
+<ul>
+  <li>
+<em><a href="http://jruby.org/">JRuby</a></em>是由<em>Java</em>实作的<em>Ruby</em>，运行在高效能、支持系统执行绪及有非常多函数库的<em>Java</em>虚拟机器<em>(JVM)</em>上。<em>JRuby</em>算是目前<em>Ruby</em>要开发跨平台(<em>Windows</em>、<em>Mac</em>和<em>Linux</em>)桌面软件最好的选择。</li>
+  <li>
+<em><a href="http://rubini.us/">Rubinuis</a></em>是用<em>C++</em>、<em>Ruby</em>和<em>LLVM</em>编译器技术实作的<em>Ruby VM</em>，可以在<em>Mac OS X</em>、<em>Debian/Ubuntu</em>、<em>FreeBSD</em>、<em>Windows</em>上执行。<em>LLVM</em>可以说是当代最重要的编译器架构，拥有各种编译器最佳化技术。能给<em>Ruby</em>带来多少效能改善幅度，值得关注。</li>
+</ul>
+
+<h2 id="irbinteractive-ruby"><em>IRB(Interactive Ruby)</em></h2>
+
+<p><em>IRB</em>是一个互动的<em>Ruby</em>环境，可以让我们练习和语法，做些简单的实验。请输入<code>irb</code>就会进入互动模式：</p>
+
+<pre><code>$ irb
+irb: Interactive Ruby
+irb(main):001:0&gt;
+irb(main):001:0&gt; 1 + 1
+=&gt; 2
+</code></pre>
+
+<p>在<code>irb</code>之中，每行执行完<em>Ruby</em>都会自动帮你<code>puts</code>输出结果。</p>
+
+<p>不过，一旦程式稍微复杂一点，还是打开文字编辑器吧。让我们编辑一个档案<em>hello.rb</em>。<em>Ruby</em>脚本附档名的惯例是<em>.rb</em>，内容如下：</p>
+
+<pre><code>puts "Hello, World!!"
+</code></pre>
+
+<p>存档后，输入：</p>
+
+<pre><code>$ ruby hello.rb
+</code></pre>
+
+<p>就会执行这个脚本了，它会在萤幕上输出<em>Hello, World!!</em>。</p>
+
+<h2 id="section">程式语言分类</h2>
+
+<p>根据需不需要事先宣告变数型别，我们可以分类出静态分型<em>(Static typing</em>)与动态分型<em>(Dynamic typing)</em>程式语言，前者例如<em>Java</em>、<em>C</em>、<em>C++</em>，后者例如<em>Ruby</em>、<em>Perl</em>、<em>Python</em>和<em>PHP</em>。根据会不会隐性自动转换型别，又可以区分出不会自动转换型别的强分型<em>(Strong typing)</em>与自动转换型别的弱分型<em>(Weak typing)</em>，前者例如<em>Ruby</em>、<em>Perl</em>、<em>Python</em>、<em>Java</em>，后者例如<em>PHP</em>、<em>C</em>、<em>C++</em>是弱分型。让我们举个例吧：</p>
+
+<pre><code>/* PHP */
+$i = 1;
+echo "Value is " . $i ;
+# Value is 1
+
+/* C */
+int a = 5;
+float b = a;
+</code></pre>
+
+<p>以上的<em>PHP</em>和<em>C</em>会隐性地自动转型，但是以下的<em>Ruby</em>程式会检查型别不相配而发生错误，这一点从<em>PHP</em>过来的朋友要特别注意。</p>
+
+<pre><code># Ruby
+i = 1
+puts "Value is " + i
+
+# TypeError: can't convert Fixnum into String
+#   from (irb):2:in `+'
+#   from (irb):2
+</code></pre>
+
+<p>另外，通常动态分型的程式语言多半也是直译式<em>(interpreted)</em>程式语言，也就是不需要事先编译，通过直译器<em>(interpreter)</em>执行即可，当然<em>Ruby</em>也不例外。相对的，编译式<em>(compiled)</em>语言则是事先编译成执行档才行执行。总结以上，<em>Ruby</em>是个动态强分型的直译式程式语言。</p>
+
+<h2 id="integer">整数<em>Integer</em>
+</h2>
+
+<p>任何整数都是<em>Fixnum</em>对象：</p>
+
+<pre><code>5
+-205
+9999999999
+0
+</code></pre>
+
+<p>完整的<em>Fixnum API</em>请参考<em><a href="http://www.ruby-doc.org/core/classes/Fixnum.html">Ruby doc</a></em>文件。</p>
+
+<h2 id="float">浮点数<em>Float</em>
+</h2>
+
+<p>中间带有点号的就是浮点数<em>Float</em>对象：</p>
+
+<pre><code>54.321
+0.001
+-12.312
+0.0
+</code></pre>
+
+<p>浮点数四则运算范例如下：</p>
+
+<pre><code>puts 1.0 + 2.0
+puts 2.0 * 3.0
+puts 5.0 - 8.0
+puts 9.0 / 2.0
+
+# 3.0
+# 6.0
+# -3.0
+# 4.5
+</code></pre>
+
+<p>要注意的是，整数四则运算结果，也会是整数：</p>
+
+<pre><code>puts 1 + 2
+puts 2 * 3
+puts 5 - 8
+puts 9 / 2
+
+# 3
+# 6
+# -3
+# 4
+</code></pre>
+
+<p>以下是一个更复杂的四则运算例子：</p>
+
+<pre><code>puts 5 * (12 - 8) + -15
+puts 98 + (59872 / (13*8)) * -52
+</code></pre>
+
+<p>完整的<em>Float API</em>请参考<em><a href="http://www.ruby-doc.org/core/classes/Float.html">Ruby doc</a></em>文件。</p>
+
+<h2 id="string">字串<em>String</em>
+</h2>
+
+<p>使用单引号或双引号括起来的是字串<em>String</em>对象：</p>
+
+<pre><code>puts 'Hello, world!'
+puts ''
+puts 'Good-bye.'
+</code></pre>
+
+<p>字串相加可以使用加号，要注意的是字串不能直接跟数字相加，会发生例外错误：</p>
+
+<pre><code>puts 'I like ' + 'apple pie.'
+puts 'You\'re smart!'
+
+puts '12' + 12
+#&lt;TypeError: can't convert Fixnum into String&gt;
+</code></pre>
+
+<p>更多字串方法示范：</p>
+
+<pre><code>var1 = 'stop'
+var2 = 'foobar'
+var3 = "aAbBcC"
+
+puts var1.reverse # pots
+puts var2.length # 6
+puts var3.upcase # AABBCC
+puts var3.downcase # aabbcc
+</code></pre>
+
+<p>为了方便字串的组合，<em>Ruby</em>也支持内插的方式：</p>
+
+<pre><code>verb = 'work'
+where = 'office'
+
+puts "I #{verb} at the #{where}" # 输出 I work at the office
+</code></pre>
+
+<p>注意到使用双引号(“)的字串才会进行内插处理。如果换成单引号(‘)：</p>
+
+<pre><code>puts 'I #{verb} at the #{where}' # 输出 I #{verb} at the #{where}
+</code></pre>
+
+<p>完整的<em>String API</em>请参考<em><a href="http://www.ruby-doc.org/core/classes/String.html">Ruby String API</a></em>文件。</p>
+
+<h2 id="ruby-1">
+<em>Ruby</em>完全地对象导向</h2>
+
+<p>你可能已经注意到，在<em>Ruby</em>裡每样东西都是对象，包括字串和数字。所有的方法都是对对象呼叫，你不会看到全域函式，例如<em>PHP</em>的<code>strlen("test")</code>用法，在<em>Ruby</em>中是<code>"test".length</code>。</p>
+
+<pre><code># 输出「UPPER」
+puts "upper".upcase
+
+# 输出 -5 的绝对值
+puts -5.abs
+
+# 输出 Fixnum 类别
+puts 99.class
+
+# 输出五次「Ruby Rocks!」
+5.times do
+  puts "Ruby Rocks!"
+end
+</code></pre>
+
+<h2 id="local-variable">区域变数<em>Local Variable</em>
+</h2>
+
+<p>区域变数使用小写开头，偏好单字之间以底线<code>_</code>来分隔。范例如下：</p>
+
+<pre><code>composer = 'Mozart'
+puts composer + ' was "da bomb", in his day.'
+
+my_composer = 'Beethoven'
+puts 'But I prefer ' + my_composer + ', personally.'
+</code></pre>
+
+<p>如果存取一个尚未初始过的区域变数，会得到以下错误：</p>
+
+<pre><code>NameError: undefined local variable or method `qwer' for main:Object
+from (irb):1
+from /Users/ihower/.rvm/rubies/ruby-2.1.5/bin/irb:11:in `&lt;main&gt;'
+</code></pre>
+
+<h2 id="conversions">型别转换<em>Conversions</em>
+</h2>
+
+<p>刚刚提到数字和字串对象不能直接相加，你必须使用<code>to_s</code>(转成字串)、<code>to_i</code>(转成整数)或<code>to_f</code>(转成浮点数)来手动转型，范例如下：</p>
+
+<pre><code>var1 = 2
+var2 = '5'
+
+puts var1.to_s + var2 # 25
+puts var1 + var2.to_i # 7
+
+puts 9.to_f / 2 # 4.5
+</code></pre>
+
+<h2 id="constant">常数<em>Constant</em>
+</h2>
+
+<p>大写开头的是为常数，范例如下：</p>
+
+<pre><code>Foo = 1
+Foo = 2 # (irb):3: warning: already initialized constant Foo
+
+RUBY_PLATFORM # =&gt; "x86_64-darwin10.7.0"
+ENV # =&gt; { "PATH" =&gt; "....", "LC_ALL" =&gt; "zh_TW.UTF-8" }
+</code></pre>
+
+<h2 id="nil">空值<em>nil</em>
+</h2>
+
+<p>表示未设定值、未定义的状态：</p>
+
+<pre><code>nil # nil
+nil.class # NilClass
+
+nil.nil? # true
+42.nil? # false
+
+nil == nil # true
+false == nil # false
+</code></pre>
+
+<h2 id="section-1">註解</h2>
+
+<p><em>Ruby</em>偏好一律使用单行註解：</p>
+
+<pre><code># this is a comment line
+# this is a comment line
+</code></pre>
+
+<p>多行註解比较少见：</p>
+
+<pre><code>=begin
+    This is a comment line
+    This is a comment line
+=end
+</code></pre>
+
+<h2 id="symbols">字串符号<em>Symbols</em>
+</h2>
+
+<p><em>Symbol</em>是唯一且不会变动的识别名称，用冒号开头：</p>
+
+<pre><code>:this_is_a_symbol
+</code></pre>
+
+<p>为什么不就用字串呢？这是因为相同名称的<em>Symbol</em>不会再重复建构对象，所以使用<em>Symbol</em>可以执行的更有效率。范例如下：</p>
+
+<pre><code>puts "foobar".object_id      # 输出 2151854740
+puts "foobar".object_id      # 输出 2151830100
+puts :foobar.object_id       # 输出 577768
+puts :foobar.object_id       # 输出 577768
+</code></pre>
+
+<p><code>object_id</code>方法会回传<em>Ruby</em>内部的内存配置编号。你会发现两个字串就算内容相同，也是不同的对象。但是<em>Symbol</em>只要内容相同，就是相同的对象。这种特性让<em>Symbol</em>的主要用途是作为杂凑<em>Hash</em>的键(Key)，一会就会介绍到。</p>
+
+<h2 id="array">阵列<em>Array</em>
+</h2>
+
+<p>使用中括号，索引从<code>0</code>开始。注意到阵列中的元素是不限同一类别，想放什么都可以：</p>
+
+<pre><code>a = [ 1, "cat", 3.14 ]
+
+puts a[0] # 输出 1
+puts a.size # 输出 3
+
+a[2] = nil
+puts a.inspect # 输出 [1, "cat", nil]
+a[99] # nil
+</code></pre>
+
+<blockquote>
+  <p><code>inspect</code>方法会将对象转成适合给人看的字串</p>
+</blockquote>
+
+<p>如果读取一个没有设定的阵列元素，预设值是<code>nil</code>。更多阵列方法范例：</p>
+
+<pre><code>colors = ["red", "blue"]
+
+colors.push("black")
+colors &lt;&lt; "white"
+puts colors.join(", ") # red, blue, black, white
+
+colors.pop
+puts colors.last #black
+</code></pre>
+
+<p>使用<code>each</code>方法走访阵列：</p>
+
+<pre><code>languages = ['Ruby', 'Javascript', 'Perl']
+
+languages.each do |lang|
+  puts 'I love ' + lang + '!'
+end
+
+# I Love Ruby!
+# I Love Javascript!
+# I Love Perl!
+</code></pre>
+
+<p>完整的<em>Array API</em>请参考<em>[Ruby Array API(http://www.ruby-doc.org/core/classes/Array.html)</em>文件。</p>
+
+<h2 id="hash">杂凑<em>Hash</em>
+</h2>
+
+<p><em>Hash</em>是一种<em>键值对(Key-Value)</em>的资料结构，虽然你可以使用任何对象当作<em>Key</em>，但是通常我们使用<em>Symbol</em>当作<em>Key</em>。例如：</p>
+
+<pre><code>config = { :foo =&gt; 123, :bar =&gt; 456 }
+puts config[:foo] # 输出 123
+config["nothing"] # 是 nil
+</code></pre>
+
+<p>在<em>Ruby 1.9</em>后支持新的语法，比较简约：</p>
+
+<pre><code>config = { foo: 123, bar: 456 } # 等同于 { :foo =&gt; 123, :bar =&gt; 456 }
+</code></pre>
+
+<p>如果读取一个不存在的值，例如上述范例的<code>nothing</code>，预设值是<code>nil</code>。</p>
+
+<p>使用<code>each</code>方法可以走访杂凑：</p>
+
+<pre><code>config = { :foo =&gt; 123, :bar =&gt; 456 }
+config.each do |key, value|
+  puts "#{key} is #{value}"
+end
+
+# foo is 123
+# bar is 456
+</code></pre>
+
+<p>完整的<em>Hash API</em>请参考<em><a href="http://www.ruby-doc.org/core/classes/Hash.html">Ruby Hash API</a></em>文件。</p>
+
+<h2 id="flow-control">流程控制<em>Flow Control</em>
+</h2>
+
+<p>让我们来看看一些流程控制：</p>
+
+<h3 id="section-2">比较方法</h3>
+
+<pre><code>puts 1 &gt; 2 # 大于
+puts 1 &lt; 2 # 小于
+puts 5 &gt;= 5 # 大于等于
+puts 5 &lt;= 4 # 小于等于
+puts 1 == 1 # 等于
+puts 2 != 1 # 不等于
+
+puts ( 2 &gt; 1 ) &amp;&amp; ( 2 &gt; 3 ) # 和
+puts ( 2 &gt; 1 ) || ( 2 &gt; 3 ) # 或
+</code></pre>
+
+<h3 id="if">控制结构<em>If</em>
+</h3>
+
+<p><em>else if</em>写成<code>elsif</code>：</p>
+
+<pre><code>total = 26000
+
+if total &gt; 100000
+  puts "large account"
+elsif total &gt; 25000
+  puts "medium account"
+else
+  puts "small account"
+end
+</code></pre>
+
+<p>另外如果要执行的<code>if</code>程式只有一行，可以将<code>if</code>放到行末即可：</p>
+
+<pre><code>puts "greater than ten" if total &gt; 10
+</code></pre>
+
+<h3 id="section-3">三元运算子</h3>
+
+<p>三元运算子<code>expression ? true_expresion : false_expression</code>可以让我们处理简易的<em>if else</em>条件，例如以下的程式：</p>
+
+<pre><code>x = 3
+if x &gt; 3
+  y = "foo"
+else
+  y = "bar"
+end
+</code></pre>
+
+<p>改用三元运算子之后，可以缩减程式行数：</p>
+
+<pre><code>x = 3
+y = ( x &gt; 3 ) ? "foo" : "bar"
+</code></pre>
+
+<h3 id="case">控制结构<em>Case</em>
+</h3>
+
+<pre><code>case name
+  when "John"
+    puts "Howdy John!"
+  when "Ryan"
+    puts "Whatz up Ryan!"
+  else
+    puts "Hi #{name}!"
+end
+</code></pre>
+
+<h3 id="while-loop-until-next-and-break">迴圈 while, loop, until, next and break</h3>
+
+<p><em>while</em>用法范例：</p>
+
+<pre><code>i=0
+while ( i &lt; 10 )
+  i += 1
+  next if i % 2 == 0 #跳过双数
+end
+</code></pre>
+
+<p><em>until</em>用法范例：</p>
+
+<pre><code>i = 0
+i += 1 until i &gt; 10
+puts i
+# 输出 11
+</code></pre>
+
+<p><em>loop</em>用法范例：</p>
+
+<pre><code>i = 0
+loop do
+  i += 1
+  break if i &gt; 10 # 中断迴圈
+end
+</code></pre>
+
+<p>不过你很快就会发现写<em>Ruby</em>很少用到<em>while</em>、<em>until</em>、<em>loop</em>，我们会使用迭代器。</p>
+
+<h3 id="section-4">真或假</h3>
+
+<p>记住，只有<code>false</code>和<code>nil</code>是假，其他都为真。</p>
+
+<pre><code>puts "not execute" if nil
+puts "not execute" if false
+
+puts "execute" if true # 输出 execute
+puts "execute" if “” # 输出 execute (和JavaScript不同)
+puts "execute" if 0 # 输出 execute (和C不同)
+puts "execute" if 1 # 输出 execute
+puts "execute" if "foo" # 输出 execute
+puts "execute" if Array.new # 输出 execute
+</code></pre>
+
+<h2 id="regular-expressions">正规表示法<em>Regular Expressions</em>
+</h2>
+
+<p>与<em>Perl</em>类似的语法，使用<code>=~</code>：</p>
+
+<pre><code># 抓出手机号码
+phone = "123-456-7890"
+if phone =~ /(\d{3})-(\d{3})-(\d{4})/
+  ext  = $1
+  city = $2
+  num  = $3
+end
+</code></pre>
+
+<h2 id="methods">方法定义<em>Methods</em>
+</h2>
+
+<p>使用<code>def</code>开头<code>end</code>结尾来定义一个方法：</p>
+
+<pre><code>def say_hello(name)
+  result = "Hi, " + name
+  return result
+end
+
+puts say_hello('ihower')
+# 输出 Hi, ihower
+</code></pre>
+
+<p>方法中的<code>return</code>是可以省略的，<em>Ruby</em>就会回传最后一行运算的值。上述方法可以改写成：</p>
+
+<pre><code>def say_hello(name)
+  "Hi, " + name
+end
+</code></pre>
+
+<p>呼叫方法时，括号也是可以省略的，例如：</p>
+
+<pre><code>say_hello 'ihower'
+</code></pre>
+
+<p>不过，除了一些方法惯例不加之外(例如<code>puts</code>和<em>Rails</em>中的<code>redirect_to</code>、<code>render</code>方法)，绝大部分的情况加上括号比较无疑义。</p>
+
+<p>我们也可以给参数预设值：</p>
+
+<pre><code>def say_hello(name = "nobody")
+  result = "Hi, " + name
+  return result
+end
+
+puts say_hello
+# 输出 Hi, nobody
+</code></pre>
+
+<h2 id="section-5">
+<code>?</code>与<code>!</code>的惯例</h2>
+
+<p>方法名称可以用<code>?</code>或<code>!</code>结尾，前者表示会回传<em>Boolean</em>值，后者暗示会有某种副作用<em>(side-effect)</em>。范例如下：</p>
+
+<pre><code>array=[2,1,3]
+
+array.empty? # false
+array.sort # [1,2,3]
+
+array.inspect # [2,1,3]
+
+array.sort! # [1,2,3]
+array.inspect # [1,2,3]
+</code></pre>
+
+<h2 id="section-6">对象导向</h2>
+
+<p>对象导向<em>(Object-Oriented Programming)</em>一种将「资料」和「方法」封装到对象的设计方式，我们定义「类别 Class」，然后依此产生出「对象 Object」，类别可说是对象的样板。</p>
+
+<p><em>Ruby</em>的类别其实也是一种常数，所以也是大写开头，使用<code>new</code>方法可以建立出对象，例如之前所学的字串、阵列和杂凑，也可以用以下方式建立：</p>
+
+<pre><code>color_string = String.new
+color_string = "" # 等同
+
+color_array = Array.new
+color_array = [] # 等同
+
+color_hash = Hash.new
+color_hash = {} # 等同
+
+time  = Time.new # 内建的时间类别
+puts time
+</code></pre>
+
+<p>来看看如何自定类别：</p>
+
+<pre><code>class Person # 大写开头的常数
+
+  def initialize(name) # 建构式
+    @name = name # 对象变数
+  end
+
+  def say(word)
+    puts "#{word}, #{@name}" # 字串相加
+  end
+
+end
+
+p1 = Person.new("ihower")
+p2 = Person.new("ihover")
+
+p1.say("Hello") # 输出 Hello, ihower
+p2.say("Hello") # 输出 Hello, ihover
+</code></pre>
+
+<blockquote>
+  <p>注意到双引号裡的字串可以使用<code>#{var}</code>来做字串嵌入，相较起用加号<code>+</code>相加字串可以更有效率。</p>
+</blockquote>
+
+<p>除了对象方法与对象变数，<em>Ruby</em>也有属于类别的方法和变数：</p>
+
+<pre><code>class Person
+
+  @@name = “ihower” # 类别变数
+
+  def self.say # 类别方法
+    puts @@name
+  end
+
+end
+
+Person.say # 输出 ihower
+</code></pre>
+
+<h3 id="section-7">资料封装</h3>
+
+<p>所有的对象变数(<code>@</code>开头)、类别变数(<code>@@</code>开头)，都是封装在类别内部的，类别外无法存取：</p>
+
+<pre><code>class Person
+  def initialize(name)
+    @name = name
+  end
+end
+
+p = Person.new('ihower')
+p.name                      # 出现 NoMethodError 错误
+p.name = 'peny'             # 出现 NoMethodError 错误
+</code></pre>
+
+<p>为了可以存取到<code>@name</code>，我们必须定义方法：</p>
+
+<pre><code>class Person
+
+  def initialize(name)
+    @name = name
+  end
+
+  def name
+    @name
+  end
+
+  def name=(name)
+    @name = name
+  end
+end
+
+p = Person.new('ihower')
+=&gt; #&lt;Person:0x007fe9e408b8f0 @name="ihower"&gt;
+p.name
+=&gt; "ihower"
+p.name="peny"
+=&gt; "peny"
+p.name
+=&gt; "peny"
+p
+=&gt; #&lt;Person:0x007fe9e408b8f0 @name="peny"&gt;
+</code></pre>
+
+<h3 id="class">类别<code>Class</code>定义范围内也可以执行程式</h3>
+
+<p>跟其他程式语言不太一样，<em>Ruby</em>的类别层级内也可以执行程式，例如以下：</p>
+
+<pre><code>class Demo
+  puts "foobar"
+end
+</code></pre>
+
+<p>当你载入这个类别的时候，就会执行<code>puts "foobar"</code>输出<em>foobar</em>。会放在这里的程式，主要的用途是来做<em>Meta-programming</em>。例如，上述定义对象变数的存取方法实在太常见了，因此<em>Ruby</em>提供了<code>attr_accessor</code>、<code>attr_writer</code>、<code>attr_reader</code>类别方法可以直接定义这些方法。上述的程式可以改写成：</p>
+
+<pre><code>class Person
+  attr_accessor :name
+
+  def initialize(name)
+    @name = name
+  end
+end
+
+p = Person.new('ihower')
+=&gt; #&lt;Person:0x007fe9e3094410 @name="ihower"&gt;
+p.name
+=&gt; "ihower"
+p.name="peny"
+=&gt; "peny"
+p.name
+=&gt; "peny"
+p
+=&gt; #&lt;Person:0x007fe9e3094410 @name="peny"&gt;
+</code></pre>
+
+<p>这里的<code>attr_accessor</code>其实就是一个类别方法。</p>
+
+<h3 id="section-8">方法封装</h3>
+
+<p>类别中的方法预设是<code>public</code>的，宣告<code>private</code>或<code>protected</code>的话，该行以下的方法就会套用：</p>
+
+<pre><code>class MyClass
+
+  def public_method
+  end
+
+  private
+
+  def private_method_1
+  end
+
+  def private_method_2
+  end
+
+  protected
+
+  def protected_method
+  end
+
+end
+</code></pre>
+
+<p><em>Ruby</em>的<em>private</em>和<em>protected</em>定义和其他程式语言不同，都是可以在整个继承体系内呼叫。两著差别在于<em>private</em>只有在对象内部才能呼叫，预设的接收者<em>(receiver)</em>就是对象本身，也就是<em>self</em>。而<em>protected</em>方法除了可以在本身内部呼叫以外，还可以被子类别的对象、或是另一个相同类别的对象呼叫。</p>
+
+<blockquote>
+  <p>在对象导向的术语中，<code>object.call_method</code>的意思是<em>object</em>收到执行<em>call_method</em>的指令，也就是<em>object</em>是<em>call_method</em>方法的接受者<em>(receiver)</em>。因此，你甚至可以改写成<code>object.__send__(:call_method)</code></p>
+</blockquote>
+
+<h3 id="class-">Class 继承</h3>
+
+<p><em>Ruby</em>使用小于<code>&lt;</code>符号代表类别继承：</p>
+
+<pre><code>class Pet
+  attr_accessor :name, :age
+
+  def say(word)
+    puts "Say: #{word}"
+  end
+end
+
+class Cat &lt; Pet
+  def say(word)
+    puts "Meow~"
+    super
+  end
+end
+
+class Dog &lt; Pet
+  def say(word, person)
+    puts "Bark at #{person}!"
+    super(word)
+  end
+end
+
+Cat.new.say("Hi")
+Dog.new.say("Hi", "ihower")
+</code></pre>
+
+<p>输出</p>
+
+<pre><code>Meow~
+Say: Hi
+Bark at ihower!
+Say: Hi
+</code></pre>
+
+<p>这个范例中，<code>Cat</code>和<code>Dog</code>子类别覆写了<em>Pet say</em>方法，其中的<code>super</code>是用来呼叫被覆写掉的<em>Pet say</em>方法。另外，没有括号的<code>super</code>和有括号的<code>super()</code>是有差异的，前者<em>Ruby</em>会自动将所有参数都代进去来呼叫父类别的方法，后者则是自己指定参数。此例中如果<em>Dog say</em>裡只写<code>super</code>，则会发生<em>wrong number of arguments</em>的错误，这是因为<em>Ruby</em>会传<code>say("Hi", "ihower")</code>给<em>Pet say</em>而发生错误。</p>
+
+<h3 id="module">Module</h3>
+
+<p><em>Module</em>是<em>Ruby</em>一个非常好用的功能，它跟<em>Class</em>类别非常相似，你可以在裡面定义方法。只是你不能用<em>new</em>来建立它。它的第一个用途是可以当做<em>Namespace</em>来放一些工具方法：</p>
+
+<pre><code>module MyUtil
+
+  def self.foobar
+    puts "foobar"
+  end
+
+end
+
+MyUtil.foobar
+# 输出 foobar
+</code></pre>
+
+<p>另一个更重要的功能是<em>Mixins</em>，可以将一个<em>Module</em>混入类别之中，这样这个类别就会拥有此<em>Module</em>的方法。这回让我们拆成两个档案，<em>debug.rb</em>和<em>foobar.rb</em>，然后在<em>foobar.rb</em>中用<code>require</code>来引用<em>debug.rb</em>：</p>
+
+<p>首先是<em>debug.rb</em></p>
+
+<pre><code>module Debug
+  def who_am_i?
+    puts "#{self.class.name}: #{self.inspect}"
+  end
+end
+</code></pre>
+
+<p>然后是<em>foobar.rb</em></p>
+
+<pre><code>require "./debug"
+class Foo
+  include Debug # 这个动作叫做 Mixin
+end
+
+class Bar
+  include Debug
+end
+
+f = Foo.new
+b = Bar.new
+f.who_am_i? # 输出 Foo: #&lt;Foo:0x00000102829170&gt;
+b.who_am_i? # 输出 Bar: #&lt;Bar:0x00000102825b88&gt;
+</code></pre>
+
+<p><em>Ruby</em>使用<em>Module</em>来解决多重继承的问题，不同类别之间但是拥有相同的方法，就可以改放在<em>Module</em>裡面，然后<code>include</code>它即可。</p>
+
+<h2 id="iterator">迴圈走访与迭代器<em>Iterator</em>
+</h2>
+
+<p>不同于<code>while</code>迴圈用法，<em>Ruby</em>习惯使用迭代器<em>(Iterator)</em>来走访迴圈，例如<code>each</code>是一个阵列的方法，它会走访其中的元素，其中的<code>do ... end</code>是<code>each</code>方法的参数，称作匿名方法<em>(code block)</em>。范例程式如下：</p>
+
+<pre><code>languages = ['Ruby', 'Javascript', 'Perl']
+languages.each do |lang|
+  puts "I love #{lang}!"
+end
+# I Love Ruby!
+# I Love Javascript!
+# I Love Perl!
+</code></pre>
+
+<p>其中两个直线<code>|</code>中间的<em>lang</em>被称作<em>Block variable</em>区块变数，每次迭代都会被设定成不同元素。其他迭代器范例如：</p>
+
+<pre><code># 反覆三次
+3.times do
+  puts 'Good Job!'
+end
+# Good Job!
+# Good Job!
+# Good Job!
+
+# 从一数到九
+1.upto(9) do |x|
+  puts x
+end
+
+# 多一个索引区块变数
+languages = ['Ruby', 'Javascript', 'Perl']
+languages.each_with_index do |lang, i|
+    puts "#{i}, I love #{lang}!"
+end
+# 0, I Love Ruby!
+# 1, I Love Javascript!
+# 2, I Love Perl!
+</code></pre>
+
+<p><em>(Code block)</em>的形式除了<code>do ... end</code>，也可以改用大括号。通常单行会会用大括号，多行会用<code>do ... end</code>的形式。</p>
+
+<pre><code>3.times { puts "Hello" }
+</code></pre>
+
+<p>通过迭代器，我们就比较少用到<code>while</code>、<code>until</code>、<code>for</code>等迴圈语法了。</p>
+
+<h3 id="section-9">其他迭代方式范例</h3>
+
+<pre><code># 迭代并造出另一个阵列
+a = ["a", "b", "c", "d"]
+b = a.map {|x| x + "!" }
+puts b.inspect
+
+# 结果是 ["a!", "b!", "c!", "d!"]
+
+# 找出符合条件的值
+b = [1, 2, 3].find_all{ |x| x % 2 == 0 }
+b.inspect
+# 结果是 [2]
+
+# 迭代并根据条件删除
+a = [51, 101, 256]
+a.delete_if {|x| x &gt;= 100 }
+# 结果是 [51]
+
+# 定制化排序
+[2, 1, 3].sort! { |a, b| b &lt;=&gt; a }
+# 结果是 [3, 2, 1]
+
+# 计算总和
+(5..10).inject {|sum, n| sum + n }
+# 结果是 45
+
+# 找出最长字串find the longest word
+longest = ["cat", "sheep", "bear"].inject do |memo, word|
+  ( memo.length &gt; word.length ) ? memo : word
+end
+# 结果是 "sheep"
+</code></pre>
+
+<blockquote>
+  <p><code>&lt;=&gt;</code>是比较运算子，当两个数字相等于回传<code>0</code>，第一个数字较大时回传<code>1</code>，反之回传<code>-1</code></p>
+</blockquote>
+
+<h3 id="section-10">仅执行一次呼叫</h3>
+
+<p>除了迭代，<em>Code block</em>只会执行一次的特性也很有用，例如用来开啟档案。往常我们在档案处理完毕之后，会使用<code>close</code>方法关闭：</p>
+
+<pre><code>file = File.new("testfile", "r")
+# ...处理档案
+file.close
+</code></pre>
+
+<p>改用<em>Code block</em>语法之后，<em>Ruby</em>就会在<em>Code block</em>结束后自动关档：</p>
+
+<pre><code>File.open("testfile", "r") do |file|
+  # ...处理档案
+end
+# 档案自动关闭
+</code></pre>
+
+<p><em>Code block</em>的这个特性不只让你少打<code>close</code>方法，更可以避免你忘记关闭档案(不然就语法错误了)，也有视觉上缩排的好处。</p>
+
+<h3 id="yield">Yield</h3>
+
+<p>在方法中使用<code>yield</code>可以执行<em>Code block</em>参数：</p>
+
+<pre><code># 定义方法
+def call_block
+  puts "Start"
+  yield
+  yield
+  puts "End"
+end
+
+call_block { puts "Blocks are cool!" }
+# 输出
+# "Start"
+# "Blocks are cool!"
+# "Blocks are cool!"
+# "End"
+</code></pre>
+
+<h3 id="code-block">带有参数的<em>Code block</em>
+</h3>
+
+<pre><code>def call_block
+  yield(1)
+  yield(2)
+  yield(3)
+end
+
+call_block { |i|
+  puts "#{i}: Blocks are cool!"
+}
+# 输出
+# "1: Blocks are cool!"
+# "2: Blocks are cool!"
+# "3: Blocks are cool!"
+</code></pre>
+
+<h3 id="proc-object">Proc object</h3>
+
+<p>可以将<em>Code block</em>明确转成一个变数：</p>
+
+<pre><code>def call_block(&amp;block)
+  block.call(1)
+  block.call(2)
+  block.call(3)
+end
+
+call_block { |i| puts "#{i}: Blocks are cool!" }
+
+# 输出
+# "1: Blocks are cool!"
+# "2: Blocks are cool!"
+# "3: Blocks are cool!"
+
+# 或是先宣告出 proc object
+proc_1 = Proc.new { |i| puts "#{i}: Blocks are cool!" }
+proc_2 = lambda { |i| puts "#{i}: Blocks are cool!" }
+
+call_block(&amp;proc_1)
+call_block(&amp;proc_2)
+
+# 分别输出
+# "1: Blocks are cool!"
+# "2: Blocks are cool!"
+# "3: Blocks are cool!"
+</code></pre>
+
+<h2 id="section-11">传递不定参数</h2>
+
+<pre><code>def my_sum(*val)
+  val.inject { |sum, v| sum + v }
+end
+
+puts my_sum(1, 2, 3, 4) # val 变数就是 [1, 2, 3, 4]
+# 输出 10
+</code></pre>
+
+<p>其中<em>my_sum</em>方法中的<code>val</code>是一个包含所有参数的阵列。</p>
+
+<h2 id="hash-">参数尾巴的<em>Hash</em>可以省略<code>{ }</code>
+</h2>
+
+<pre><code>def my_print(a, b, options)
+  puts a
+  puts b
+  puts options[:x]
+  puts options[:y]
+  puts options[:z]
+end
+
+my_print("A", "B", { :x =&gt; 123, :z =&gt; 456 } )
+my_print("A", "B", :x =&gt; 123, :z =&gt; 456) # 结果相同
+# 输出 A
+# 输出 B
+# 输出 123
+# 输出 nil
+# 输出 456
+</code></pre>
+
+<h2 id="section-12">例外处理</h2>
+
+<p>使用<em>rescue</em>可以将例外救回来：</p>
+
+<pre><code>begin
+  puts 10 / 0 # 这会丢出 ZeroDivisionError 的例外错误
+rescue =&gt; e
+  puts e.class # 如果发生例外会执行 rescue 这一段
+ensure
+  # 无论有没有发生例外，ensure 这一段都一定会执行
+end
+# 输出 ZeroDivisionError
+</code></pre>
+
+<p>使用<em>raise</em>可以手动触发例外错误：</p>
+
+<pre><code>raise "Not works!!"
+# 丢出一个 RuntimeError
+
+# 自行自定例外对象
+class MyException &lt; RuntimeError
+end
+
+raise MyException
+</code></pre>
+
+<h2 id="metaprogramming">
+<em>Metaprogramming</em>用程式写程式</h2>
+
+<p><em>Metaprogramming</em>是很进阶的技巧，这里示范<code>define_method</code>方法可以动态定义方法：</p>
+
+<pre><code>class Dragon
+  define_method(:foo) { puts "bar" }
+
+  ['a', 'b', 'c', 'd', 'e', 'f'].each do |x|
+    define_method(x) { puts x }
+  end
+end
+
+dragon = Dragon.new
+dragon.foo # 输出 bar
+dragon.a # 输出 a
+dragon.f # 输出 f
+</code></pre>
+
+<h3 id="introspection">
+<em>Introspection</em>反射机制</h3>
+
+<p><em>Ruby</em>拥有许多反射方法，可以动态知道对象的信息：</p>
+
+<pre><code># 这个对象有什么方法
+Object.methods
+=&gt; ["send", "name", "class_eval", "object_id", "new", "singleton_methods", ...]
+
+# 这个对象有这个方法吗？
+Object.respond_to? :name
+=&gt; true
+</code></pre>
+
+<h2 id="section-13">其他常见惯例</h2>
+
+<pre><code>result ||= a
+</code></pre>
+
+<p>如果<code>result</code>是<code>nil</code>或<code>false</code>的话，将<code>a</code>指派给<code>result</code>，如果不是的话，什么都不做。以上这段程式等同于</p>
+
+<pre><code>result || ( result = a )
+</code></pre>
+
+<h2 id="ruby--1">Ruby 应用</h2>
+
+<p>除了本书介绍的<em>Ruby on Rails</em>之外，<em>Ruby</em>也有各式各样的应用，以下兹举一些使用<em>Ruby</em>发展的专案：</p>
+
+<ul>
+  <li>
+<a href="http://www.sinatrarb.com/">Sinatra</a>：轻量级的<em>Web</em>框架</li>
+  <li>网页设计
+    <ul>
+      <li>
+<a href="http://sass-lang.com/">Sass</a>：CSS Pre-Processor</li>
+      <li>
+<a href="http://lesscss.org/">Less</a>：CSS Pre-Processor</li>
+      <li>
+<a href="http://compass-style.org/">Compass</a>：CSS 设计框架</li>
+      <li>
+<a href="http://middlemanapp.com/">Middleman</a>: 静态网站产生工具</li>
+      <li>
+<a href="http://jekyllrb.com/">Jekyll</a>: 静态网站和Blog产生工具</li>
+    </ul>
+  </li>
+  <li>自动化测试
+    <ul>
+      <li>
+<a href="http://cukes.info/">Cucumber</a>：BDD 测试框架</li>
+      <li>
+<a href="http://watir.com/">Watir</a>：自动化浏览器测试工具</li>
+    </ul>
+  </li>
+  <li>DevOps
+    <ul>
+      <li>
+<a href="https://www.getchef.com/">Chef</a>：服务器部署工具</li>
+      <li>
+<a href="http://puppetlabs.com/">Puppet</a>：服务器部署工具</li>
+      <li>
+<a href="https://www.vagrantup.com/">Vagrant</a>：虚拟机(VM)工具</li>
+    </ul>
+  </li>
+  <li>iOS/Mac
+    <ul>
+      <li>
+<a href="http://cocoapods.org/">CocoaPods</a>：Objective-C 的套件管理工具</li>
+      <li>
+<a href="http://www.rubymotion.com/">RubyMotion</a> <em>是由</em>Objective-C<em>实作的</em>Ruby<em>，运作在</em>iOS<em>和</em>Mac OS X<em>作业系统上，也可以在</em>App Store*上架。这个平台需要商业收费。</li>
+    </ul>
+  </li>
+  <li>
+<a href="http://www.redmine.org/">Redmine</a>：专案管理系统</li>
+</ul>
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：29 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Action View - Helpers 方法</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/actionview-helpers.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="action-view---helpers-">Action View - Helpers 方法</h1>
+
+<blockquote>
+  <p>Measuring programming progress by lines of code is like measuring aircraft building progress by weight. - Bill Gates</p>
+</blockquote>
+
+<p>在<em>Rails</em>中，<em>Helper</em>指的是可以在<em>Template</em>中使用的辅助方法，主要用途是可以将资料转化成输出用的<em>HTML</em>字串，例如我们已经用过了<em>Rails</em>内建的<code>link_to</code>方法，它可以将字串变成超连结。<em>Rails</em>还内建了许多<em>Helper</em>方法，可以让我们建构<em>HTML</em>更为容易。我们在一章中将介绍其中较为常用的几个方法。</p>
+
+<p>另一个使用<em>Helper</em>的理由是可以简化<em>Template</em>中的复杂结构，将<em>Template</em>中较为复杂的程式都用<em>Helper</em>包装起来，最好让<em>Template</em>只包含单纯的变数以及最简单的条件逻辑和迴圈，这样就算是不会程式的网页设计师，也能够轻易了解套版甚至修改<em>Template</em>样板。</p>
+
+<blockquote>
+  <p>因为<em>Helper</em>预设只能在<em>Template</em>中使用，如果想在<em>rails console</em>中呼叫，必须加上<code>helper</code>，例如<code>helper.link_to</code>。另外，虽然机会不多，如果真的要在<em>Rails Controller</em>或<em>Model</em>程式中呼叫<em>Helper</em>，则可以加上<code>ApplicationController.helpers</code>前置词。</p>
+</blockquote>
+
+<h2 id="section">静态档案辅助方法</h2>
+
+<p>使用<em>Rails</em>内建的静态档案<em>(Assets)</em>辅助方法有几个好处：</p>
+
+<ul>
+  <li>
+<em>Rails</em>会合併<em>Stylesheet</em>和<em>JavasSript</em>档案，可以加速浏览器的下载。</li>
+  <li>
+<em>Rails</em>会编译<em>Sass</em>和<em>CoffeeScript</em>等通过<em>Assets template engine</em>产生的<em>Stylesheet</em>和<em>JavasSript</em>
+</li>
+  <li>
+<em>Rails</em>会在静态档案网址中加上时间序号，如果内容有修改则会重新产生。这样的好处是强迫用户的浏览器一定会下载到最新的版本，而不会有浏览器快取到旧版本的问题。</li>
+  <li>变更<em>Assets host</em>主机位址时，可以一次搞定，例如上<em>CDN</em>时。通过<em>Helpers</em>，<em>Rails</em>可以帮所有的<em>Assets</em>加上静态档案服务器网址。</li>
+</ul>
+
+<p>几个常用的方法：</p>
+
+<ul>
+  <li><code>javascript_include_tag</code></li>
+  <li><code>stylesheet_link_tag</code></li>
+  <li><code>auto_discovery_link_tag</code></li>
+  <li><code>favicon_link_tag</code></li>
+  <li><code>image_tag</code></li>
+  <li><code>video_tag</code></li>
+  <li><code>audio_tag</code></li>
+</ul>
+
+<h2 id="section-1">格式化辅助方法</h2>
+
+<h3 id="simpleformat">simple_format</h3>
+
+<p>将<code>\n</code>换行字元换成<em>HTML</em>的<code>&lt;br&gt;</code>标籤</p>
+
+<h3 id="truncate">truncate</h3>
+
+<p>擷取前n个字元</p>
+
+<h3 id="sanitize">sanitize</h3>
+
+<p>白名单逸出</p>
+
+<p>预设允许的<em>HTML</em>标籤和属性如下：</p>
+
+<pre><code>ActionView::Base.sanitized_allowed_tags
+=&gt; #&lt;Set: {"strong", "em", "b", "i", "p", "code", "pre", "tt", "samp", "kbd", "var", "sub", "sup", "dfn", "cite", "big", "small", "address", "hr", "br", "div", "span", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li", "dl", "dt", "dd", "abbr", "acronym", "a", "img", "blockquote", "del", "ins"}&gt;
+ActionView::Base.sanitized_allowed_attributes
+=&gt; #&lt;Set: {"href", "src", "width", "height", "alt", "cite", "datetime", "title", "class", "name", "xml:lang", "abbr"}&gt;
+</code></pre>
+
+<p>如果需要增加，可以在<code>config/application.rb</code>中新增，例如：</p>
+
+<pre><code>config.action_view.sanitized_allowed_tags = %w[table tr td]
+config.action_view.sanitized_allowed_attributes = "rel"
+</code></pre>
+
+<h3 id="striptags">strip_tags</h3>
+
+<p>移除<em>HTML</em>标籤</p>
+
+<h3 id="striplinks">strip_links</h3>
+
+<p>移除<em>HTML</em>超连结标籤</p>
+
+<h3 id="distanceoftimeinwords">distance_of_time_in_words</h3>
+
+<p>输出很潮的时间距离，例如</p>
+
+<pre><code> distance_of_time_in_words(Time.now, Time.now + 60.minutes)
+ =&gt; "about 1 hour"
+</code></pre>
+
+<h3 id="distanceoftimeinwordstonow">distance_of_time_in_words_to_now</h3>
+
+<pre><code>distance_of_time_in_words_to_now(Time.now - 1.second)
+=&gt; "less than a minute"
+</code></pre>
+
+<h3 id="timetag">time_tag</h3>
+
+<p>输出<em>HTML5</em>时间标籤</p>
+
+<pre><code>time_tag(Time.now)
+=&gt; "&lt;time datetime=\"2014-11-03T23:55:11+08:00\"&gt;November 03, 2014 23:55&lt;/time&gt;"
+</code></pre>
+
+<h3 id="numberwithdelimiter">number_with_delimiter</h3>
+
+<pre><code>helper.number_with_delimiter(1234567)
+ 	=&gt; "1,234,567"
+</code></pre>
+
+<h3 id="numberwithprecision">number_with_precision</h3>
+
+<pre><code>helper.number_with_precision(123.4567, precision: 2)
+=&gt; "123.46"
+</code></pre>
+
+<h2 id="url">
+<em>URL</em>辅助方法</h2>
+
+<ul>
+  <li>link_to 文字超连结</li>
+  <li>mail_to E-mail</li>
+  <li>button_to 按钮连结</li>
+  <li>current_page?</li>
+</ul>
+
+<h2 id="section-2">自定标籤辅助方法</h2>
+
+<ul>
+  <li>tag</li>
+  <li>content_tag</li>
+</ul>
+
+<h2 id="section-3">其他辅助方法</h2>
+
+<ul>
+  <li>escape_javascript</li>
+  <li>debug</li>
+</ul>
+
+<h2 id="section-4">表单辅助方法</h2>
+
+<p>对网页应用程式来说，表单是非常重要的用户输入介面。<em>Rails</em>在这方面也提供了很多好用的<em>Helper</em>方法。基本上，<em>Rails</em>处理表单分成两种类型：</p>
+
+<p>一种是对应到<em>Model</em>对象的新增、修改，我们会使用<code>form_for</code>这个<em>Helper</em>。它的好处在于通过传入<em>Model</em>对象，可以在修改的时候自动帮你将预设值带入。例如我们已经在<em>Part1</em>使用过的<em>event</em>表单：</p>
+
+<pre><code>&lt;%= form_for @event do |f| %&gt;
+    &lt;%= f.text_field :name %&gt;
+    &lt;%= f.submit %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>另一种是就是没有对应<em>Model</em>的表单，我们使用<code>form_tag</code>这个方法。例如：</p>
+
+<pre><code>&lt;%= form_tag "/search" do %&gt;
+    &lt;%= text_field_tag :keyword %&gt;
+    &lt;%= submit_tag %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>和<code>form_tag</code>有些类似，但是其中不需要传<em>Block</em>变数<code>f</code>，其中的栏位<em>Helper</em>需要多加<em>_tag</em>结尾。不像<code>form_for</code>的栏位名称一定要是<em>Model</em>的属性之一，在<code>form_tag</code>之中的栏位名称则完全不受限。</p>
+
+<p>几个常用的表单栏位辅助方法：</p>
+
+<ul>
+  <li>label</li>
+  <li>text_field</li>
+  <li>text_area</li>
+  <li>radio_button</li>
+  <li>check_box</li>
+  <li>file_field</li>
+  <li>select</li>
+  <li>select_date</li>
+  <li>select_datetime</li>
+  <li>hidden_field</li>
+  <li>submit</li>
+</ul>
+
+<p>搭配<em>ActiveRecord</em>关联的辅助方法：</p>
+
+<ul>
+  <li>collection_select</li>
+  <li>collection_radio_buttons</li>
+  <li>collection_check_boxes</li>
+</ul>
+
+<p>一些<em>HTML5</em>的辅助方法</p>
+
+<ul>
+  <li>color_field</li>
+  <li>date_field</li>
+  <li>email_field</li>
+  <li>month_field</li>
+  <li>number_field</li>
+  <li>url_field</li>
+  <li>range_field</li>
+  <li>search_field</li>
+</ul>
+
+<h2 id="model">如何处理<em>Model</em>中不存在的属性</h2>
+
+<p>使用<em>form_for</em>时，其中的栏位必须是<em>Model</em>有的属性，那如果数据库没有这个栏位呢?这时候你依需要在<em>Model</em>程式中加上存取方法，例如：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    #...
+    def custom_field
+        # 根据其他属性的值或条件，来决定这个栏位的值
+    end
+
+    def custom_field=(value)
+        # 根据value，来调整其他属性的值
+    end
+end
+</code></pre>
+
+<p>这样就可以在<em>form_for</em>裡使用<code>custom_field</code>了。</p>
+
+<pre><code>&lt;%= form_for @event do |f| %&gt;
+    &lt;%= f.text_field :custom_field %&gt;
+    &lt;%= f.submit %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h2 id="section-5">资料验证错误时的处理</h2>
+
+<p>当<em>Model</em>对象储存失败时，我们通常会重新显示表单，这时候该怎麼显示<em>Model</em>的错误信息呢? 以下是一个预设的范例：</p>
+
+<pre><code>&lt;%= form_for(@person) do |f| %&gt;
+    &lt;% if @person.errors.any? %&gt;
+        &lt;div id="error_explanation"&gt;
+          &lt;h2&gt;&lt;%= pluralize(@person.errors.count, "error") %&gt; prohibited this person from being saved:&lt;/h2&gt;
+
+          &lt;ul&gt;
+          &lt;% @person.errors.full_messages.each do |msg| %&gt;
+            &lt;li&gt;&lt;%= msg %&gt;&lt;/li&gt;
+          &lt;% end %&gt;
+          &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;% end %&gt;
+
+    &lt;%= f.text_field :name %&gt;
+    &lt;%= f.submit %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>通过检查<code>@person.errors</code>我们可以把所有的错误信息显示出来。除了这种作法，我们也可以把错误信息放在输入框的旁边：</p>
+
+<pre><code>&lt;%= form_for(@person) do |f| %&gt;
+    &lt;%= f.text_field :name %&gt;
+    &lt;% if @person.errors[:name].presence %&gt;
+        &lt;%= @person.errors[:name].join(", ") %&gt;
+    &lt;% end %&gt;
+
+    &lt;%= f.submit %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h2 id="helper">自定<em>Helper</em>
+</h2>
+
+<p>要建立自定的<em>Helper</em>，只需要将方法定义在<em>app/helpers/</em>目录下的任意档案就可以了。在产生<em>Controller</em>的同时，<em>Rails</em>就会自动产生一个同名的<em>Helper</em>档案，照惯例该<em>Controller</em>下的<em>Template</em>所用的<em>Helper</em>，就放在该档案下。如果是全站使用的<em>Helper</em>，则会放在<em>app/helpers/application_helper_rb</em>，例如：</p>
+
+<pre><code>module ApplicationHelper
+    def gravatar_url(email)
+     gravatar_email = Digest::MD5.hexdigest(email.downcase)
+     return "http://www.gravatar.com/avatar/#{gravatar_email}?s=48"
+    end
+end
+</code></pre>
+
+<p>如此便可以在<em>Template</em>中这样使用：</p>
+
+<pre><code>&lt;%= image_tag gravatar_url(user.email) %&gt;
+</code></pre>
+
+<blockquote>
+  <p><em>Helper</em>是全域的，定义在哪一个档案中没有关係，档案名称也不需要与<em>Controller</em>名称对应。</p>
+</blockquote>
+
+<p>另外，<em>Controller</em>裡面定义的方法，也可以用<code>helper_method</code>曝露出来当作<em>Helper</em>，例如</p>
+
+<pre><code>class ApplicationController &lt; ActionController::Base
+  #...
+  helper_method :current_user
+
+  protected
+
+  def current_user
+    @current_user = User.find(session[:user_id]) if session[:user_id]
+  end
+end
+</code></pre>
+
+<h2 id="section-6">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Layouts and Rendering in Rails</a></li>
+  <li><a href="http://guides.rubyonrails.org/form_helpers.html">Rails Form helpers</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

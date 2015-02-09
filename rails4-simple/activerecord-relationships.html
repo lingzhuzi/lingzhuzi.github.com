@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | ActiveRecord - 数据表关联</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./activerecord-relationships.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="activerecord---">ActiveRecord - 数据表关联</h1>
+
+<blockquote>
+  <p>Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it. — Brian W. Kernighan</p>
+</blockquote>
+
+<p>在「ActiveRecord - 基本操作与关联设计」一章我们已经有了关联设计的基本概念，这一章我们将进一步深入了解细节的设定，以及多型关联设计。</p>
+
+<h2 id="hasmany-">has_many 的集合对象</h2>
+
+<p>在关联的集合上，我们有以下方法可以使用：</p>
+
+<ul>
+  <li>«(*records) and create</li>
+  <li>any? and empty?</li>
+  <li>build and new</li>
+  <li>count</li>
+  <li>delete_all</li>
+  <li>destroy_all</li>
+  <li>find(id)</li>
+  <li>ids</li>
+  <li>include?(record)</li>
+  <li>first, last</li>
+  <li>reload</li>
+</ul>
+
+<p>例如：</p>
+
+<pre><code>&gt; e = Event.first
+&gt; e.attendees.destroy_all
+</code></pre>
+
+<h2 id="hasmany--1">has_many 的设定</h2>
+
+<h3 id="classname">class_name</h3>
+
+<p>可以变更关联的类别名称，例如：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :paid_attendees, :class_name =&gt; "Attendee" # 外部键是user_id
+end
+</code></pre>
+
+<h3 id="foreignkey">foreign_key</h3>
+
+<p>可以变更<em>Foreign Key</em>的栏位名称，例如改成<code>user_id</code>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    belongs_to :paid_attendees, :class_name =&gt; "Attendee", :foreign_key =&gt; "user_id"
+end
+</code></pre>
+
+<h3 id="order">order</h3>
+
+<p><code>has_many</code>可以通过<code>:order</code>参数指定顺序：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :attendees, :order =&gt; "id desc"
+    #...
+end
+</code></pre>
+
+<h3 id="dependent">dependent</h3>
+
+<p>可以设定当对象删除时，也会顺便删除它的<code>has_many</code>对象：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :attendees, :dependent =&gt; :destroy
+ end
+</code></pre>
+
+<p><code>:dependent</code>可以有三种不同的删除方式，分别是：</p>
+
+<ul>
+  <li>
+<code>:destroy</code> 会执行<em>attendee</em>的<em>destroy</em>回呼</li>
+  <li>
+<code>:delete</code> 不会执行<em>attendee</em>的<em>destroy</em>回呼</li>
+  <li>
+<code>:nullify</code> 这是预设值，不会帮忙删除<em>attendee</em>
+</li>
+</ul>
+
+<blockquote>
+  <p>要不要执行<em>attendee</em>的删除回呼效率相差不少，如果需要的话，必须一笔笔把<em>attendee</em>读取出来变成<em>attendee</em>对象，然后呼叫它的<em>destroy</em>。如果用<code>:delete</code>的话，只需要一个<em>SQL</em>语句就可以删除全部<em>attendee</em>。</p>
+</blockquote>
+
+<h3 id="where">where</h3>
+
+<p>这可以加上额外的条件在关联上，例如</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :paid_attendees, -&gt; { where(:status =&gt; "paid) }, :class_name =&gt; 'Attendee'
+ end
+</code></pre>
+
+<h3 id="through">through</h3>
+
+<p>通过关联来建立另一个关联集合，用于建立多对多的关係。</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+	has_many :event_groupships
+   has_many :groups, :through =&gt; :event_groupships
+end
+</code></pre>
+
+<h3 id="source">source</h3>
+
+<p>搭配<code>through</code>设定使用，当关联的名称不一致的时候，需要加上<code>source</code>指名是哪一种对象。</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+	has_many :event_groupships
+   has_many :classifications, :through =&gt; :event_groupships, :source =&gt; :group
+end
+</code></pre>
+
+<h2 id="hasone-">has_one 的集合对象</h2>
+
+<p>多了两个方法可以新增关联对象：</p>
+
+<ul>
+  <li><code>build_{association_name}</code></li>
+  <li><code>create_{association_name}</code></li>
+</ul>
+
+<p>例如：</p>
+
+<pre><code>e = Event.first
+e.build_location
+</code></pre>
+
+<h2 id="hasone--1">has_one 的设定</h2>
+
+<p><code>class_name</code>、<code>dependent</code>、<code>where</code>、<code>order</code>等设定，都和<em>has_many</em>一样。</p>
+
+<h2 id="belognsto-">belogns_to 的设定</h2>
+
+<h3 id="classname-1">class_name</h3>
+
+<p>可以变更关联的类别名称，例如：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    belongs_to :manager, :class_name =&gt; "User" # 外部键是user_id
+end
+</code></pre>
+
+<h3 id="foreignkey-1">foreign_key</h3>
+
+<p>可以变更<em>Foreign Key</em>的栏位名称，例如改成<code>manager_id</code>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    belongs_to :manager, :class_name =&gt; "User", :foreign_key =&gt; "manager_id"
+end
+</code></pre>
+
+<h3 id="touch">touch</h3>
+
+<p>这会在修改时，也顺道修改关联资料的<code>updated_at</code>时间：</p>
+
+<pre><code>class Attendee &lt; ActiveRecord::Base
+	belongs_to :event, :touch =&gt; true
+end
+</code></pre>
+
+<h3 id="countercache">counter_cache</h3>
+
+<p>针对关联作计数的快取，假设<em>Event</em>身上有<em>attendees_count</em>这个栏位，那么：</p>
+
+<pre><code>class Attendee &lt; ActiveRecord::Base
+	belongs_to :event, :counter_cache =&gt; true
+end
+</code></pre>
+
+<p>这样<em>ActiveRecord</em>就会自动更新<em>attendees_count</em>的数字。</p>
+
+<h2 id="joins--includes-">joins 和 includes 查询</h2>
+
+<p>针对<em>Model</em>中的<code>belongs_to</code>和<code>has_many</code>关连，可以使用<code>joins</code>，也就是<em>INNER JOIN</em></p>
+
+<pre><code>Event.joins(:category)
+# SELECT "events".* FROM "events" INNER JOIN "categories" ON "categories"."id" = "events"."category_id"
+</code></pre>
+
+<p>可以一次关连多个：</p>
+
+<pre><code> Event.joins(:category, :location)
+</code></pre>
+
+<p><em>joins</em>主要的用途是来搭配<em>where</em>的条件查询：</p>
+
+<pre><code>Event.joins(:category).where("categories.name is NOT NULL")
+# SELECT "events".* FROM "events" INNER JOIN "categories" ON "categories"."id" = "events"."category_id" WHERE (categories.name is NOT NULL)
+</code></pre>
+
+<p>通过<em>joins</em>抓出来的<em>event</em>对象是没有包括其关连对象的。如果需要其关连对象的资料，会使用<code>includes</code>。<em>includes</em>可以预先将关连对象的资料也读取出来，避免<em>N+1</em>问题(见效能一章)</p>
+
+<pre><code>Event.includes(:category)
+# SELECT * FROM events
+# SELECT * FROM categories WHERE categories.id IN (1,2,3...)
+</code></pre>
+
+<p>同理，也可以一次载入多个关连：</p>
+
+<pre><code>Event.includes(:category, :attendees)
+# SELECT "events".* FROM "events"
+# SELECT "categories".* FROM "categories" WHERE "categories"."id" IN (1,2,3...)
+# SELECT "attendees".* FROM "attendees" WHERE "attendees"."event_id" IN (4, 5, 6, 7, 8...)
+</code></pre>
+
+<p><code>includes</code>方法也可以加上条件：</p>
+
+<pre><code>Event.includes(:category).where( :category =&gt; { :position =&gt; 1 } )
+</code></pre>
+
+<h2 id="polymorphic-associations">多型关联(Polymorphic Associations)</h2>
+
+<p>多型关连<em>(Polymorphic Associations)</em>可以让一个 Model 不一定关连到某一个特定的 Model，秘诀在于除了整数的<code>_id</code>外部键之外，再加一个字串的<code>_type</code>栏位说明是哪一种<em>Model</em>。</p>
+
+<p>例如一个<code>Comment model</code>，我们可以通过多型关连让它<code>belongs_to</code>到各种不同的 <em>Model</em>上，假设我们已经有了<em>Article</em>与<em>Photo</em>这两个<em>Model</em>，然后我们希望这两个<em>Model</em>都可以被留言。不用多型关连的话，你得分别建立<em>ArticleComment</em>和<em>PhotoComment</em>的<em>model</em>。用多型关连的话，无论有多少种需要被留言的<em>Model</em>，只需要一个<em>Comment model</em>即可：</p>
+
+<pre><code>rails g model comment content:text commentable_id:integer commentable_type
+</code></pre>
+
+<p>这样会产生下面的 Migration 档案：</p>
+
+<pre><code>class CreateComments &lt; ActiveRecord::Migration
+  def change
+    create_table :comments do |t|
+      t.text :content
+      t.integer :commentable_id
+      t.string :commentable_type
+
+      t.timestamps
+    end
+  end
+end
+</code></pre>
+
+<p>这个<em>Migration</em>档案中，我们用<em>content</em>这个栏位来储存留言的内容，<em>commentable_id</em>用来储存被留言的对象的<em>id</em>而<em>commentable_type</em>则用来储存被留言对象的种类，以这个例子来说被留言的对象就是<em>Article</em>与<em>Photo</em>这两种<em>Model</em>，这个<em>Migration</em>档案也可以改写成下面这样：</p>
+
+<pre><code>class CreateComments &lt; ActiveRecord::Migration
+  def change
+    create_table :comments do |t|
+      t.text :content
+      t.belongs_to :commentable, :polymorphic =&gt; true
+
+      t.timestamps
+    end
+  end
+end
+</code></pre>
+
+<p>回到我们的<em>Model</em>，我们必须指定他们的关联关係：</p>
+
+<pre><code>class Comment &lt; ActiveRecord::Base
+  belongs_to :commentable, :polymorphic =&gt; true
+end
+
+class Article &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+
+class Photo &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+</code></pre>
+
+<p>这样会告诉<em>Rails</em>如何去设定你的多型关係，现在让我们进<em>console</em>实验看看：</p>
+
+<pre><code>article = Article.first
+
+# 通过关连新增留言
+comment = article.comments.create(:content =&gt; "First Comment")
+
+# 你可以发现 Rails 很聪明的帮我们指定了被留言对象的种类和id
+comment.commentable_type =&gt; "Article"
+comment.commentable_id =&gt; 1
+
+# 也可以通过 commentable 反向回查关连的对象
+comment.commentable =&gt; #&lt;Article id: 1, ....&gt;
+</code></pre>
+
+<blockquote>
+  <p><em>DBA</em>背景的同学可能会注意到<em>PolymorphicAassociations</em>无法做到保证<em>Referential integrity</em>特性。原因很简单，既然不知道<code>_id</code>会指到哪个<code>table</code>，自然也就没办法在数据库层级加上<em>Foreign key constraint</em>。</p>
+</blockquote>
+
+<h2 id="section">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/association_basics.html">Active Record Associations</a></li>
+</ul>
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

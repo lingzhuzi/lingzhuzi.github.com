@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 多國語系及時區</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/i18n.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="section">多國語系及時區</h1>
+
+<blockquote>
+  <p>It Works on My Machine! - 數以萬計的程式設計師</p>
+</blockquote>
+
+<h2 id="section-1">建立翻譯詞彙檔</h2>
+
+<p>要讓你的網站可以支援多國語系，首先必須定義出需要翻譯的詞彙。這些詞彙檔放在 config/locales 下，使用 yml 格式。Rails 預設的語系是英文，如果要換成中文，請這樣做：</p>
+
+<ul>
+  <li>下載 zh-TW.yml <a href="https://github.com/svenfuchs/rails-i18n/blob/master/rails/locale/zh-TW.yml">http://github.com/svenfuchs/rails-i18n</a> 到 config/locale/ 下，就有預設的 Rails 繁體中文翻譯</li>
+  <li>
+    <p>修改 config/application.rb 的預設語系</p>
+
+    <pre><code>  config.i18n.default_locale = "zh-TW"
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-2">使用方法</h2>
+
+<p>使用<code>I18n.t</code>這個方法來做翻譯詞彙的替換。而在 View 中可以直接使用 t 方法。翻譯關鍵字可以用字串或 Symbol，也可以加上 Scope，例如:</p>
+
+<pre><code>t("admin.event")
+t(:event, :scope =&gt; :admin )
+
+I18n.t(:hello_world)  # 如果不在View中，則需要加上 I18n 類別
+</code></pre>
+
+<p>搭配的 yml 設定範例：</p>
+
+<pre><code>"zh-TW"
+  admin:
+    event: 活動
+</code></pre>
+
+<blockquote>
+  <p>注意 YAML 格式的縮排必須使用兩個空隔，Tab 是不允許的。直接複製貼上可能會有問題，請重新縮排過。</p>
+</blockquote>
+
+<p>要在詞彙內嵌的話，可以使用<code>%{variable_name}</code>：</p>
+
+<pre><code>"zh-TW"
+    hello: "親愛的%{name}你好!"
+</code></pre>
+
+<p>在樣板中傳入參數即可：</p>
+
+<pre><code>t(:hello, :name =&gt; @user.name) # 親愛的XXX你好
+</code></pre>
+
+<h2 id="model">搭配<em>Model</em>使用</h2>
+
+<p>在套用上述的翻譯詞彙檔之後，你可能會注意到<em>Model</em>驗證錯誤訊息會變成如<em>Name 不能是空白字元</em>，如果需要近一步中文化欄位名稱，你可以新增<em>config/locales/events.yml</em>內容如下：</p>
+
+<pre><code>zh-TW:
+  activerecord:
+    attributes:
+      event:
+        name: "活動名稱"
+        description: "描述"
+</code></pre>
+
+<p>其實，翻譯檔檔名叫<em>events.yml</em>、<em>zh-TW.yml</em>、<em>en.yml</em>什麼都無所謂，重要的是<em>YAML</em>結構中第一層要對應<em>locale</em>的名稱，也就是<code>zh-TW</code>，<em>Rails</em>會載入<em>config/locales</em>下所有的<em>YAML</em>詞彙檔案。</p>
+
+<h2 id="section-3">如何讓使用者可以切換多語系</h2>
+
+<p>在 application_controller.rb 中加入:</p>
+
+<pre><code>before_action :set_locale
+
+def set_locale
+  # 可以將 ["en", "zh-TW"] 設定為 VALID_LANG 放到 config/environment.rb 中
+  if params[:locale] &amp;&amp; I18n.available_locales.include?( params[:locale].to_sym )
+    session[:locale] = params[:locale]
+  end
+
+  I18n.locale = session[:locale] || I18n.default_locale
+end
+</code></pre>
+
+<p>在 View 中可以這樣做:</p>
+
+<pre><code>&lt;%= link_to "中文版", :controller =&gt; controller.controller_name,
+   	         :action =&gt; controller.action_name, :locale =&gt; "zh-TW"	%&gt;
+&lt;%= link_to "English", :controller =&gt; controller.controller_name,
+   	         :action =&gt; controller.action_name, :locale =&gt; "en" %&gt;
+</code></pre>
+
+<h2 id="section-4">語系樣板</h2>
+
+<p>除了上述一個單字一個單字的翻譯詞彙替換之外，如果樣板內大多是屬於較為靜態的內容，<em>Rails</em>也提供了不同語系可以有不同樣板，你只要將樣板命名加上語系附檔名即可，例如：</p>
+
+<pre><code>app/views/pages/faq.zh-TW.html.erb
+app/views/pages/faq.en.html.erb
+</code></pre>
+
+<p>如此在英文版的時候就會使用<em>faq.en.html.erb</em>這個樣板，中文版時使用<em>faq.zh-TW.html.erb</em>這個樣板。</p>
+
+<h2 id="timezone">時區 TimeZone</h2>
+
+<p>首先，資料庫裡面的時間一定都是儲存 UTC 時間。而 Rails 提供的機制是讓你從資料庫拿資料時，自動幫你轉換時區。例如，要設定台北 +8 時區：</p>
+
+<p>首先設定 config/application.rb 中預設時區為 config.time_zone = “Taipei”，如此 ActiveRecord 便會幫你自動轉換時區，也就是拿出來時 +8，存回去時 -8</p>
+
+<h3 id="section-5">如何根據使用者切換時區？</h3>
+
+<p>首先，你必須找個地方儲存不同使用者的時區，例如 User model 有一個欄位叫做 time_zone:string。然後在編輯設定的地方，可以讓使用者自己選擇時區:</p>
+
+<pre><code> &lt;%= time_zone_select :user, :time_zone %&gt;
+</code></pre>
+
+<p>接著在 application_controller.rb 中加入:</p>
+
+<pre><code>before_action :set_timezone
+
+def set_timezone
+   if logged_in? &amp;&amp; current_user.time_zone
+      Time.zone = current_user.time_zone
+    end
+end
+</code></pre>
+
+<h3 id="section-6">時區處理方法</h3>
+
+<p><em>Ruby</em>原生的<em>Time</em>類別對於時區的處理一律是參考唯一的系統環境變數<code>ENV['TZ']</code>，這在使用者多時區的應用程式中就顯的見拙。因此在<em>Rails</em>中的時間類別使用的是<em>ActiveSupport::TimeWithZone</em>，我們已經知道可以使用<code>Time.zone</code>可以改變時區，其他的用法例如：</p>
+
+<pre><code>Time.zone = "Taipei"
+Time.zone.local(2011, 8, 3, 9, 0) # 建立一個Taipei當地時間
+=&gt; Wed, 03 Aug 2011 09:00:00 CST +08:00
+t = Time.zone.now # 目前時間
+=&gt; Wed, 03 Aug 2011 22:17:54 CST +08:00
+t.in_time_zone("Tokyo") # 將這個時間換時區
+=&gt; Wed, 03 Aug 2011 23:18:34 JST +09:00
+Time.utc(2005,2,1,15,15,10).in_time_zone # 將UTC時間換Taipei當地時間
+=&gt; Tue, 01 Feb 2005 23:15:10 CST +08:00
+</code></pre>
+
+<h3 id="section-7">時間的顯示</h3>
+
+<p>除了使用<em>Ruby</em>內建的<a href="http://www.ruby-doc.org/core-2.1.5/Time.html#method-i-strftime"><code>Datetime#strftime</code></a>格式化時間之外，<em>Rails</em>也可以直接呼叫<code>to_s</code>轉換輸出格式：</p>
+
+<pre><code>datetime.to_s(:db)                      # =&gt; "2007-12-04 00:00:00"
+datetime.to_s(:number)                  # =&gt; "20071204000000"
+datetime.to_formatted_s(:short)         # =&gt; "04 Dec 00:00"
+datetime.to_formatted_s(:long)          # =&gt; "December 04, 2007 00:00"
+datetime.to_formatted_s(:long_ordinal)  # =&gt; "December 4th, 2007 00:00"
+datetime.to_formatted_s(:rfc822)        # =&gt; "Tue, 04 Dec 2007 00:00:00 +0000"
+datetime.to_formatted_s(:iso8601)       # =&gt; "2007-12-04T00:00:00+00:00"
+</code></pre>
+
+<p>也可以自行註冊專案常用的格式在<em>config/initializers/time_formats.rb</em>裡：</p>
+
+<pre><code>Time::DATE_FORMATS[:month_and_year] = '%B %Y'
+Time::DATE_FORMATS[:short_ordinal] = lambda { |time| time.strftime("%B #{time.day.ordinalize}") }
+</code></pre>
+
+<p>或是透過<em>I18n</em>的機制，在翻譯詞彙檔中編輯格式，然後使用：</p>
+
+<pre><code>I18n.l( Time.now )
+I18n.l( Time.now, :format =&gt; :short )
+</code></pre>
+
+<h2 id="section-8">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/i18n.html">Rails Internationalization (I18n) API</a></li>
+</ul>
+
+<!--
+
+* [Rails I18n 投影片](http://www.slideshare.net/ihower/rails-i18n-20081125-presentation)
+* http://elabs.se/blog/36-working-with-time-zones-in-ruby-on-rails
+* https://speakerdeck.com/u/j3/p/internationalization-and-localization
+
+
+-->
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

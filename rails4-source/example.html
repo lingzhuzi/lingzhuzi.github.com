@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | Rails 範例專案</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./example.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="rails-">Rails 範例專案</h1>
+
+<p>本章的目的是讓讀者可以從一個完整的<em>Rails</em>專案中學習：</p>
+
+<h2 id="job-board">Job Board</h2>
+
+<p><em><a href="http://jobs.ruby.tw">Ruby Jobs in Taiwan</a></em>是一個簡單的<em>Job Board</em>系統，原始碼開放在<em><a href="https://github.com/rubytaiwan/jobs.ruby.tw">Github</a></em>上，功能包括：</p>
+
+<ol>
+  <li>使用者註冊、登入、登出。使用 <a href="https://github.com/plataformatec/devise">Devise Gem</a>
+</li>
+  <li>使用者可以張貼工作，並設定工作的張貼期限</li>
+  <li>使用者可以編輯、下架、刪除自己張貼的工作</li>
+</ol>
+
+<p>功能雖然簡單，但是包含了<em>Model spec</em>、<em>Controler spec</em>和<em>Acceptence Test</em>可供學習。</p>
+
+<h2 id="section">簡易論壇系統</h2>
+
+<ul>
+  <li>開發一個簡易論壇系統。系統要有 Forum 與 Post 兩個 Model，寫出 CRUD 介面，並且文章網址是使用 http://forum.local/forums/1/posts/2 這種表示。</li>
+  <li>可以使用 http://http://getbootstrap.com/ 套版</li>
+  <li>使用者必須能夠 註冊 / 登入，登入後才可以發表 Post，不然只能瀏覽。只有自己的 Post 才能進行修改與刪除。請使用 devise gem。</li>
+  <li>論壇的文章要能夠分頁，每一頁 20 筆，每一個論壇要秀出現在論壇裡有多少文章數量。請使用 <a href="https://github.com/amatsuda/kaminari">Kaminari Gem</a>。</li>
+  <li>可依照文章時間排序，請使用 Model 的 scope 功能。</li>
+  <li>每篇文章可以上傳附件。請使用 <a href="https://github.com/thoughtbot/paperclip/">Paperclip Gem</a>。</li>
+  <li>建立一個後台，讓管理員可以刪改所有文章，網址是 http://forum.local/admin/。只有身分是 admin 的人可以進後台。admin 的判別方是 column 裡加一個 boolean，判斷是否是 admin。</li>
+  <li>用 Rake 撰寫的產生假資料的步驟。執行 rake dev:fake 即會產生假文章與假論壇。</li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

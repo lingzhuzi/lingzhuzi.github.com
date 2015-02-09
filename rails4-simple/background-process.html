@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | 非同步处理</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./background-process.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="section">非同步处理</h1>
+
+<blockquote>
+  <p>Nine people can’t make a baby in a month.  — Fred Brooks, The Mythical Man-Month 作者</p>
+</blockquote>
+
+<p>一个 request 的工作时间应该控制在 500ms 以内，理想上都要在 200ms 以内完成，要不然 web server 通常也会限制在 30 秒以内，不然就会出现 timeout 错误。一个运算时间太久的 request 除了让使用者感受不佳之外，对于服务器效能上的影响也很巨大。使用者可能等待不及重新reload，于是相同的任务又在重头执行一遍。一个 request 长时间佔据了一个 rails process，也让其他 reuqest 无法进行处理。</p>
+
+<p>常见的非同步任务包括：</p>
+
+<ul>
+  <li>寄出<em>E-mail</em>
+</li>
+  <li>匯入大笔资料</li>
+  <li>匯出大笔资料</li>
+  <li>呼叫第三方服务</li>
+</ul>
+
+<p>对于这种任务，非同步的处理就非常重要。非同步的意思是让任务的处理在背景完成，而不在浏览器的<em>HTTP request/response</em>流程中完成，等完成之后再通知使用者即可。</p>
+
+<p>目前主流有以下几种选择：</p>
+
+<ul>
+  <li>
+<em><a href="https://github.com/collectiveidea/delayed_job">delayed_job</a></em> 使用关联式数据库，非常方便安装使用。</li>
+  <li>
+<em><a href="http://sidekiq.org/">sidekiq</a></em> 使用高效能的<em><a href="http://redis.io/">Redis</a>: key-value store</em>来储存要执行的任务，并且善用多执行序来增加效能，号称可以以一个<em>process</em>抵上<em>20</em>个<em>delayed_job</em>的<em>processes</em>。</li>
+</ul>
+
+<p>我们来用<em>sidekiq</em>举例，本机需要安装<em>Redis</em>：</p>
+
+<pre><code>brew install redis
+</code></pre>
+
+<p>在<em>Gemfile</em>新增<code>gem 'sidekiq'</code>。建立一个<em>Worker</em>非常容易：</p>
+
+<pre><code># app/workers/hard_worker.rb
+class HardWorker
+  include Sidekiq::Worker
+
+  def perform(name)
+     Rails.logger.info("SIDEKIQ TEST: #{name}")
+  end
+end
+</code></pre>
+
+<p>接着在需要非同步的地方使用：</p>
+
+<pre><code>HardWorker.perform_async('ihover')
+</code></pre>
+
+<p>我们需要啟动另外的<em>sidekiq</em>进程来执行这些非同步的任务：</p>
+
+<pre><code>bundle exec sidekiq
+</code></pre>
+
+<p><em>sidekiq</em>提供了一个<em>Web UI</em>介面让我们可以观察目前有哪些任务在执行。如果搭配<em>Devise</em>的话，需要在<code>Gemfile</code>加上<code>gem 'sinatra', '&gt;= 1.3.0', :require =&gt; nil</code>，以及<code>routes.rb</code>加入：</p>
+
+<pre><code>require 'sidekiq/web'
+authenticate :user, lambda { |u| u.admin? } do
+  mount Sidekiq::Web =&gt; '/sidekiq'
+end
+</code></pre>
+
+<!--
+
+*[resque](https://github.com/defunkt/resque)*使用*[Redis](http://redis.io)*，效能较好。
+
+*Resque*有许多外掛可以使用，例如：
+
+* https://github.com/bvandenbos/resque-scheduler
+* https://github.com/lantins/resque-retry
+* https://github.com/quirkey/resque-status
+* https://github.com/zapnap/resque_mailer
+* https://github.com/jayniz/resque-loner
+* https://github.com/ono/resque-cleaner
+
+> [The Resque Way](http://www.engineyard.com/blog/2011/the-resque-way/)
+
+-->
+
+<h2 id="section-1">投影片</h2>
+
+<ul>
+  <li><a href="http://www.slideshare.net/ihower/distributed-ruby-and-rails">Distributed Ruby and Rails</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

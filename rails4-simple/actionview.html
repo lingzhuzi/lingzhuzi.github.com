@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Action View - 样板设计</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/actionview.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="action-view---">Action View - 样板设计</h1>
+
+<blockquote>
+  <p>Any fool can write code that a computer can understand. Good programmers write code that humans can understand. - Martin Fowler</p>
+</blockquote>
+
+<p>在这一章中我们将进入<em>MVC</em>架构中的<em>View</em>，也就是提供介面给用户操作，与我们的应用程式做互动。</p>
+
+<p><em>ActionView</em>是<em>Rails</em>中处理<em>View</em>的元件名称，而提供给用户的文件，我们会用<em>Template</em>样板来呈现。本章假设读者们都对<em>HTML</em>有基本的认识。</p>
+
+<h2 id="template">
+<em>Template</em>样板</h2>
+
+<p>什么是<em>Template</em>样板呢？我们知道服务器最终提供给浏览器的格式是<em>HTML</em>文件，而<em>Template</em>样板就是动态产生<em>HTML</em>的方式。</p>
+
+<blockquote>
+  <p>相对的说，我们用静态<em>HTML</em>来称呼不经过程式产生的<em>HTML</em>文件</p>
+</blockquote>
+
+<p><em>Rails</em>预设用来产生<em>Template</em>的方式是<em>Embedded Ruby(ERb)</em>，如果你曾经使用过<em>PHP</em>、<em>JSP</em>或<em>ASP</em>，那么你会非常熟悉这种内嵌程式码的风格，这是一种最为直觉且容易学习的方法。例如以下是一小段嵌入目前时间的<em>ERb</em>，中间<code>&lt;%= %&gt;</code>的部份便是<em>Ruby</em>程式：</p>
+
+<pre><code>&lt;h1&gt;&lt;%= Time.now.to_s %&gt;&lt;/h1&gt;
+</code></pre>
+
+<p><em>Rails</em>的<em>Template</em>档案位置和名称也是有玄机的，例如<em>app/views/welcome/index.html.erb</em>来说，<em>welcome</em>目录是它的<em>Controller</em>名称，档案第一段<em>index</em>是它的<em>Action</em>名称，附档名则是用来指定要用什么方式来产生什么格式的文件：<em>index.html.erb</em>表示用<em>ERb</em>产生<em>HTML</em>格式的文件。会有这样惯例的原因，你可能已经猜到，那就是使用<em>ERb</em>不代表一定就是用来产生HTML。用什么<em>Template</em>引擎(在<em>Rails</em>中又叫作<em>Template Handler</em>)产生文件，和文件的<em>Format</em>格式是两回事情。所以<em>ERb</em>其实可以用来产生任何文字档格式，例如<em>CSV</em>、<em>XML</em>、<em>JavaScript</em>等等。</p>
+
+<p>虽然可以，但<em>ERb</em>并不是产生<em>XML</em>的最好方式，通常在我们会用<em>Builder</em>来产生<em>XML</em>，例如一个叫做<em>show.xml.builder</em>的档案：</p>
+
+<pre><code>people do |p|
+  p.person "test"
+end
+</code></pre>
+
+<p>就会产生以下的<em>XML</em>：</p>
+
+<pre><code>&lt;people&gt;
+  &lt;person&gt;test&lt;person&gt;
+&lt;/people&gt;
+</code></pre>
+
+<p>以下是常见的样板引擎与格式组合：</p>
+
+<table class="table">
+<tr>
+<th>格式</th>
+<th>引擎</th>
+</tr>
+<tr>
+<td>html、xhtml</td>
+<td>erb</td>
+</tr>
+<tr>
+<td>js</td>
+<td>erb</td>
+</tr>
+<tr>
+<td>json</td>
+<td>jbuilder</td>
+</tr>
+<td>xml、rss、atom</td>
+<td>builder</td>
+
+</table>
+
+<h2 id="template-handler">扩充<em>Template Handler</em>
+</h2>
+
+<p><em>Rails</em>预设只有内建<em>ERb</em>和<em>Builder</em>这两套样板引擎，但要扩充非常容易。例如在<em>Rails</em>社群中，也很流行用<em><a href="http://haml-lang.com/">HAML</a></em>和<em><a href="http://slim-lang.com/">Slim</a></em>这两套样板引擎来取代<em>ERb</em>。这两套都利用缩排的技术简化<em>HTML</em>撰写的格式，例如以下的<em>HAML</em>:</p>
+
+<pre><code>%section.container
+    %h1= post.title
+    %h2= post.subtitle
+    .content
+        = post.content
+</code></pre>
+
+<p>等同于以下的<em>ERb</em>：</p>
+
+<pre><code>&lt;section class=”container”&gt;
+    &lt;h1&gt;&lt;%= post.title %&gt;&lt;/h1&gt;
+    &lt;h2&gt;&lt;%= post.subtitle %&gt;&lt;/h2&gt;
+    &lt;div class=”content”&gt;
+        &lt;%= post.content %&gt;
+    &lt;/div&gt;
+&lt;/section&gt;
+</code></pre>
+
+<p>要安装使用，只需要在<em>Gemfile</em>档案中加上<code>gem "haml-rails"</code>然后<code>bundle install</code>即可。不过相较于<em>ERb</em>，使用<em>HAML</em>虽然可以更为有效率地撰写<em>HTML</em>样板，但是还是需要考量团队中的网页设计师是否能够配合使用。</p>
+
+<h2 id="renderercontroller">使用<em>Renderer</em>在<em>Controller</em>中直接回传结果</h2>
+
+<p>有一些格式的本质其实不需要<em>Template</em>引擎，只需要再<em>Controller</em>中直接<em>render</em>其结果即可，例如<em>JSON</em>和<em>CSV</em>或是<em>XML</em>。<em>Rails</em>对<em>ActiveRecord model</em>提供了<code>to_xml</code>和<code>to_json</code>方法。而<em>CSV</em>则可以使用<em>FasterCSV</em>函式库。范例如下：</p>
+
+<pre><code>require 'csv'
+class PeopleController &lt; ApplicationController
+
+def index
+    @people = Person.all
+    respond_to do |format|
+      format.html
+      format.json{ render :json =&gt; @person.to_json }
+      format.xml { render :xml =&gt; @person.to_xml }
+      format.csv do
+        csv_string = CSV.generate do |csv|
+            csv &lt;&lt; ["Name", "Created At"]
+            @people.each do |person|
+                csv &lt;&lt; [person.name, person.created_at]
+            end
+        end
+        render :text =&gt; csv_string
+      end
+    end
+end
+</code></pre>
+
+<blockquote>
+  <p><em>Ruby 1.8.7</em>则需要在<em>Gemfile</em>中指定<code>gem "fastercsv"</code>，将<em>CSV</em>改成用<em>FasterCSV</em>。</p>
+</blockquote>
+
+<h2 id="erb">
+<em>ERb</em>标籤</h2>
+
+<p>除了上述介绍的<em>ERb</em>标籤<code>&lt;%= %&gt;</code>会输出中间的<code>Ruby</code>程式执行结果，还有一些其他用法：</p>
+
+<pre><code>&lt;% %&gt;
+</code></pre>
+
+<p>这样就不会输出任何结果，通常用在<code>if</code>或迴圈条件中，例如：</p>
+
+<pre><code>&lt;% @people.each do |person| %&gt;
+    &lt;% if person.name.present? %&gt;
+        &lt;p&gt;&lt;%= person.name %&gt;&lt;/p&gt;
+    &lt;% end %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>上述的<code>&lt;% %&gt;</code>标籤虽然不会输出<em>HTML</em>内容，但是还是在<em>HTML</em>原始码中换行了，为了避免输出时多余的换行，可以改用<code>&lt;%- -%&gt;</code>。不过实际上并没有很多人在乎就是了，毕竟这不影响用户的页面。</p>
+
+<pre><code>&lt;%# blah blah %&gt;
+</code></pre>
+
+<p>这是註解，不会输出任何内容。不过如果需要整段多行註解，有个小技巧可以善用：</p>
+
+<pre><code>&lt;% if false %&gt;
+    &lt;%= foo %&gt;
+    &lt;hr&gt;
+    &lt;%= bar %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h2 id="layout">
+<em>Layout</em>版型</h2>
+
+<p><em>Layout</em>可以用来包裹<em>Template</em>样板，让不同<em>View</em>可以共用<em>Layout</em>作为文件的头尾。因此我们可以为全站的页面建立共用的版型。这个档案预设是<em>app/views/layouts/application.html.erb</em>。如果在<em>app/views/layouts</em>目录下有跟某<em>Controller</em>同名的<em>Layout</em>档案，那这个<em>Controller</em>下的所有<em>Views</em>就会使用这个同名的<em>Layout</em>。</p>
+
+<p>预设的<em>Layout</em>长得如下：</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;YourApplicationName&lt;/title&gt;
+  &lt;%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' =&gt; true %&gt;
+  &lt;%= javascript_include_tag 'application', 'data-turbolinks-track' =&gt; true %&gt;
+  &lt;%= csrf_meta_tags %&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;%= yield %&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>其中的<code>&lt;%= yield %&gt;</code>会被替换成个别<code>Action</code>的样板。</p>
+
+<blockquote>
+  <p>开头的<code>&lt;!DOCTYPE html&gt;</code>说明了这是一份<em>HTML5</em>文件，这种宣告法向下相容于所有浏览器的<em>HTML4</em>。</p>
+</blockquote>
+
+<p>如果需要指定<em>Controller</em>的<em>Layout</em>，可以这麼做：</p>
+
+<pre><code>class EventsController &lt; ApplicationController
+   layout "special"
+end
+</code></pre>
+
+<p>这样就会指定<em>Events Controller</em>下的<em>Views</em>都使用<em>app/views/layouts/special.html.erb</em>这个<em>Layout</em>，你可以加上参数<code>:only</code>或<code>:except</code>表示只有特定的<em>Action</em>：</p>
+
+<pre><code>class EventsController &lt; ApplicationController
+   layout "special", :only =&gt; :index
+end
+</code></pre>
+
+<p>或是</p>
+
+<pre><code>class EventsController &lt; ApplicationController
+   layout "special", :except =&gt; [:show, :edit, :new]
+end
+</code></pre>
+
+<p>请注意到使用字串和<em>Symbol</em>是不同的。使用<em>Symbol</em>的话，它会通过一个同名的方法来动态决定，例如以下的<em>Layout</em>是通过<code>determine_layout</code>这个方法来决定：</p>
+
+<pre><code>class EventsController &lt; ApplicationController
+   layout :determine_layout
+
+	private
+
+	def determine_layout
+   	   ( rand(100)%2 == 0 )? "event_open" : "event_closed"
+	end
+end
+</code></pre>
+
+<p>除了在<em>Controller</em>层级设定<em>Layout</em>，我们也可以设定个别的<em>Action</em>使用不同的<em>Layout</em>，例如:</p>
+
+<pre><code>def show
+   @event = Event.find(params[:id])
+	render :layout =&gt; "foobar"
+end
+</code></pre>
+
+<p>这样<em>show Action</em>的样板就会套用<em>foobar Layout</em>。更常见的情形是关掉<em>Layout</em>，这时候我们可以写<code>render :layout =&gt; false</code>。</p>
+
+<h3 id="layout-1">自定<em>Layout</em>内容</h3>
+
+<p>除了<code>&lt;%= yield %&gt;</code>会载入<em>Template</em>内容之外，我们也可以预先自定一些其他的区块让<em>Template</em>可以置入内容。例如，要在<em>Layout</em>中放一个侧栏用的区块，取名叫做<code>:sidebar</code>：</p>
+
+<pre><code>&lt;div id="sidebar"&gt;
+    &lt;%= yield :sidebar %&gt;
+&lt;/div&gt;
+&lt;div id="content"&gt;
+    &lt;%= yield %&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>那么在<em>Template</em>样板中，任意地方放:</p>
+
+<pre><code>&lt;%= content_for :sidebar do %&gt;
+   &lt;ul&gt;
+       &lt;li&gt;foo&lt;/li&gt;
+       &lt;li&gt;bar&lt;/li&gt;
+   &lt;/ul&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>那么这段内容就会被置入到<em>Layout</em>的<code>&lt;%= yield :sidebar %&gt;</code>之中。</p>
+
+<p>除了侧栏之外，也常用这招让每一页的<em>HTML meta</em>特製化，例如我们可以放<a href="http://ogp.me/">Facebook Open Graph</a>，这样分享到<em>Facebook</em>时，就会抓取你设定的中介资料：</p>
+
+<pre><code>&lt;head&gt;
+  &lt;title&gt;YourApplicationName&lt;/title&gt;
+  &lt;%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' =&gt; true %&gt;
+  &lt;%= javascript_include_tag 'application', 'data-turbolinks-track' =&gt; true %&gt;
+  &lt;%= csrf_meta_tags %&gt;
+  &lt;%= yield :head %&gt;
+&lt;/head&gt;
+</code></pre>
+
+<p>在<em>Template</em>样板中，加入：</p>
+
+<pre><code>&lt;%= content_for :head do %&gt;
+    &lt;%= tag(:meta, :content =&gt; @event.name, :property =&gt; "og:title") %&gt;
+    &lt;%= tag(:meta, :content =&gt; @event.description, :property =&gt; "og:description") %&gt;
+    &lt;%= tag(:meta, :content =&gt; "article", :property =&gt; "og:type") %&gt;
+    &lt;%= tag(:meta, :content =&gt; @event.logo.url, :property =&gt; "og:image") %&gt;
+    &lt;%= tag(:meta, :content =&gt; event_url(@event), :property =&gt; "og:url") %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<!--
+
+## *Layout*版型的继承(进阶)
+
+* <http://edgerails.info/articles/what-s-new-in-edge-rails/2011/01/12/template-inheritance/index.html>
+* <http://asciicasts.com/episodes/269-template-inheritance>
+
+-->
+
+<h2 id="template-1">在<em>Template</em>中可以使用的变数</h2>
+
+<p>我们已经认识到，在<em>Controller Action</em>中使用<code>@</code>的对象变数，就会被传进<em>Template</em>中可以被存取。除此之外，还包括<code>cookies</code>、<code>session</code>、<code>flash</code>、<code>params</code>、<code>request</code>、<code>response</code>等在<em>Controller</em>中使用的变数也可以在<em>Template</em>中使用。</p>
+
+<p>比较特别的是，<em>Template</em>中的<code>controller</code>变数，我们可以用这个变数让每一页有不同的<em>CSS class</em>，例如</p>
+
+<pre><code>&lt;%= tag(:body, :class =&gt; "#{controller.controller_name} #{controller.action_name}") %&gt;
+</code></pre>
+
+<p>这样会输出成</p>
+
+<pre><code>&lt;body class="events show"&gt;
+</code></pre>
+
+<h2 id="partials">局部样板<em>Partials</em>
+</h2>
+
+<p>局部样板可以将<em>Template</em>中重复的程式码抽出来，例如我们在<em>Part1</em>中示范过的新增和编辑的表单。<em>Partial Template</em>的命名惯例是底线开头，但是呼叫时不需加上底线，例如：</p>
+
+<pre><code>&lt;%= render :partial =&gt; "common/nav" %&gt;
+</code></pre>
+
+<p>在这个情境下，可以省略<code>:partial</code>键：</p>
+
+<pre><code>&lt;%= render "common/nav" %&gt;
+</code></pre>
+
+<p>这样便会使用<em>app/views/common/_nav.html.erb</em>这个样板。如果使用<em>Partial</em>的样板和<em>Partial</em>所在的目录相同，可以省略第一段的<em>common</em>路径。</p>
+
+<p>在<em>Partial</em>样板中是可以直接使用实例变数的(也就是<code>@</code>开头的变数)。不过好的实务作法是通过<code>:locals</code>明确传递区域变数，这样程式会比较清楚，<em>Partial</em>样板也比较容易被重复使用：</p>
+
+<pre><code>&lt;%= render :partial =&gt; "common/nav", :locals =&gt; { :a =&gt; 1, :b =&gt; 2 } %&gt;
+</code></pre>
+
+<p>在这个情境下，也可以进一步把<code>locals</code>键也省略：</p>
+
+<pre><code>&lt;%= render "common/nav", :a =&gt; 1, :b =&gt; 2 %&gt;
+</code></pre>
+
+<p>这样在<em>partial</em>样板中，就可以存取到区域变数<code>a</code>和<code>b</code>。</p>
+
+<h3 id="collection">阵列型<em>Collection</em>
+</h3>
+
+<p>如果是阵列的资料，像是<code>tr</code>或<code>li</code>这类会一直重复的<em>Template</em>元素，我们可以使用<code>collection</code>参数来处理，例如像以下的程式：</p>
+
+<pre><code>&lt;ul&gt;
+    &lt;% @people.each do |person| %&gt;
+        &lt;%= render :partial =&gt; "person", :locals =&gt; { :person =&gt; person } %&gt;
+    &lt;% end %&gt;
+&lt;ul&gt;
+</code></pre>
+
+<p>我们可以改写成使用<em>collection</em>参数来支持阵列形式：</p>
+
+<pre><code>&lt;ul&gt;
+    &lt;%= render :partial =&gt; "person", :collection =&gt; @people, :as =&gt; :person %&gt;
+&lt;ul&gt;
+</code></pre>
+
+<p>在<em>_person.html.erb</em>这个<em>partial</em>中，会有一个额外的索引变数<code>person_counter</code>纪录编号。</p>
+
+<p>使用<em>collection</em>的好处不只是少打字而已，还有执行效能上的大大改善，<em>Rails</em>内部会针对这种形式做执行效率最佳化。</p>
+
+<h2 id="section">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Layouts and Rendering in Rails</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 環境設定與*Bundler*</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./environments-and-bundler.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="bundler">環境設定與<em>Bundler</em>
+</h1>
+
+<blockquote>
+  <p>Complication is What Happens When You Try to Solve a Problem You Don’t Understand - Andy Boothe</p>
+</blockquote>
+
+<p>這一章我們走訪<em>Rails</em>的一些設定、Bundler，以及<em>Command Line</em>指令的用法。</p>
+
+<h2 id="section">目錄結構</h2>
+
+<p>這一節讓我們走訪一個 Rails 的目錄結構：</p>
+
+<h3 id="app">app/</h3>
+
+<p>app 目錄是你主要工作的地方，不同子目錄存放了 Models、Controllers、Views、Helpers 和 Assets 等檔案。</p>
+
+<h3 id="appcontrollers">app/controllers</h3>
+
+<p>Controller 的類別檔案存放在這裡</p>
+
+<h3 id="appmodels">app/models</h3>
+
+<p>Model 的類別檔案存放在這裡</p>
+
+<h3 id="appviews">app/views</h3>
+
+<p>View 的樣本(template)檔案，依照不同 Controllers 分子目錄存放。</p>
+
+<h3 id="apphelpers">app/helpers</h3>
+
+<p>Helper 一些在 Views 中可以使用的小方法，用來產生較複雜的 HTML。預設的 Helper 檔案命名是對應 Controller 的，不過並不強制，定義在任一個 Helper 檔案中的方法，都可以在任何 Views 中使用。</p>
+
+<h3 id="appassets">app/assets</h3>
+
+<p>Assets 靜態檔案存放在這裡，包括有<em>JavaScript</em>、<em>Stylesheets</em>樣式表和<em>Images</em>圖檔。詳細的用法會在<em>Assets</em>一章中介紹。</p>
+
+<h3 id="config">config/</h3>
+
+<p>雖然 Rails 的原則是慣例優於設定，不過還是有一些需要設定的地方。這個目錄下存放了例如資料庫設定檔 database.yml、路由設定 routes.rb、應用程式設定檔 application.rb 和不同執行環境的設定檔在 config/environments 目錄下。</p>
+
+<h3 id="db">db/</h3>
+
+<p>資料庫 Schema(綱要) 和定義檔 migrations</p>
+
+<h3 id="doc">doc/</h3>
+
+<p>你可以將你的文件放在這裡</p>
+
+<h3 id="lib">lib/</h3>
+
+<p>如果你有一些共用的類別或模組檔案，可以放在這裡，然後用<em>require</em>載入。例如一個放在<em>lib/foobar.rb</em>的類別或模組檔案，可以在要使用的<em>.rb</em>檔案中這樣載入：</p>
+
+<pre><code>require "foobar"
+</code></pre>
+
+<p>如果放在子目錄<em>lib/foo/bar.rb</em>的話：</p>
+
+<pre><code>require "foo/bar"
+</code></pre>
+
+<h3 id="libtasks">lib/tasks</h3>
+
+<p>Rake 任務檔案存放在這裡，我們會在 <a href="rails-recipes.html">Rails 錦囊妙計</a> 一章介紹 Rake。</p>
+
+<h3 id="log">log/</h3>
+
+<p>不同執行環境的 log 檔案會分別記錄在這裡</p>
+
+<h3 id="public">public/</h3>
+
+<p>這個目錄對 Web 伺服器來說，就是文件根目錄(document root)，也就是唯一可以在網路上讀取到的目錄。</p>
+
+<h3 id="bin">bin/</h3>
+
+<p>Rails 的腳本檔案</p>
+
+<h3 id="test">test/</h3>
+
+<p>單元測試、功能測試及整合測試的檔案</p>
+
+<h3 id="tmp">tmp/</h3>
+
+<p>用來存放暫時用途的檔案</p>
+
+<h3 id="vendor">vendor/</h3>
+
+<p>第三方函式庫或 Plugin 套件會放在這裡</p>
+
+<h3 id="section-1">其他根目錄下的檔案</h3>
+
+<ul>
+  <li>config.ru	 用來啟動應用程式的 Rack 設定檔</li>
+  <li>Gemfile	 設定你的 Rails 應用程式會使用哪些 Gems</li>
+  <li>README.rdoc	 你的應用程式使用手冊。你可以用來告訴其他人你的應用程式是做什麼用的，如何使用等等。</li>
+  <li>Rakefile	 用來載入可以被命令列執行的 Rake 任務</li>
+</ul>
+
+<h2 id="section-2">多重環境</h2>
+
+<p>Rails 應用程式預設提供了三種不同的執行模式：</p>
+
+<ul>
+  <li>development environment 開發模式，用在你的開發的時候</li>
+  <li>test environment 測試模式，用在執行測試程式時</li>
+  <li>production environment 正式上線模式，用在實際的上線運作環境</li>
+</ul>
+
+<p>不同環境的差異在於有不同的設定，除了資料庫設定 databasese.yml 裡分開設定之外，個別的環境設定放在 config/environments/development.rb、config/environments/test.rb 和 config/environments/production.rb，它們可以有不同的 Log 層級、Session 設定、Email 設定等等。除了預設的這三種模式，我們也可以自定模式，只需要建立對應的檔案即可，例如 config/environments/staging.rb。我們會在下一節詳述這些檔案裡面的設定。</p>
+
+<blockquote>
+  <p>staging 可以用來表示準上線模式，用來做正式上線前的 QA 測試用途。</p>
+</blockquote>
+
+<p>因為程式本身是不是寫死是哪一種執行模式，那麼要怎麼區分呢？根據不同情況有不同方法，包括：</p>
+
+<p>根據環境變數 RAILS_ENV 或 RACK_ENV 來決定使用哪一種模式，例如使用<em>rake</em>時：</p>
+
+<pre><code>RAILS_ENV=production rake db:migrate
+</code></pre>
+
+<p>下一節會介紹的<em>rails</em>指令根據參數決定:</p>
+
+<pre><code>rails console production
+rails server -e production
+</code></pre>
+
+<p>最後，應用程式伺服器則看伺服器設定檔，例如<em>Passenger</em>裡會設定<code>RackEnv</code>參數，佈署一章會詳細介紹。</p>
+
+<h2 id="rails-">Rails 指令</h2>
+
+<p>我們已經陸續使用過一些指令了，讓我們看看全部的指令吧：</p>
+
+<h3 id="generate--g">generate 可縮寫為 g</h3>
+
+<p>產生各種不同類型的檔案，例如</p>
+
+<pre><code>rails generate model person
+rails g controller people
+</code></pre>
+
+<h3 id="console--c">console 可縮寫為 c</h3>
+
+<p>開啟一個 Rails 主控台</p>
+
+<pre><code>rails console
+rails c
+</code></pre>
+
+<p>預設的環境是 developement，如果需要指定環境，請多輸入環境名稱即可，例如：</p>
+
+<pre><code>rails c production
+</code></pre>
+
+<p><em>Rails</em>也有提供沙箱模式<em>(Sandbox)</em>，任何資料庫的修改都會在離開時回復(原理是資料庫<em>Transaction</em>)：</p>
+
+<pre><code>rails c --sandbox
+</code></pre>
+
+<p>在主控台中輸入<code>exit</code>就會離開。</p>
+
+<h3 id="server--s">server 可縮寫為 s</h3>
+
+<p>開啟一個 Rails 伺服器</p>
+
+<pre><code>rails s
+</code></pre>
+
+<p>預設是使用 Port 3000 和 development 環境，如果需要指定：</p>
+
+<pre><code>rails s -p 4000 -e production
+</code></pre>
+
+<h3 id="new">new</h3>
+
+<p>建立一個新 Rails 專案</p>
+
+<pre><code>rails new my_app
+</code></pre>
+
+<p>將會建立一個叫做 MyApp 的 Rails 專案在 ./my_app 目錄下。加上<code>--database</code>參數可以改變設定檔的預設值，例如：</p>
+
+<pre><code>rails new my_app --database=mysql
+</code></pre>
+
+<p>其他說明可以輸入 rails 看到全部的指令。</p>
+
+<h3 id="section-3">其他指令</h3>
+
+<ul>
+  <li>dbconsole 開起一個資料庫主控台 (可簡寫為 rails db)，讓你直接輸入 SQL 指令。</li>
+  <li>destroy      刪除 “generate” 所產生的檔案</li>
+  <li>benchmarker  產生 benchmark 資訊，我們會在 效能 一章介紹如何使用</li>
+  <li>profiler     產生 profiler 資訊，我們會在 效能 一章介紹如何使用</li>
+  <li>runner       在 Rails 環境中執行一段程式，例如 rails runner “puts Person.count”</li>
+</ul>
+
+<h2 id="rails--1">Rails 啟動與應用程式設定</h2>
+
+<blockquote>
+  <p>不同的 Rails 版本產生的設定檔可能會略有差異，這些設定檔也沒有列出所有<em>Rails</em>設定，只有列出比較常用的。</p>
+</blockquote>
+
+<p>啟動整個 Rails 程序(包括 rails server, rails runner, rails console 等) 時，會執行 application.rb 的應用程式設定，讓我們來看看這個檔案一些比較重要的部分吧。如果你對這個檔案有修改，無論在什麼模式下，都必須重新啟動 Rails 設定才會生效。</p>
+
+<pre><code># Custom directories with classes and modules you want to be autoloadable.
+# config.autoload_paths += %W(#{config.root}/extras)
+</code></pre>
+
+<p>任何放在 app 子目錄下的類別檔案，Rails 都會根據類別的命名慣例來自動載入。如果你有其他類別檔案需要載入，請在這個設定加入。例如我們常會加入</p>
+
+<pre><code>config.autoload_paths += %W( #{config.root}/lib )
+</code></pre>
+
+<blockquote>
+  <p>如果 app/models 下的檔案太多，我們可以很簡單地增加新的子目錄來做分類，例如我們可以將檔案直接搬到 app/models/foobar 子目錄下(程式內容無需修改)，然後將這個目錄加進 autoload_paths 即可，例如 config.autoload_paths += %W( #{config.root}/lib #{config.root}/app/models/foobar)。這裡的 %W 是 Ruby 的陣列簡寫用法。</p>
+</blockquote>
+
+<pre><code># Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
+# Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
+# config.time_zone = 'Central Time (US &amp; Canada)'
+</code></pre>
+
+<p>設定預設的應用程式時區，預設是 UTC。在 Rails 中，資料庫裡面儲存的時間皆為 UTC 時間，而設定此時區會自動幫你處理轉換動作。例如設定 Taipei 的話，從資料庫讀取出來時會自動加八小時，存進資料庫時會自動減八小時。</p>
+
+<pre><code># The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
+# config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
+# config.i18n.default_locale = :de
+</code></pre>
+
+<p>設定預設的應用程式語系，預設是:en。我們會在”I18n 多國語系及時區”一章介紹如何使用。</p>
+
+<pre><code># Use SQL instead of Active Record's schema dumper when creating the database.
+# This is necessary if your schema can't be completely dumped by the schema dumper,
+# like if you have constraints or database-specific column types
+# config.active_record.schema_format = :sql
+</code></pre>
+
+<p>每次跑測試的時候，為了節省建立資料庫的時間，預設的 schema_format = :ruby 會使用 schema.rb 而不是跑 Migrations。不過，schema.rb 沒辦法表達出特定資料庫所專屬的功能，像是外部鍵約束（foreign key constraints）、觸發（triggers）或是預存程序（stored procedures）。所以如果你的 Migration 中有自定的 SQL 陳述句，請在這裡把 schema 的格式設定成 :sql。</p>
+
+<blockquote>
+  <p>改用 :sql 的話，Rails 會倒出現有的 development 資料庫，產生 #{Rails.env}_structure.sql 檔案來作為測試資料庫之用。</p>
+</blockquote>
+
+<pre><code># Enforce whitelist mode for mass assignment.
+# This will create an empty whitelist of attributes available for mass-assignment for all models
+# in your app. As such, your models will need to explicitly whitelist or blacklist accessible
+# parameters by using an attr_accessible or attr_protected declaration.
+config.active_record.whitelist_attributes = true
+
+預設打開*Mass assignment*的白名單設定，詳見安全性一章。
+</code></pre>
+
+<h3 id="initialzers">其他初始設定檔(initialzers)</h3>
+
+<p>如果將所有的設定都放到 application.rb 就太混亂了，所以非 Rails 核心的設定，我們會放在 config/initializers 目錄下。這個目錄下的所有.rb檔案會在Rails啟動時都會自動載入執行。預設產生的檔案有五個：</p>
+
+<h4 id="filterparameterlogging">filter_parameter_logging</h4>
+
+<pre><code># Configure sensitive parameters which will be filtered from the log file.
+Rails.application.config.filter_parameters += [:password]
+</code></pre>
+
+<p>設定 filter_paramsters 可以避免任何叫做 password 的參數值記錄到 log 中，有效防止使用者的原始密碼外洩到 log 檔案。</p>
+
+<h4 id="backtrace-silencers">backtrace silencers</h4>
+
+<p>可以讓你選擇性地移除例外追蹤(exception backtrace)訊息，例如有些套件可能會很吵，妨礙你除錯。</p>
+
+<h4 id="inflections">inflections</h4>
+
+<p>Rails 的命名慣例十分倚賴英文的單複數，例如將單數的類別名稱 Person 轉成複數的表格名稱 people。Inflector 就是負責將字串轉換成單複數的類別，雖然它內建了一些基本的轉換規格，但是英文常常有例外的時候，你可以在這個檔案中加上新的規格來做修正。如果你不太確定 Rails 轉換的對不對，請進入 console 主控台試試看：</p>
+
+<pre><code>$ rails c
+$ Loading development environment (Rails 3.2.8)
+$ &gt; "Business".singularize  =&gt; "Busines" # 轉單數
+$ &gt; "moose".pluralize =&gt; "mooses"  # 轉複數
+</code></pre>
+
+<p>很不幸地這兩個例子 Rails 都沒轉對，這時候你就可以利用 inflections.rb 來修正。</p>
+
+<blockquote>
+  <p>Rails 核心不接受有關單複數轉換的單字錯誤回報，畢竟它不是想做字典。</p>
+</blockquote>
+
+<h4 id="mimetypes">mime_types</h4>
+
+<p>Rails 預設支援了如下常見的標準 MIME(Multipurpose Internet Mail Extensions) 格式，MIME 被用在 HTTP 通訊協定中的請求標頭 Accept 和回應標頭 Content-Type 中，來說明此文件的格式。例如 Accept:application/xml,application/xhtml+xml,text/html; 和 Content-Type:text/html; charset=UTF-8。而 Rails 會在 Controller 的 respond_to 方法中辨識並回應所請求的格式樣板，例如瀏覽器請求 application/xml 就會回應 xml 格式</p>
+
+<table>
+<tr>
+<th>type/subtype</th>
+<th>respond_to symbol</th>
+<th>別名/說明</th>
+</tr>
+<tr>
+<td>text/html</td>
+<td>:html, :xhtml</td>
+<td>application/xhtml+xml</td>
+</tr>
+<tr>
+<td>text/plain</td>
+<td>:text, :txt</td>
+<td></td>
+</tr>
+<tr>
+<td>text/javascript</td>
+<td>:js</td>
+<td>application/javascript, application/x-javascript</td>
+</tr>
+<tr>
+<td>text/css</td>
+<td>:css</td>
+<td></td>
+</tr>
+<tr>
+<td>text/calendar</td>
+<td>:ics</td>
+<td>iCalendar 格式</td>
+</tr>
+<tr>
+<td>text/csv</td>
+<td>:csv</td>
+<td></td>
+</tr>
+<tr>
+<td>application/xml</td>
+<td>:xml</td>
+<td>text/xml, application/x-xml</td>
+</tr>
+<tr>
+<td>application/rss+xml</td>
+<td>:rss</td>
+<td></td>
+</tr>
+<tr>
+<td>application/atom+xml</td>
+<td>:atom</td>
+<td></td>
+</tr>
+<tr>
+<td>application/x-yaml</td>
+<td>:yaml</td>
+<td>text/yaml</td>
+</tr>
+<tr>
+<td>application/x-www-form-urlencoded</td>
+<td>:url_encoded_form</td>
+<td>預設的 HTML forms 格式</td>
+</tr>
+<tr>
+<td>multipart/form-data</td>
+<td>:multipart_form</td>
+<td>HTML forms 格式(包含二進位檔案資料)</td>
+</tr>
+<tr>
+<td>application/json</td>
+<td>:json</td>
+<td>text/x-json application/jsonrequest</td>
+</tr>
+</table>
+
+<p>如果你需要客製，可以在這裡註冊。</p>
+
+<h4 id="sesssionstore">sesssion_store</h4>
+
+<p>Rails 預設使用了 Cookie 來儲存 Session 訊息。它會用上述的 key 編碼之後，直接存放在使用者瀏覽器 Cookie 上。除了 Cookie Session，我們也可以使用 ActiveRecord 儲存在資料庫中。我們會在 Controller 一章中詳細介紹及比較。</p>
+
+<h4 id="configsecretsyml">config/secrets.yml</h4>
+
+<p>這個設定檔包括了亂數產生的一組<code>secret_key_base</code>用來編碼需要保護的<em>Cookie</em>訊息。修改這組 key 會讓已經存放在使用者瀏覽器上的 Cookie Session 和 Signed Cookie 失效。你可以用來強制使用者需要重新登入。</p>
+
+<pre><code>development:
+  secret_key_base: 8dd8d723d33d474710ab65b....
+  some_api_key: SOMEKEY
+
+test:
+  secret_key_base: 175fa99b200ba23cf82fec6c....
+
+# Do not keep production secrets in the repository,
+# instead read values from the environment.
+production:
+  secret_key_base: &lt;%= ENV["SECRET_KEY_BASE"] %&gt;
+</code></pre>
+
+<p>除了本來的<code>secret_key_base</code>之外，你也可以用這個檔案放其他設定，例如第三方應用的<em>Key</em>或<em>Token</em>。上述的例子透過<code>Rails.application.secrets.some_api_key</code>方法就會回傳<code>SOMEKEY</code>。</p>
+
+<blockquote>
+  <p>請小心這個檔案不要將<code>production</code>用的<em>secret</em>公開，例如上傳到<em>Github</em>的公開儲存庫。因為如果有人拿到<code>secret_key_base</code>那他就可以破解<em>Rails</em>預設的<em>Cookie-based Session</em>，造成安全上的嚴重漏洞。一般<em>Production</em>環境的作法是會將含有<code>production</code>完整設定的<code>config/secrets.yml</code>只放一份在伺服器上，或是透過環境變數來設定。詳細的作法可以參考佈署一章。</p>
+</blockquote>
+
+<h2 id="section-4">環境設定檔</h2>
+
+<p>我們在上一節”多重環境設定”曾經介紹不同環境會有不同的設定檔，讓我們來更深入看看有哪些設定值，以及這些值是如果影響 Development、Production 和 Test 環境的不同：</p>
+
+<h3 id="development-">Development 模式</h3>
+
+<pre><code># In the development environment your application's code is reloaded on
+# every request. This slows down response time but is perfect for development
+# since you don't have to restart the web server when you make code changes.
+config.cache_classes = false
+</code></pre>
+
+<p>使用 Rails 開發可以快速的原因之一，就是當你修改一個小東西，只要重新整理瀏覽器就可以馬上看到修改後的結果。這個秘訣就在於  cache_classes = false 會讓每一次的 HTTP 請求都重新載入類別檔案。更仔細的說，當這個值是 false 的時候，Rails 會改用 Ruby 的 load 方法，每次執行都會重新載入一次。相反地，如果這個值是 true，則會用 Ruby 的 require 方法，只會在第一次碰到的時候載入，之後碰到 require 相同的檔案，就會自動忽略，也就是說如果你啟動 Rails 後，檔案有修改想看到結果，必須重新啟動 Rails 才行，否則無法立即看到結果。</p>
+
+<pre><code># Show full error reports and disable caching
+config.consider_all_requests_local = true
+</code></pre>
+
+<p><em>Rails</em>只有在連線是來自本地端的時候，才會將發生錯誤時的<em>Call stack trace</em>資訊給瀏覽器顯示。這個設定將所有連線都當做本地端連線，好讓開發模式時所有人連線都可以看到錯誤訊息。</p>
+
+<pre><code>config.action_controller.perform_caching = false
+</code></pre>
+
+<p>是否啟用 Controller 層級的快取(我們會在 Controller 一章介紹到有哪些快取方法)，一般來說在開發模式不會啟用，除非你要測試它。</p>
+
+<pre><code># Don't care if the mailer can't send
+config.action_mailer.raise_delivery_errors = false
+</code></pre>
+
+<p>如果寄信失敗，是否要丟出例外。建議可以改成 true。</p>
+
+<blockquote>
+  <p>建議可以在開發模式設定 config.action_mailer.perform_deliveries = false，這樣就不會真的寄信出去。我們會再 ActionMailer 一章詳細介紹如何實作寄信功能。</p>
+</blockquote>
+
+<pre><code># Print deprecation notices to the Rails logger
+config.active_support.deprecation = :log
+</code></pre>
+
+<p>隨著 Rails 版本的升級，如果有方法會在之後的版本中移除，deprecation 會提示你如何因應。這裡的 :log 表示會記錄到 log 檔案中。</p>
+
+<pre><code>config.assets.debug = true
+ config.assets.raise_runtime_errors = true
+</code></pre>
+
+<p><em>Asset Pipeline</em>的設定會在<em>Asset</em>一章中介紹。</p>
+
+<h3 id="production-">Production 模式</h3>
+
+<pre><code># The production environment is meant for finished, "live" apps.
+# Code is not reloaded between requests
+config.cache_classes = true
+</code></pre>
+
+<p>cache_classes = true 表示在 production 中，類別檔案載入進記憶體中就快取起來了，大大獲得效能。不像在 development 環境中每一次 HTTP 請求就會重新載入一次。</p>
+
+<pre><code># Full error reports are disabled and caching is turned on
+ config.consider_all_requests_local       = false
+config.action_controller.perform_caching = true
+</code></pre>
+
+<p>不同於 development，如果在 production 環境出現例外錯誤，不會顯示程式 call stack 訊息，而是回傳 public/500.html 頁面。</p>
+
+<pre><code># Disable Rails's static asset server (Apache or nginx will already do this)
+config.serve_static_assets = false
+</code></pre>
+
+<p>不像 development 和 test，在這裡我們會讓 Rails 應用伺服器關掉對靜態檔案的回應。在 production 環境中，靜態檔案應該由效能極佳的 Apache 或 Nginx 網頁伺服器直接提供檔案。我們會在部署一章詳細介紹伺服器的架構。</p>
+
+<pre><code># Disable Rails's static asset server (Apache or nginx will already do this)
+config.serve_static_assets = false
+
+# Compress JavaScripts and CSS
+config.assets.compress = true
+
+# Don't fallback to assets pipeline if a precompiled asset is missed
+config.assets.compile = false
+
+# Generate digests for assets URLs
+config.assets.digest = true
+
+# Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
+# config.assets.precompile += %w( search.js )
+</code></pre>
+
+<p>這幾個設定會在<em>Assets</em>一章中介紹。</p>
+
+<pre><code># Specifies the header that your server uses for sending files
+# config.action_dispatch.x_sendfile_header = "X-Sendfile" # for apache
+# config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect' # for nginx
+</code></pre>
+
+<p>“X-Sendfile” 是網頁伺服器提供的功能，可以讓下載檔案的動作完全委派給網頁伺服器，Rails 送出 X-Sendfile 標頭後就毋需再佔住資源。</p>
+
+<pre><code># Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+# config.force_ssl = true
+</code></pre>
+
+<p>是否限制全站必須<em>SSL</em>才能使用。</p>
+
+<pre><code># See everything in the log (default is :info)
+# config.log_level = :debug
+</code></pre>
+
+<p>我們在 RESTful 應用程式 一章最後介紹了 Logger。這裡可以設定 Logger 的層級。預設 production 是 :info，其他則是 :debug</p>
+
+<pre><code># Use a different logger for distributed setups
+# config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
+</code></pre>
+
+<p>可以更換掉 Rails 內建的 Logger，例如換成使用 syslog 的 <a href="http://seattlerb.rubyforge.org/SyslogLogger/">SyslogLogger</a>。</p>
+
+<pre><code># Use a different cache store in production
+# config.cache_store = :mem_cache_store
+</code></pre>
+
+<p>設定不同的快取儲存庫，預設是 :memory_store，也就是每個 Rails process 各自用記憶體存放。業界最常用的則是 <a href="http://memcached.org/">memcached</a> 記憶體快取伺服器。</p>
+
+<pre><code># Enable serving of images, stylesheets, and javascripts from an asset server
+# config.action_controller.asset_host = "http://assets.example.com"
+</code></pre>
+
+<p>預設的靜態檔案位置是目前主機的 public 目錄，你可以透過修改 asset_host 變更位置。例如你的靜態檔案放在不同台機器或 CDN(Content delivery network) 上。</p>
+
+<blockquote>
+  <p>這就是為什麼 Rails 在 View 中會使用 Helper 方法的原因之一，我們不會平舖直敘的寫 <img src="images/rails.png">，而是使用 &lt;%= image_tag(“rails.png”) %&gt; 目的就在於透過程式來獲得修改位置的彈性。其他還包括 stylesheets、javascripts 等靜態檔案都有 Helper 可以使用。</p>
+</blockquote>
+
+<pre><code># Disable delivery errors, bad email addresses will be ignored
+# config.action_mailer.raise_delivery_errors = false
+
+# Enable locale fallbacks for I18n (makes lookups for any locale fall back to
+# the I18n.default_locale when a translation can not be found)
+config.i18n.fallbacks = true
+</code></pre>
+
+<p>如果 I18n 翻譯檔找不到，則找用預設語系的文字。我們會在<em>I18n</em>一章詳細介紹多國語系功能。</p>
+
+<pre><code># Send deprecation notices to registered listeners
+config.active_support.deprecation = :notify
+</code></pre>
+
+<p>將 deprecation 訊息傳到 <a href="http://api.rubyonrails.org/classes/ActiveSupport/Notifications.html">Notifications</a> 頻道，你可以用以下程式去訂閱這個訊息：</p>
+
+<pre><code>ActiveSupport::Notifications.subscribe("deprecation.rails") do |message, callstack|
+  # deprecation message
+end
+</code></pre>
+
+<p>如果沒有訂閱的話，就什麼事都不會發生。</p>
+
+<h3 id="test-">Test 模式</h3>
+
+<pre><code># Show full error reports and disable caching
+config.consider_all_requests_local       = true
+config.action_controller.perform_caching = false
+
+# Raise exceptions instead of rendering exception templates
+config.action_dispatch.show_exceptions = false
+</code></pre>
+
+<p>不同於 development 或 production 碰到例外會捕捉例外後，給瀏覽器顯示出 call stack trace 或 public/500.html 畫面，在 test 模式就不處理，讓例外直接爆出。</p>
+
+<pre><code># Tell Action Mailer not to deliver emails to the real world.
+# The :test delivery method accumulates sent emails in the
+# ActionMailer::Base.deliveries array.
+config.action_mailer.delivery_method = :test
+</code></pre>
+
+<p>測試模式下不會真的去寄送<em>email</em></p>
+
+<pre><code># Print deprecation notices to the stderr
+config.active_support.deprecation = :stderr
+</code></pre>
+
+<p>讓 deprecation 訊息會直接顯示到視窗之中。</p>
+
+<h3 id="databaseyml">資料庫設定檔 database.yml</h3>
+
+<p>幾乎每一個 Rails 應用程式都會與資料庫互動。而資料庫需要一個設定檔是 config/database.yml。如果你打開這個檔案，你會發現預設設定是 SQLite3。這個檔案包含三個不同的部分，對應到三個 Rails 預設環境。</p>
+
+<p>一個 Mysql 的設定檔範例如下：</p>
+
+<pre><code>development:
+  adapter: mysql
+  encoding: utf8
+  database: blog_development
+  username: root
+  password:
+production:
+  adapter: mysql
+  encoding: utf8
+  database: blog_production
+  username: root
+  password:
+test:
+  adapter: mysql
+  encoding: utf8
+  database: blog_test
+  username: root
+  password:
+</code></pre>
+
+<h2 id="bundler--gemfile-">Bundler 與 Gemfile 設定檔</h2>
+
+<p>Bundler <a href="http://gembundler.com/">http://gembundler.com/</a> 是管理應用程式 Gem 依存性(dependencies)管理工具，它會根據 Gemfile 的設定自動下載及安裝 Gem 套件，並且幫你解決不同套件之間的依存關係，更重要的是，它可以讓不同開發者之間和佈署時，所有依存套件的版本都能夠一致。</p>
+
+<p>在 Rails3 中 (Bundler 不只用在 Rails3，其他例如 Sinatra 或是 Rails2 也都可以使用) 要使用的 Gems，都必須宣告在 Gemfile 設定檔中，沒寫在裡面的話，就算手動 require 也找不到。這跟 Rails2 以前可以直接 require 任意 rubygems 不同，在使用 Bundler 的環境中，要 require 什麼 rubygems 必須透過 Gemfile 管理。</p>
+
+<p>Gemfile 的寫法說明如下：</p>
+
+<pre><code>  # 第二個參數可以指定版本
+  gem "rails", "4.2.0"
+
+  # 也可以不指定版本，這樣會安裝最新的穩定版本 (不包括 .pre 或 .rc 結尾的版本)
+  gem 'mysql2'
+
+  # 如果 require 的檔名不同，可以加上 :require
+  gem 'yajl-ruby', :require =&gt; 'yajl'
+
+  # 可以用 Git 當做來源(根目錄要有 .gemspec 檔案)，甚至可以指定 branch, tag 或 ref。
+  gem 'authlogic', :git =&gt; 'git://github.com/odorcicd/authlogic.git',
+                            :branch =&gt; 'rails3'
+
+  # 也可以直接用電腦裡的其他目錄
+  # gem "rails", :path =&gt; '/Users/ihower/github/rails'
+
+  # Group 功能可以讓特定環境才會載入
+  group :development, :test do
+     gem "rspec", "~&gt; 2.0"
+     gem "rspec-rails", "~&gt; 2.0"
+  end
+</code></pre>
+
+<blockquote>
+  <p>版號的指定方式除了指定特定版本，還可以指定大於等於 &gt;= 某個版本。不過最建議的方式則是使用 ~&gt; 的語法。”~&gt; x.y.z” 的意思是版號 x,y 固定，但可以大於等於 z。例如 “~&gt; 1.3.5” 的意思是 1.3.5, 1.3.6, 1.3.9 可以安裝，但是 1.4.0, 1.5.5, 2.0.1 就不行。這種寫法的好處是，通常版號的命名有其慣例：x major 版號升級表示有 API 發生不向後的相容性變動，y minor 版號升級表示有功能新增，z tiny 版號升級表示 bugs 修正。因此 “~&gt; x.y.z” 可以讓我們保有升級彈性，又不致於升級太多讓程式發生不相容錯誤。</p>
+</blockquote>
+
+<h3 id="gems">安裝及更新 Gems</h3>
+
+<p>如果你修改了這個檔案，請執行 bundle install，這樣 Bundler 就會檢查並安裝這些函式庫，並產生一個 Gemfile.lock 檔案。Gemfile.lock 檔案會詳細列出所有使用到的套件版本，你應該把這個檔案也 commit 送進版本控制系統，這樣其他開發者及上線的版本就都會安裝完全一樣的版本了。</p>
+
+<p>執行 bundle update gem_name 則會更新此 gem 的版本。bundle update 則會檢查所有的 gem 更新到最新版本。一般來說你只需要在每次 Gemfile 修改後，執行 bundle install 即可。如果有套件關連性 bundle install 無法解決，它會提示你執行 bundle update。</p>
+
+<p>什麼時候該執行 bundle install 或 bundle update 呢？一般來說，總是執行 bundle install 即可。這個指令只會做必要的更新到 Gemfile.lock，執行速度較快，它不會幫你升級現有的 Gem。而 bundle update 會重新產生整個 Gemfile.lock 檔案，更新所有 Gem 到最新版本。但是，一次升級太多套件，可能會造成除錯上的困難。因此會建議如果要升級，請執行 bundle update gem_name 一次升級一個套件。</p>
+
+<p>怎麼知道可以升級哪些<em>Gem</em>呢？</p>
+
+<pre><code>bundle outdated
+</code></pre>
+
+<p>這個指令就會列出有新版本可以升級的<em>gems</em>。</p>
+
+<h3 id="gems-1">打包 Gems</h3>
+
+<p>執行以下指令，會將所有用到的 Gems 打包進 vendor/cache 目錄。如此執行 bundle install 時就不會連線到 http://rubygems.org 下載套件。</p>
+
+<pre><code>bundle package
+</code></pre>
+
+<p>什麼時候需要用到這個功能呢？例如你希望佈署的時候避免外部連線，或是你有非公開的 gems 不會上傳到 http://rubygems.org 網站上。</p>
+
+<blockquote>
+  <p>如果你有非 Rails 的 script 需要執行(也就是放在 Gemfile 檔案中的 Gem 所自行提供的執行檔)，使用 bundle exec 可以正確的載入 Bundler 的環境。例如 bundle exec rspec spec/</p>
+</blockquote>
+
+<h2 id="section-5">名稱慣例</h2>
+
+<p>在 Rails 中有一些命名上的慣例：</p>
+
+<h3 id="section-6">類別命名與自動載入</h3>
+
+<p>檔名使用小寫、單數，用底線區隔。例如當 Rails 看到一個 OrderItem 的類別或模組(Module)，它會在 autoload_paths (我們在 config/application.rb 中有此項設定) 目錄中自動去載入叫做 order_item.rb 的檔案，也就是 require “order_item”。</p>
+
+<p>如果是有嵌套的類別或模組，例如 Admin::OrderItem，則會多一層目錄，它會自動載入 admin/order_item.rb 的檔案，也就是 require “admin/order_item”。</p>
+
+<blockquote>
+  <p>如果你沒有設定 autoload_paths 加入 lib 目錄，或是你的檔案沒有依照慣例命名，那麼你會需要在程式中手動 require 它。基本上，只要依照命名慣例，你不太需要在程式中寫 require。</p>
+</blockquote>
+
+<blockquote>
+  <p>autoload_paths 目錄是指 Rails 會自動根據命名慣例載入，而 Ruby 的 $LOAD_PATH 常數則是 require 時會尋找的目錄。像 lib 這個目錄 Rails 預設就只有加到 $LOAD_PATH 之中，所以你放在 lib 的檔案是可以 require 到，但是因為預設沒有加到 autoload_paths 之中，所以沒有自動載入的機制。</p>
+</blockquote>
+
+<h3 id="model-">Model 命名</h3>
+
+<p>類別名稱使用大寫、單數，沒有底線。而檔名使用小寫、單數，用底線。資料庫表格名稱用小寫且為複數。例如：</p>
+
+<ul>
+  <li>資料庫表格 line_items</li>
+  <li>檔名 app/models/line_item.rb</li>
+  <li>類別名稱 LineItem</li>
+</ul>
+
+<h3 id="controller-">Controller 命名</h3>
+
+<p>假設有一個<em>store controller</em>的話：</p>
+
+<ul>
+  <li>檔名 app/controllers/store_controller.rb</li>
+  <li>類別名稱 StoreController</li>
+</ul>
+
+<p>如果需要將<em>controllers</em>檔案做分類，這時候可以使用<em>Module</em>，將檔案放在子目錄下，例如後台專用的<em>controllers</em>：</p>
+
+<ul>
+  <li>檔名 app/controllers/admin/store_controller.rb</li>
+  <li>類別名稱 Admin::StoreController</li>
+</ul>
+
+<h3 id="view-">View 命名</h3>
+
+<p>例如一個叫做 People 的 controller，其中的 index action：</p>
+
+<ul>
+  <li>檔名 app/views/people/index.html.erb</li>
+  <li>Helper 名稱 module PeopleHelper</li>
+  <li>檔名 app/helpers/people_helper.rb</li>
+</ul>
+
+<h2 id="rails--2">Rails 元件導覽</h2>
+
+<p>Rails 包含許多個別的函式庫元件：</p>
+
+<ul>
+  <li>Action Pack</li>
+  <li>Action Controller</li>
+  <li>Action Dispatch</li>
+  <li>Action View</li>
+  <li>Action Mailer</li>
+  <li>Active Model</li>
+  <li>Active Record</li>
+  <li>Active Resource</li>
+  <li>Active Support</li>
+  <li>Railties</li>
+</ul>
+
+<h3 id="action-pack">Action Pack</h3>
+
+<p>Action Pack 是個包含 Action Controller、Action View 和 Action Dispatch 的 gem。也就是 “MVC” 中的 “VC” 部分。</p>
+
+<h3 id="action-controller">Action Controller</h3>
+
+<p>Action Controller 是 Rails 應用程式中，管理 Controllers 的元件。Action Controller 框架處理傳給 Rails 的 HTTP 請求，萃取出參數，然後分派給所屬的 Action。Action Controller 還提供了 session 管理、樣板演算顯示(template rendering) 和 redirect 功能。</p>
+
+<h3 id="action-view">Action View</h3>
+
+<p>Action View 負責 Rails 應用程式中的 Views。它預設可以產生 HTML 或 XML 輸出。Action View 負責樣板的演算顯示(template rendering)，包括嵌套(nesting)或局部(partial)樣板，甚至也內建支援一些 Ajax。</p>
+
+<h3 id="action-dispatch">Action Dispatch</h3>
+
+<p>Action Dispatch 處理 HTTP 請求的路由(routing)，它把 HTTP 請求發派(dispatch)到它該去的地方，也許是你的應用程式或其他 Rack 程式。</p>
+
+<h3 id="action-mailer">Action Mailer</h3>
+
+<p>Action Mailer 是個建構 E-mail 功能的框架。你可以使用 Action Mailer 來接收來信，或是使用樣板來寄出純文字或複雜的 multipart 信件。</p>
+
+<h3 id="active-model">Active Model</h3>
+
+<p>Active Model 在 Action Pack gem 和 ORM gem (例如 Active Record) 之間定義了一組介面。Active Model 允許 Rails 可以依你的需求把 Active Record 換成其他 ORM 框架。</p>
+
+<h3 id="active-record">Active Record</h3>
+
+<p>Active Record 是 Rails 應用程式中的 Models 基礎。它不依存特定的資料庫系統，提供了 CRUD 功能、先進的查詢能力以及可以跟其他 Models 關聯的本事。</p>
+
+<h3 id="active-support">Active Support</h3>
+
+<p>Active Support 是 Rails 裡的工具函式庫，它也擴充了一些 Ruby 標準函式庫。除了被用在 Rails 核心程式中，你也可以在你的程式中使用。</p>
+
+<h3 id="railties">Railties</h3>
+
+<p>Railties 是 Rails 的核心程式碼，用來把以上各種的框架函式庫以及 Plugin 全部組合在一起。</p>
+
+<h2 id="section-7">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://edgeguides.rubyonrails.org/configuring.html">Configuring Rails Applications</a></li>
+  <li><a href="http://edgeguides.rubyonrails.org/command_line.html">A Guide to The Rails Command Line</a></li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：15 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

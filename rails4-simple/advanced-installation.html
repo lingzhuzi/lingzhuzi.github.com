@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | 进阶开发环境安装</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./advanced-installation.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="section">进阶开发环境安装</h1>
+
+<p>本书在<a href="installation.html">第二章</a>介绍了如何快速安装，本附录将介绍进阶的安装方式，例如<em>RVM</em>和<em>MySQL</em>。适合专业的开发者。</p>
+
+<h2 id="mac-os-x">Mac OS X</h2>
+
+<h3 id="mysql">安装<em>MySQL</em>
+</h3>
+
+<p><em>Mac OS</em>除了可以至<em>MySQL</em>官网下载，笔者推荐通过<em>Homebrew</em>安装：</p>
+
+<pre><code>$ brew install mysql
+$ mysql.server start
+</code></pre>
+
+<p>如果需要开机就把<em>MySQL</em>开起来的话：</p>
+
+<pre><code>$ mkdir -p ~/Library/LaunchAgents
+$ ln -sfv /usr/local/opt/mysql/*.plist ~/Library/LaunchAgents
+</code></pre>
+
+<p>安装<em>MySQL Adapter</em>：</p>
+
+<pre><code>$ gem install mysql2
+</code></pre>
+
+<p>修改<em>Gemfile</em>加上以下套件，然后输入<code>bundle</code>：</p>
+
+<pre><code>gem 'mysql2'
+</code></pre>
+
+<p>修改<em>config/database.yml</em>设定档，整个换成：</p>
+
+<pre><code>development:
+  adapter: mysql2
+  encoding: utf8
+  database: demo_development
+  host: localhost
+  username: root
+  password:
+
+test:
+  adapter: mysql2
+  encoding: utf8
+  database: demo_test
+  host: localhost
+  username: root
+  password:
+
+production:
+  adapter: mysql2
+  encoding: utf8
+  database: demo_production
+  host: localhost
+  username: root
+  password:
+</code></pre>
+
+<h3 id="rvmruby">使用<em>RVM</em>安装<em>Ruby</em>
+</h3>
+
+<p><em><a href="http://rvm.beginrescueend.com/">RVM</a>(Ruby Version Manager)</em>是一套可以同时安装不同版本<em>Ruby</em>的工具，你可以安装<em>REE</em>、<em>1.8.7</em>、<em>1.9.3</em>、<em>JRuby</em>甚至是开发中的最新<em>Ruby</em>。</p>
+
+<p>安装<em>RVM</em> (请参考官方网页的<a href="https://rvm.io/">安装说明</a>)：</p>
+
+<pre><code>$ curl -sSL https://get.rvm.io | bash -s stable
+</code></pre>
+
+<p>接着看你想要安装哪一个<em>Ruby</em>版本，例如笔者推荐<em>Ruby 2.1.5</em>：</p>
+
+<pre><code>$ rvm install 2.1.5
+$ rvm 2.1.5 --default
+</code></pre>
+
+<p>你也可以试著安装其他版本，输入<code>rvm list known</code>会列出有哪些版本可以安装，例如：</p>
+
+<pre><code>$ rvm install jruby
+</code></pre>
+
+<p>这样就会安装<em><a href="http://jruby.org/">JRuby</a></em>版本，输入<code>rvm jruby</code>切换到<em>JRuby</em>版的<em>Ruby</em>，输入<code>rvm list</code>会列出目前已经安装的版本。输入<code>ruby -v</code>可以得知目前的<em>Ruby</em>版本：</p>
+
+<pre><code>$ rvm 2.1.5
+$ ruby -v
+ruby 2.1.5p273 (2014-11-13 revision 48405) [x86_64-darwin13.0]
+$ rvm jruby
+$ ruby -v
+jruby 1.7.15 (1.9.3p392) 2014-09-03 82b5cc3 on Java HotSpot(TM) 64-Bit Server VM 1.7.0_67-b01 +jit [darwin-x86_64]
+</code></pre>
+
+<p>输入<code>rvm 2.1.5 --default</code>可以设定<em>2.1.5</em>为预设的<em>Ruby</em>版本。</p>
+
+<!--
+
+## Windows
+
+如果不使用*[Rails Installer](http://railsinstaller.org/)*的话，你可以选择拆开来安装：
+
+### MySQL
+
+至*[MySQL](http://www.mysql.com/)*官网下载安装。
+
+安装*MySQL Adapter*：
+
+    $ gem install mysql
+
+修改*Gemfile*加上：
+
+    gem 'mysql'
+
+修改*config/database.yml*设定档。
+
+Windows 7 x64 的使用者，请参考：
+
+* https://github.com/oneclick/rubyinstaller/wiki/Troubleshooting#wiki-gems_mix_bits
+* http://blog.mmediasys.com/2011/07/07/installing-mysql-on-windows-7-x64-and-using-ruby-with-it/
+* http://paul-wong-jr.blogspot.com/2011/06/getting-mysql2-gem-to-work-with-ruby-on.html
+
+### SQLite3
+
+至*[SQLite](http://www.sqlite.org/)*官网下载*DLL of the SQLite library*档案放到`C:\Windows`目录下。
+
+安装*SQLite Adapter*：
+
+    $ gem install sqlite
+
+### 使用*RubyInstaller*安装*Ruby*
+
+请至*[RubyInstaller](http://rubyinstaller.org/)*下载*Ruby 2*安装包，安装过程中请点选将*Ruby*加入可执行的路径*(Add Ruby executables to your PATH)*。
+
+另外，有一些*RubyGems*套件会需要编译动作，需要下载*Development Kit*。
+
+> 使用*Git*版本控制系统请参阅附录。
+
+### 使用*Uru (Unleash Ruby)*安装*Ruby*
+
+*[pik](https://bitbucket.org/jonforums/uru)*是一套类似的*RVM*的工具，可以同时安装不同版本的*Ruby*。
+
+
+### 使用虚拟机器
+
+不过，如第二章所说跑在*Windows*上有一些缺点，例如碰到一些需要的套件没有支持*Windows*。另一种在*Windows*上开发的方式是通过虚拟机器*(Virtual Machine)*，例如用*[VirtualBox](http://www.virtualbox.org/)*来跑*[Ubuntu Desktop Edition](http://www.ubuntu.com/desktop)*，或是使用*[Cygwin](http://www.cygwin.com/)*来提供*Unix-like*环境。
+
+-->
+
+<h2 id="ubuntu-desktop">Ubuntu Desktop</h2>
+
+<h3 id="mysql-1">安装<em>MySQL</em>
+</h3>
+
+<p><em>Ubuntu</em>上安装<em>MySQL</em>请执行：</p>
+
+<pre><code>$ sudo apt-get install mysql-server mysql-common mysql-client libmysqlclient-dev
+</code></pre>
+
+<p>安装<em>MySQL Adapter</em>：</p>
+
+<pre><code>$ gem install mysql2
+</code></pre>
+
+<p>修改<em>Gemfile</em>加上：</p>
+
+<pre><code>gem 'mysql2'
+</code></pre>
+
+<p>修改<em>config/database.yml</em>设定档。</p>
+
+<h3 id="rvmruby-1">使用<em>RVM</em>安装<em>Ruby</em>
+</h3>
+
+<p>在使用<em>RVM</em>之前必须先安装以下套件：</p>
+
+<pre><code>$ sudo apt-get install build-essential libssl-dev libpcre3-dev libncurses5-dev libreadline6-dev
+</code></pre>
+
+<p><em><a href="http://rvm.beginrescueend.com/">RVM</a>(Ruby Version Manager)</em>请参考上一节的内容。记得也是要先装有<em>Git</em>，请参考附录<em>Git</em>如何安装。</p>
+
+<p>如果碰到<em>Linux</em>套件问题，请参考<em><a href="http://beginrescueend.com/packages/">RVM Packages</a></em>有一些常见解法。</p>
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

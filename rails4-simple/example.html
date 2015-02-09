@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Rails 范例专案</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./example.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="rails-">Rails 范例专案</h1>
+
+<p>本章的目的是让读者可以从一个完整的<em>Rails</em>专案中学习：</p>
+
+<h2 id="job-board">Job Board</h2>
+
+<p><em><a href="http://jobs.ruby.tw">Ruby Jobs in Taiwan</a></em>是一个简单的<em>Job Board</em>系统，原始码开放在<em><a href="https://github.com/rubytaiwan/jobs.ruby.tw">Github</a></em>上，功能包括：</p>
+
+<ol>
+  <li>使用者注册、登入、登出。使用 <a href="https://github.com/plataformatec/devise">Devise Gem</a>
+</li>
+  <li>使用者可以张贴工作，并设定工作的张贴期限</li>
+  <li>使用者可以编辑、下架、删除自己张贴的工作</li>
+</ol>
+
+<p>功能虽然简单，但是包含了<em>Model spec</em>、<em>Controler spec</em>和<em>Acceptence Test</em>可供学习。</p>
+
+<h2 id="section">简易论坛系统</h2>
+
+<ul>
+  <li>开发一个简易论坛系统。系统要有 Forum 与 Post 两个 Model，写出 CRUD 介面，并且文章网址是使用 http://forum.local/forums/1/posts/2 这种表示。</li>
+  <li>可以使用 http://http://getbootstrap.com/ 套版</li>
+  <li>使用者必须能够 注册 / 登入，登入后才可以发表 Post，不然只能浏览。只有自己的 Post 才能进行修改与删除。请使用 devise gem。</li>
+  <li>论坛的文章要能够分页，每一页 20 笔，每一个论坛要秀出现在论坛裡有多少文章数量。请使用 <a href="https://github.com/amatsuda/kaminari">Kaminari Gem</a>。</li>
+  <li>可依照文章时间排序，请使用 Model 的 scope 功能。</li>
+  <li>每篇文章可以上传附件。请使用 <a href="https://github.com/thoughtbot/paperclip/">Paperclip Gem</a>。</li>
+  <li>建立一个后台，让管理员可以删改所有文章，网址是 http://forum.local/admin/。只有身分是 admin 的人可以进后台。admin 的判别方是 column 裡加一个 boolean，判断是否是 admin。</li>
+  <li>用 Rake 撰写的产生假资料的步骤。执行 rake dev:fake 即会产生假文章与假论坛。</li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

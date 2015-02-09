@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Asset Pipeline</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./assets-pipeline.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="asset-pipeline">Asset Pipeline</h1>
+
+<blockquote>
+  <p>A language that doesn’t affect the way you think about programming is not worth knowing. - Alan Perlis</p>
+</blockquote>
+
+<p><em>Assets</em>指的是<em>JavaScript</em>、<em>Stylesheets</em>和图片等静态档案，这些档案并不会随<em>Requests</em>不同而有所不同。而在<em>Rails</em>目录中，只有<em>public</em>这个目录是公开读取的，所以通常我们会将静态档案都放在<em>public</em>这个目录下，好让浏览器可以直接读取。但是隨着<em>JavaScript</em>和<em>Stylesheet</em>档案越来越多时，如何管理这些档案变为一项议题，为了加快浏览器的下载速度，我们会合并<em>JavaScript</em>和<em>Stylesheet</em>档案，来減少浏览器<em>Request</em>下载次数。更近一步的还会压缩这些档案来加速下载时间。像是<em>Yahoo!</em>和<em>Google</em>都有各自开源出自己的压缩工具<em><a href="http://developer.yahoo.com/yui/compressor/">YUI Compressor</a></em>和<em><a href="http://code.google.com/closure/compiler/">Closure Compiler</a></em>。</p>
+
+<p>而<em>Rails</em>的<em>Assets pipeline</em>可以讓我們突破<em>public</em>目錄限制，可以將靜態檔案依需求放在不同目錄下，<em>Rails</em>會幫你組合並壓縮起來。特別是有一些<em>Rails</em>的外掛套件需要使用<em>JavaScript</em>等靜態檔案，在沒有這個功能之前，我們必須將<em>JavaScript</em>等檔案複製放在<em>public</em>目錄下，這樣瀏覽器才能讀取的到。</p>
+
+<p><em>Assets</em>的位置在<em>app/assets/</em>下，首先最重要的就是<em>app/assets/javascripts/application.js</em>和<em>app/assets/stylesheets/application.css</em>，這兩個檔案看起來充滿註解，其實它是個<em>manifest</em>檔案，列出了所有要載入的靜態檔案，這些檔案的位置依照慣例放在<em>app/assets</em>或<em>vendor/assets</em>目錄下。</p>
+
+<p>讓我們先看看<em>application.js</em></p>
+
+<pre><code>// This is a manifest file that'll be compiled into application.js, which will include all the files
+// listed below.
+//
+// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,
+// or vendor/assets/javascripts of plugins, if any, can be referenced here using a relative path.
+//
+// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
+// compiled file.
+//
+// Read Sprockets README (https://github.com/sstephenson/sprockets#sprockets-directives) for details
+// about supported directives.
+//
+//= require jquery
+//= require jquery_ujs
+//= require turbolinks
+//= require_tree .
+</code></pre>
+
+<p>其中的<code>require jquery</code>和<code>require jquery_ujs</code>會載入<em>JQuery</em>和<em>Rails</em>的<em>JQuery adapater</em>，這是因為我們在<em>Gemfile</em>中有裝<em>jquery-rails</em>這個套件，所以這裡可以讀取的到。<code>require turbolinks</code>在上一章有提到。而<code>require_tree .</code>會載入這個目錄下的所有<em>JavaScript</em>檔案。總之，這個<em>manifest</em>的最後輸出結果就是通通壓縮成一個<em>application.js</em>檔案。</p>
+
+<p>同理<em>application.css</em>也是一樣載入所有<em>stylesheets</em>目錄下的<em>CSS</em>檔案，最後壓縮成<em>application.css</em>：</p>
+
+<pre><code>/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any styles
+ * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+ * file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+</code></pre>
+
+<p>讓我們看看<em>View</em>，在<em>Layout</em>檔案中：</p>
+
+<pre><code>&lt;%= stylesheet_link_tag    "application" %&gt;
+&lt;%= javascript_include_tag "application" %&gt;
+</code></pre>
+
+<p>因為最後輸出都壓縮成一個檔案了，所以這裡只需要載入<em>application.css</em>和<em>application.js</em>。</p>
+
+<p>除了<code>require_tree</code>之外，還有其他的用法，你都可以使用絕對或是相對路徑來指定檔案位置，副檔名可有可無：</p>
+
+<ul>
+  <li>
+<code>require</code> [路徑]:載入某支特定檔案，如果這支檔案被載入多次，Sprockets 也會很聰明的只幫你載入一次。</li>
+  <li>
+<code>include</code> [路徑]:與<code>require</code>一樣，差別在即使是被載入過的檔案也會再被載入。</li>
+  <li>
+<code>require_directory</code> [路徑] : 將路徑下不包含子目錄的檔案按照字母順序依次載入。</li>
+  <li>
+<code>require_tree</code> [路徑] : 會將路徑下包含子目錄的檔案全部載入。</li>
+  <li>
+<code>require_self</code> [路徑] : 告訴 Sprockets 再載入其他的檔案前，先將自己的內容插入。</li>
+  <li>
+<code>depend_on</code> [路徑] : 宣告依賴於某支 js，在需要通知某支快取的 assets 過期時非常實用。</li>
+  <li>
+<code>stub</code> [路徑] : 將路徑中的 assets 加入黑名單，所有其他的 require 都不會將他載入。</li>
+</ul>
+
+<p>你可以看 <a href="https://github.com/sstephenson/sprockets">Sprockets 的官方說明</a> 來獲得更多的資訊。</p>
+
+<p>另外，在<em>Rails</em>中的<em>assets</em>目錄其實有三個：</p>
+
+<ul>
+  <li>
+<code>app/assets</code>(通常放置我們自己為了自己的程式所寫的 js、css 或是 images)</li>
+  <li>
+<code>lib/assets</code>(通常是我們所使用的套件中去用到的 assets)</li>
+  <li>
+<code>vendor/assets</code>(通常是放一些我們從別的地方借用的 assets，例如說一些 jQuery 的套件)</li>
+</ul>
+
+<p>這三個目錄，在預設情況下這三個資料夾的東西是共通的(因為都會被打包成一個檔案)，你可以把你的 rails app 跑起來後在 <code>http://localhost:3000/assets/application.js</code> 中看到你所有的 js 都在這支檔案中，css 同理亦然，你可以在 terminal 中輸入 <code>Rails.application.config.assets.paths</code> 來查看所有的 assets 路徑。你可以發現，除了原本我們剛剛說的三個 assets 目錄之外，還出現了包含在我們 GemFile 中的 jquery，這代表你的 assets 現在也可以包成 gem 來用，如果你有很多個 projects 常重複使用一些共通的 assets，不妨考慮包成 gem 來使用，方便又愉快。</p>
+
+<h2 id="section">如何處理圖片</h2>
+
+<p>放在<em>app/assets/images</em>下的圖片該怎麼使用呢？在實際佈署後，<em>Rails</em>會將檔案名稱加以編碼，例如<em>rails.png</em>會變成<em>rails-bd9ad5a560b5a3a7be0808c5cd76a798.png</em>。這麼做的原因是當圖片有變更的時候，編碼就會不同而有不同的檔名，這樣就可以避免瀏覽器快取到舊的檔案。也因為檔案名稱會變動，所以放在<em>app/assets/images</em>下的圖片，要用的時候就沒有辦法寫死檔名。在一般的<em>View</em>中，可以使用<code>image_tag</code>這個<em>Helper</em>：</p>
+
+<pre><code>&lt;%= image_tag("rails.png") %&gt;
+</code></pre>
+
+<p>如果在<em>CSS</em>裡的話，有兩種辦法：一是將檔案命名為<em>erb</em>結尾，例如<em>app/assets/stylesheets/main.css.erb</em>，然後使用<code>asset_path</code>這個<em>Helper</em>：</p>
+
+<pre><code>h1 {
+  background-image: url('&lt;%= asset_path("rails.png") %&gt;');
+}
+</code></pre>
+
+<p>另一種方法是使用<em>Sass</em>或<em>SCSS</em>語法。其中<em>SCSS</em>相容於<em>CSS</em>。例如命名為<em>app/assets/stylesheets/main.css.scss</em>，然後使用<code>image-url</code>這個<em>Sass</em>提供的方法：</p>
+
+<pre><code>h1 {
+    background-image: image-url("rails.png")
+}
+</code></pre>
+
+<p>如果是<em>js</em>檔案中想要拿圖片的位置，就只能用<em>js.erb</em>的格式，然後內嵌<em>asset_path Helper</em>方法了。</p>
+
+<h2 id="helper">其他 Helper</h2>
+
+<p>Assets 提供了很多路徑 helper 來讓你指向你的 assets:</p>
+
+<p><code>
+audio_path("horse.wav")   # =&gt; /audios/horse.wav
+audio_tag("sound")        # =&gt; &lt;audio src="/audios/sound" /&gt;
+font_path("font.ttf")     # =&gt; /fonts/font.ttf
+image_path("edit.png")    # =&gt; "/images/edit.png"
+image_tag("icon.png")     # =&gt; &lt;img src="/images/icon.png" alt="Icon" /&gt;
+video_path("hd.avi")      # =&gt; /videos/hd.avi
+video_tag("trailer.ogg")  # =&gt; &lt;video src="/videos/trailer.ogg" /&gt;
+</code></p>
+
+<p>Sass 還提供了像是 <code>-url</code> 和 <code>-path</code> 這樣的 helper 來協助你，因此你也可以這樣使用：</p>
+
+<p><code>
+image-url("rails.png")         # =&gt; url(/assets/rails.png)
+image-path("rails.png")        # =&gt; "/assets/rails.png".
+asset-url("rails.png", image)  # =&gt; url(/assets/rails.png)
+asset-path("rails.png", image) # =&gt; "/assets/rails.png"
+</code></p>
+
+<h2 id="precompile">
+<em>Precompile</em>編譯靜態檔案</h2>
+
+<p>放在<em>app/assets</em>目錄下的<em>Assets</em>，<em>Rails</em>支援使用不同的語法，例如使用<em><a href="http://sass-lang.com/">Sass</a></em>語法產生<em>CSS</em>、<em><a href="http://jashkenas.github.com/coffee-script/">CoffeeScript</a></em>產生<em>JavaScript</em>，或是用<em>ERb</em>樣板也可以。使用的方法是將附檔名命名成<em>.css.sass</em>、<em>.css.scss</em>、<em>.js.coffee</em>、<em>.css.erb</em>或<em>.js.erb</em>，<em>Rails</em>就會編譯出結果給瀏覽器。</p>
+
+<p><em>Sass</em>是一種<em>CSS3</em>語法的擴充，可以使用巢狀、變數、混入、選擇子繼承等等功能，可以更有效率有彈性的撰寫<em>Stylesheet</em>。<em>Sass</em>最後會編譯出合法的<em>CSS</em>讓瀏覽器使用。使用上它區分成兩種形式的語法<em>scss</em>和<em>sass</em>，前者可以與現有的<em>css</em>程式碼直接混合在一起，後者則透過縮排來省略了大括號<code>{}</code>(就像<em>Python</em>用縮排一樣)。<em>CoffeeScript</em>也是類似原理，它是一種迷你的程式語言，編譯之後會輸出可讀性高、符合<em><a href="http://www.javascriptlint.com/">JavaScript Lint</a></em>規範的<em>JavaScript</em>程式碼。</p>
+
+<p>學習這兩種新語法需要額外的時間投入，但是對需要常常撰寫<em>CSS</em>和<em>JavaScript</em>的設計師來說，應該是很不錯的工具，讀者可以自行斟酌是否採用。如果你不打算使用的話，可以編輯<em>Gemfile</em>拿掉以下：</p>
+
+<pre><code>gem 'sass'
+gem 'coffee-script'
+</code></pre>
+
+<blockquote>
+  <p>如果採用<em>Sass</em>的話，推薦還可以採用<em><a href="http://compass-style.org/">Compass</a></em>這套<em>CSS</em>框架的框架。</p>
+</blockquote>
+
+<h2 id="section-1">編譯出最後結果</h2>
+
+<p>開發的時候，<em>Rails</em>會自動將<em>Asset</em>的壓縮結果快取在<em>tmp</em>下，所以開發者不需要特別處理。但是實際正式上線時，最後壓縮的檔案還是必須放在<em>public</em>目錄下由網頁伺服器直接提供(或是由CDN)效能較好，以下的<em>rake</em>指令可以產生出來：</p>
+
+<pre><code>rake assets:precompile
+</code></pre>
+
+<p>產生出來的檔案在<em>public/assets/</em>下。</p>
+
+<pre><code>rake assets:clobber
+</code></pre>
+
+<p>這樣會刪除。</p>
+
+<p>注意，如果在開發模式下執行了<code>rake assets:precompile</code>，那麼因為放在<em>public/assets/</em>下的靜態檔案會優先丟給瀏覽器，所以這時候再修改<em>app/assets</em>下的原始碼會沒有作用。所以，開發時請記得要刪除這個目錄。</p>
+
+<blockquote>
+  <p>不過，如果你有很多靜態檔案的話，開發模式下每次都要重新編譯太辛苦了。你可以先<em>compile</em>一次，然後把<em>public/assets/</em>下目前正在開發的檔案砍掉即可。</p>
+</blockquote>
+
+<h2 id="section-2">如何拆成數個壓縮檔</h2>
+
+<p>上述的<em>application.js</em>或<em>application.css</em>中，預設會壓縮所有<em>app/assets</em>目錄下的檔案，如果你需要拆開，只需要修改其中的內容把<code>require_tree</code>那行移除，那麼就只會壓縮你所指定的目錄或檔案。</p>
+
+<p>例如，要新增新的<em>Manifest</em>檔案的話，假設叫做<em>app/assets/javascripts/search.js</em>，內容如：</p>
+
+<pre><code>//= require ./foobar
+</code></pre>
+
+<p>這樣就會將<em>assets/javascripts/foobar</em>這個目錄下的檔案通通壓縮成<em>search.js</em>，而在<em>View</em>中：</p>
+
+<pre><code>&lt;%= javascript_include_tag "application" %&gt;
+&lt;%= javascript_include_tag "search" %&gt;
+</code></pre>
+
+<p>就會載入。注意到如果啟用了<em>assets</em>功能，<code>javascript_include_tag</code>只能接受一個參數，即<em>Manifest</em>檔案的名稱。</p>
+
+<p>為了讓<code>rake assets:precompile</code>也能產生新的壓縮檔案，你還需要編輯<em>config/initializers/assets.rb</em>加入：</p>
+
+<pre><code>Rails.application.config.assets.precompile += %w( search.js )
+</code></pre>
+
+<h2 id="section-3">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/asset_pipeline.html">The Asset Pipeline</a></li>
+  <li><a href="http://asciicasts.com/episodes/268-sass-basics">SASS Basic</a></li>
+  <li><a href="http://asciicasts.com/episodes/267-coffeescript-basics">CoffeeScript Basics</a></li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

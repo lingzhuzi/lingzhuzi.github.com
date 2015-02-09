@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | RESTful 應用程式</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/restful.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="restful-">RESTful 應用程式</h1>
+
+<blockquote>
+  <p>請注意本章內容銜接前一章，請先完成前一章內容。</p>
+</blockquote>
+
+<h2 id="restful">什麼是 RESTful？</h2>
+
+<blockquote>
+  <p>The first 90% of the code accounts for the first 90% of the development time. The remaining 10% of the code accounts for the other 90% of the development time. – Tom Cargill, 貝爾實驗室的物件導向程式專家</p>
+</blockquote>
+
+<p><em>RESTful</em>路由設計是<em>Rails</em>的一項獨到的發明，它使用了<em>REST</em>的概念來建立一整組的命名路由<em>(named routes)</em>。</p>
+
+<p>什麼是<em>REST</em>呢？表象化狀態轉變<em>Representational State Transfer</em>，簡稱<em>REST</em>，是<em>Roy Fielding</em>博士在<em>2000</em>年他的博士論文中提出來的一種軟體架構風格。相較於<em>SOAP</em>、<em>XML-RPC</em>更為簡潔容易使用，也是眾多網路服務中最為普遍的<em>API</em>格式，像是<em>Amazon</em>、<em>Yahoo!</em>、<em>Google</em>等提供的<em>API</em>服務均有<em>REST</em>介面。</p>
+
+<p><em>REST</em>有主要有兩個核心精神：1. 使用<em>Resource</em>來當做識別的資源，也就是使用一個<em>URL</em>網址來代表一個<em>Resource</em> 2. 同一個<em>Resource</em>則可以有不同的<em>Representations</em>格式變化。這一章的路由實作了<em>Resource</em>概念，而<em>Representation</em>則是用了<code>respond_to</code>方法來實作，稍候我們也會介紹如何使用。</p>
+
+<blockquote>
+  <p>關於<em>REST</em>的理論可以參考筆者整理的<a href="http://ihower.tw/blog/archives/1542">什麼是REST跟RESTful？</a>。不過，了解理論並不是在<em>Rails</em>中使用<em>RESTful</em>路由的前提條件，所以大可以跳過不甚理解沒關係。我們只要知道它可以帶來什麼技術上的具體好處，以及如何使用就足夠了。</p>
+</blockquote>
+
+<p><em>RESTful</em>帶給<em>Rails</em>最大的好處是：它幫助我們用一種比較標準化的方式來命名跟組織<em>Controllers</em>和<em>Actions</em>。在沒有<em>RESTful</em>之前，我們上一章介紹了典型路由設計方式，也就是一個個指定<em>Controller</em>和<em>Action</em>，雖然十分地簡便，但是卻沒有什麼準則。同一個<em>Action</em>讓不同的開發者設計，就很可能放在不同的<em>Controller</em>之下，更常見的是讓一個<em>Controller</em>放太多不相關的<em>Action</em>，造成單一<em>Controller</em>過於龐大。</p>
+
+<p>將<em>RESTful</em>帶入<em>Rails</em>路由系統的點子，出自它對應了<em>HTTP</em>動詞<em>POST</em>、<em>GET</em>、<em>PATCH/PUT</em>、<em>DELETE</em>到資料的新增、讀取、更新、刪除等四項操作。一旦將<em>HTTP</em>動詞考慮進來，如此我們就將上一章手工打造<em>CRUD</em>的路由</p>
+
+<ul>
+  <li><code>/events/create</code></li>
+  <li><code>/events/show/1</code></li>
+  <li><code>/events/update/1</code></li>
+  <li><code>/events/destroy/1</code></li>
+</ul>
+
+<p>變成</p>
+
+<ul>
+  <li>
+<code>POST /events</code>對應到<em>Controller</em>中的<em>create action</em>
+</li>
+  <li>
+<code>GET /events/1</code>對應到<em>Controller</em>中的<em>show action</em>
+</li>
+  <li>
+<code>PATCH /events/1</code>對應到<em>Controller</em>中的<em>update action</em>
+</li>
+  <li>
+<code>DELETE /events/1</code>對應到<em>Controller</em>中的<em>destroy action</em>
+</li>
+</ul>
+
+<blockquote>
+  <p>什麼是<em>HTTP method</em>？在<em>HTTP</em>通訊協定中制定了九種動詞<em>(Verbs)</em>來跟伺服器溝通，分別是<em>HEAD</em>、<em>GET</em>、<em>POST</em>、<em>PUT</em>、<em>PATCH</em>、<em>DELETE</em>、<em>TRACE</em>、<em>OPTIONS</em>、<em>CONNECT</em>。其中最常見的就是<em>GET</em>和<em>POST</em>：<em>GET</em>用來讀取資料，這個動作不應該造成任何資料變更。而<em>POST</em>用於送出資料，這個動作不會被快取。而因為<em>HTML</em>只能送出<em>GET</em>或透過表單送出<em>POST</em>，<em>Rails</em>為了突破這個限制，在<em>POST</em>加上一個隱藏參數<code>_method=PATCH</code>或<code>_method=DELETE</code>就可以當做<em>PATCH</em>和<em>DELETE</em>請求了。</p>
+</blockquote>
+
+<blockquote>
+  <p><em>HTTP GET</em>和其他動詞最大的差別在於它被認為是一個純讀取、不會修改任何資料的操作，不像<em>POST</em>、<em>PATCH</em>、<em>DELETE</em>會修改伺服器上的資料。我們一般用瀏覽器<em>GET</em>網頁，可以回上一頁或重新整理，但是<em>POST</em>網頁要重新整理時，瀏覽器會提示你是否要在執行一次，就是這個道理。</p>
+</blockquote>
+
+<p><em>Rails</em>用這套慣例來大大簡化了路由設定。那程式該怎麼寫呢？我們在<em>config/routes.rb</em>加入以下一行程式：</p>
+
+<pre><code>resources :events
+</code></pre>
+
+<p>如此就會自動建立四個命名路由<em>(named routes)</em>，搭配四個<em>HTTP</em>動詞，對應到七個<em>Actions</em>。它的實際作用，就如同以下的<em>routes.rb</em>設定：</p>
+
+<pre><code>get    '/events'          =&gt; "events#index",   :as =&gt; "events"
+post   '/events'          =&gt; "events#create",  :as =&gt; "events"
+get    '/events/:id'      =&gt; "events#show",    :as =&gt; "event"
+patch  '/events/:id'      =&gt; "events#update",  :as =&gt; "event"
+put    '/events/:id'      =&gt; "events#update",  :as =&gt; "event"
+delete '/events/:id'      =&gt; "events#destroy", :as =&gt; "event"
+get    '/events/new'      =&gt; "events#new",     :as =&gt; "new_event"
+get    '/events/:id/edit' =&gt; "events#edit",    :as =&gt; "edit_event"
+</code></pre>
+
+<p>用這張表格會更清楚：</p>
+
+<table class="table">
+<tr>
+<th>Helper</th>
+<th>GET</th>
+<th>POST</th>
+<th>PATCH/PUT</th>
+<th>DELETE</th>
+</tr>
+<tr>
+<td>event_path(@event)</td>
+<td>/events/1 <br> show action </td>
+<td></td>
+<td>/events/1 <br> update action </td>
+<td>/events/1 <br> destroy action </td>
+</tr>
+<tr>
+<td>events_path</td>
+<td>/events <br> index action </td>
+<td>/events <br> create action </td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>edit_event_path(@event)</td>
+<td>/events/1/edit <br> edit action </td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>new_event_path</td>
+<td>/events/new <br> new action </td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+<p>輸入<code>bin/rake routes</code>也會列出目前設定的路由規則有哪些：</p>
+
+<pre><code>$ bin/rake routes
+
+ 	       Prefix Verb   URI Pattern                  Controller#Action
+           events GET    /events(.:format)            events#index
+                  POST   /events(.:format)            events#create
+        new_event GET    /events/new(.:format)        events#new
+       edit_event GET    /events/:id/edit(.:format)   events#edit
+            event GET    /events/:id(.:format)        events#show
+                  PATCH  /events/:id(.:format)        events#update
+                  PUT    /events/:id(.:format)        events#update
+                  DELETE /events/:id(.:format)        events#destroy
+          welcome GET    /welcome(.:format)           welcome#index
+welcome_say_hello GET    /welcome/say_hello(.:format) welcome#say
+             root GET    /                            welcome#index
+</code></pre>
+
+<p>其中的<em>Prefix</em>指的是在<em>View</em>的<em>Helper</em>命名，搭配<code>_path</code>(相對路徑)或<code>_url</code>(絕對路徑)結尾就可以組合出<em>Helper</em>方法，例如<code>welcome_say_hello_path</code>方法會產生出<em>/welcome/say_hello</em>這樣的網址。</p>
+
+<p>另外，注意到這七個<em>Action</em>方法的名字，<em>Rails</em>是定好的，無法修改。這一套慣例建議你背起來，你可以這樣記憶：</p>
+
+<ul>
+  <li>
+<em>show</em>、<em>new</em>、<em>edit</em>、<em>update</em>、<em>destroy</em>是單數，對單一元素操作</li>
+  <li>
+<em>index</em>、<em>create</em>是複數，對群集操作</li>
+  <li>
+<code>event_path(@event)</code>需要參數，根據<em>HTTP</em>動詞決定<em>show</em>、<em>update</em>、<em>destroy</em>
+</li>
+  <li>
+<code>events_path</code>毋需參數，根據<em>HTTP</em>動詞決定<em>index</em>、<em>create</em>
+</li>
+</ul>
+
+<p>因此，最後我們不寫：</p>
+
+<pre><code>link_to event.name, :controller =&gt; 'events', :action =&gt; :show , :id =&gt; event.id
+</code></pre>
+
+<p>而改寫成：</p>
+
+<pre><code>link_to event.name, event_path(event)
+</code></pre>
+
+<p>只需記得<em>resources</em>名稱，就可以推導出一整組的<em>URL Helper</em>方法。<em>Rails</em>就是利用這樣的高階概念，來簡化路由的設計。</p>
+
+<blockquote>
+  <p>瀏覽器支援<em>PATCH/PUT</em>跟<em>DELETE</em>嗎？<em>Rails</em>其實偷藏了<code>_method</code>參數。<em>HTML</em>規格只定義了<em>GET/POST</em>，所以<em>HTML</em>表單是沒有<em>PUT/DELETE</em>的。但是<em>XmlHttpRequest</em>規格(也就是<em>Ajax</em>用的)有定義<em>GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS</em>。</p>
+</blockquote>
+
+<h2 id="restfulcrud">修改成一個<em>RESTful</em>版本的<em>CRUD</em>
+</h2>
+
+<p>根據上一節所學到<em>RESTful</em>技巧，接續上一章的<em>CRUD</em>應用程式，來改造成<em>RESTful</em>應用程式，相信各位讀者可以從中發現到<em>RESTful</em>所帶來的簡潔好處。讓我們開始動手修改吧：</p>
+
+<h3 id="step-1">Step. 1</h3>
+
+<p>編輯<em>config/routes.rb</em>，加入一個<em>Resources</em>：</p>
+
+<pre><code>resources :events
+</code></pre>
+
+<p>請加在上方，<em>routes.rb</em>裡面越上面的規則優先權較高。</p>
+
+<h3 id="step-2">Step. 2</h3>
+
+<p>編輯<em>app/views/events/index.html.erb</em>，修改各個<code>link_to</code>的路徑：</p>
+
+<pre><code>&lt;% @events.each do |event| %&gt;
+  &lt;li&gt;
+    &lt;%= event.name %&gt;
+    &lt;%= link_to "Show", event_path(event) %&gt;
+    &lt;%= link_to 'Edit', edit_event_path(event) %&gt;
+    &lt;%= button_to 'Delete', event_path(event), :method =&gt; :delete %&gt;
+  &lt;/li&gt;
+&lt;% end %&gt;
+&lt;/ul&gt;
+
+&lt;%= link_to 'New Event', new_event_path %&gt;
+</code></pre>
+
+<p>注意到刪除的地方，我們多一個參數<code>:method =&gt; :delete</code>。非<code>GET</code>的操作，顧及網頁親和力我們順道把<code>link_to</code>改成用<code>button_to</code>。<code>link_to</code>如果瀏覽器的<em>JavaScript</em>沒開，就會無法送出<em>GET</em>之外的操作。<code>button_to</code>就無此困擾，因為<em>Rails</em>是產生<code>form</code>標籤夾帶<code>_method</code>參數。</p>
+
+<h4 id="step-3">Step. 3</h4>
+
+<p>編輯<em>app/views/events/show.html.erb</em>，修改<code>link_to</code>的路徑：</p>
+
+<pre><code>&lt;%= @event.name %&gt;
+&lt;%= simple_format(@event.description) %&gt;
+
+&lt;p&gt;&lt;%= link_to 'Back to index', events_path %&gt;&lt;/p&gt;
+</code></pre>
+
+<h3 id="step-4">Step. 4</h3>
+
+<p>修改<em>app/views/events/new.html.erb</em>的表單送出位置如下：</p>
+
+<pre><code>&lt;%= form_for @event, :url =&gt; events_path do |f| %&gt;
+</code></pre>
+
+<blockquote>
+  <p>在本例中，你也可以完全省略<code>:url</code>參數，<em>Rails</em>可以根據<code>@event</code>推算出路由。</p>
+</blockquote>
+
+<h3 id="step-5">Step. 5</h3>
+
+<p>修改<em>app/views/events/edit.html.erb</em>的表單送出位置如下：</p>
+
+<pre><code>&lt;%= form_for @event, :url =&gt; event_path(@event), :method =&gt; :patch do |f| %&gt;
+</code></pre>
+
+<blockquote>
+  <p><code>:url</code>和<code>:method</code>也可以省略，<em>Rails</em>自動會根據<code>@event</code>是新建的還是修改來決定要不要使用<code>PATCH</code>。</p>
+</blockquote>
+
+<h3 id="step-6">Step. 6</h3>
+
+<p>修改<em>app/controllers/events_controller.rb</em>，將<em>create Action</em>和<em>destroy Action</em>裡的<code>redirect_to</code>改成</p>
+
+<pre><code>redirect_to events_url
+</code></pre>
+
+<p>而<em>update Action</em>中的<code>redirect_to</code>改成</p>
+
+<pre><code>redirect_to event_url(@event)
+</code></pre>
+
+<h3 id="step7">Step.7</h3>
+
+<p>一旦完成<em>RESTful</em>之後，我們在上一章一開始設定的典型路由就用不到了，編輯<em>config/routes.rb</em>將以下程式註砍掉：</p>
+
+<pre><code>match ':controller(/:action(/:id(.:format)))', :via =&gt; :all
+</code></pre>
+
+<p>典型路由雖然設定上很方便，但已經不被推薦使用，它讓所有<em>Actions</em>都可以透過<em>GET</em>訪問到，而有安全上的顧慮。我們希望限制接收表單的<em>create Action</em>只允許<em>POST</em>請求。</p>
+
+<h2 id="section">常見錯誤</h2>
+
+<h3 id="unknown-action">Unknown action</h3>
+
+<p>明明有在<em>config/routes.rb</em>裡面定義了<em>resources</em>路由，但是出現以下的<em>Unknown action</em>錯誤：</p>
+
+<p><img src="images/restful-unknown-action.png" alt="Unknown action"></p>
+
+<p>排除打錯字之外，其原因多半是跟<em>routes.rb</em>裡面的定義順序有關。注意到在<em>routes.rb</em>裡面，越上面的路由規則越優先，例如如果你定義成：</p>
+
+<pre><code>Rails::Application.routes.draw do
+    match ':controller(/:action(/:id(.:format)))', :via =&gt; :all
+    resources :events
+end
+</code></pre>
+
+<p>那麼網址<em>/events/4</em>就會優先比對到<code>:controller/:action</code>而去找<code>4</code>這個<em>Action</em>，這就錯了。</p>
+
+<h3 id="routing-error">Routing Error</h3>
+
+<p>這錯誤通常發生在<code>link_to</code>裡，它抱怨找不到適合的路由規則來產生網址：</p>
+
+<p><img src="images/restful-routing-error.png" alt="Routing Error"></p>
+
+<p>如果你是用典型路由，那麼如以下程式亂給一個不存在的<em>Controller</em>，就會產生一樣的錯誤了：</p>
+
+<pre><code>link_to "foobar", :controller =&gt; "No such controller", :action =&gt; "blah"
+</code></pre>
+
+<p>因為<code>{ :controller =&gt; "No such controller", :action =&gt; "blah" }</code>比對不出有這個路由規則。但是如果是用<em>RESTful</em>路由呢？那多半是因為參數傳錯了，例如：</p>
+
+<pre><code>link_to "Show", event_path(@foobar)
+</code></pre>
+
+<p>這個<code>@foobar</code>沒有定義所以是<code>nil</code>，<code>event_path(@foobar)</code>對<em>Rails</em>內部來說等同於<code>{ :controller =&gt; "events", :action =&gt; "show", :id =&gt; nil }</code>，這就造成了找不到路由的錯誤，它必須知道<code>:id</code>才能知道是那一個活動的<em>show Action</em>網址。</p>
+
+<h2 id="respondto">使用<em>respond_to</em>
+</h2>
+
+<p><code>respond_to</code>可以讓我們在同一個<em>Action</em>中，支援不同的資料格式，例如<em>XML</em>、<em>JSON</em>、<em>Atom</em>等。讓我們來實作看看。</p>
+
+<blockquote>
+  <p><em>Atom</em>是一種基於<em>XML</em>的供稿格式，被設計為<em>RSS</em>的替代品，廣泛應用於<em>Blog feed</em>。</p>
+</blockquote>
+
+<h3 id="step-1-1">Step. 1</h3>
+
+<p>修改<em>app/controllers/events_controller.rb</em>的<em>index Action</em>加上<em>XML</em>、<em>JSON</em>和<em>Atom</em>的支援，其中<code>to_xml</code>和<code>to_json</code>是<em>ActiveRecord</em>內建的方法：</p>
+
+<pre><code>def index
+  @events = Event.page(params[:page]).per(5)
+
+  respond_to do |format|
+    format.html # index.html.erb
+    format.xml { render :xml =&gt; @events.to_xml }
+    format.json { render :json =&gt; @events.to_json }
+    format.atom { @feed_title = "My event list" } # index.atom.builder
+  end
+end
+</code></pre>
+
+<p>新增<em>app/views/events/index.atom.builder</em>檔案，內容如下：</p>
+
+<pre><code>atom_feed do |feed|
+  feed.title( @feed_title )
+  feed.updated( @events.last.created_at )
+  @events.each do |event|
+    feed.entry(event) do |entry|
+      entry.title( event.name )
+      entry.content( event.description, :type =&gt; 'html' )
+    end
+  end
+end
+</code></pre>
+
+<p>打開瀏覽器分別瀏覽看看<em>http://localhost:3000/events.xml</em>、<em>http://localhost:3000/events.json</em>、<em>http://localhost:3000/events.atom</em>這幾個附檔名不同的網址。</p>
+
+<h3 id="step-2-1">Step. 2</h3>
+
+<p>修改<em>app/controllers/events_controller.rb</em>的<em>show Action</em>加上<em>XML</em>和<em>JSON</em>的支援，這回我們試試看比較手工的方式，用<em>Builder</em>格式來建構<em>XML</em>，以及手動組<em>Hash</em>再轉成<em>JSON</em>字串：</p>
+
+<pre><code>def show
+  @event = Event.find(params[:id])
+  respond_to do |format|
+    format.html { @page_title = @event.name } # show.html.erb
+    format.xml # show.xml.builder
+    format.json { render :json =&gt; { id: @event.id, name: @event.name }.to_json }
+  end
+end
+</code></pre>
+
+<p>編輯<em>app/views/events/show.xml.builder</em>：</p>
+
+<pre><code>xml.event do |e|
+  e.name @event.name
+  e.description @event.description
+end
+</code></pre>
+
+<p>打開瀏覽器分別瀏覽看看<em>http://localhost:3000/events/1.xml</em>、<em>http://localhost:3000/events/1.json</em>等網址。</p>
+
+<h3 id="step-3-1">Step. 3</h3>
+
+<p>如果想要加上這些格式的超連結，可以在<em>URL Helper</em>中傳入<code>:format</code>參數。讓我們修改<em>app/views/events/index.html.erb</em>加上不同格式的超連結：</p>
+
+<pre><code>&lt;% @events.each do |event| %&gt;
+  &lt;li&gt;
+    &lt;%= link_to event.name, event_path(event) %&gt;
+    &lt;%= link_to " (XML)", event_path(event, :format =&gt; :xml) %&gt;
+    &lt;%= link_to " (JSON)", event_path(event, :format =&gt; :json) %&gt;
+    &lt;%= link_to 'edit', edit_event_path(event) %&gt;
+    &lt;%= button_to 'delete', event_path(event), :method =&gt; :delete %&gt;
+  &lt;/li&gt;
+&lt;% end %&gt;
+&lt;/ul&gt;
+
+&lt;%= link_to 'new event', new_event_path %&gt;
+&lt;%= link_to "Atom feed", events_path(:format =&gt; :atom) %&gt;
+</code></pre>
+
+<h2 id="section-1">行數統計</h2>
+
+<p>到目前為止，總共寫了多少程式了呢？<em>Rails</em>提供了一個簡單的指令可以知道：</p>
+
+<pre><code>$ bin/rake stats
+</code></pre>
+
+<p>就會輸出這樣的表格：</p>
+
+<pre><code>+----------------------+-------+-------+---------+---------+-----+-------+
+| Name                 | Lines |   LOC | Classes | Methods | M/C | LOC/M |
++----------------------+-------+-------+---------+---------+-----+-------+
+| Controllers          |    86 |    61 |       2 |       7 |   3 |     6 |
+| Helpers              |     4 |     4 |       0 |       0 |   0 |     0 |
+| Models               |     2 |     2 |       1 |       0 |   0 |     0 |
+| Libraries            |     0 |     0 |       0 |       0 |   0 |     0 |
+| Integration tests    |     0 |     0 |       0 |       0 |   0 |     0 |
+| Functional tests     |    49 |    39 |       1 |       0 |   0 |     0 |
+| Unit tests           |    11 |     6 |       2 |       0 |   0 |     0 |
++----------------------+-------+-------+---------+---------+-----+-------+
+| Total                |   152 |   112 |       6 |       7 |   1 |    14 |
++----------------------+-------+-------+---------+---------+-----+-------+
+  Code LOC: 67     Test LOC: 45     Code to Test Ratio: 1:0.7
+</code></pre>
+
+<p>其中<em>LOC</em>是指不包含空行的行數。</p>
+
+<h2 id="section-2">如何除錯？</h2>
+
+<p>如果是<em>Model</em>中的程式，你可以在命令列下輸入<em>rails console</em>，然後在<em>Console</em>中呼叫看看<em>Model</em>的方法看看正確與否。而除錯<em>Controller</em>和<em>Views</em>一個簡單的方法是你可以使用<em>debug</em>這個<em>Helper</em>方法，例如在<em>app/views/events/show.html.erb</em>中插入：</p>
+
+<pre><code>&lt;%= debug(@event) %&gt;
+</code></pre>
+
+<p>這樣就會輸出<code>@event</code>這個值的詳細內容。不過，更為常見的是使用<em>Logger</em>來記錄資訊到<em>log/development.log</em>裡。</p>
+
+<h3 id="logger">關於<em>Logger</em>
+</h3>
+
+<p>在<em>Rails</em>環境中，你可以直接使用<em>logger</em>或是<code>Rails.logger</code>來拿到這個<em>Logger</em>物件，它有幾個方法可以呼叫：</p>
+
+<ul>
+  <li>logger.debug 除錯用的訊息，<em>Production</em>環境會忽略</li>
+  <li>logger.info 值得記錄的一般訊息</li>
+  <li>logger.warn 值得記錄的警告訊息</li>
+  <li>logger.error 錯誤訊息，但還不到網站無法執行的地步</li>
+  <li>logger.fatal 嚴重錯誤到網站無法執行的訊息</li>
+</ul>
+
+<p>例如，你想要觀察程式中變數<em>@event</em>的值，你可以插入以下程式到要觀察的程式段落之中：</p>
+
+<pre><code>Rails.logger.debug("event: #{@event.inspect}")
+</code></pre>
+
+<p>接著開瀏覽器跑實際跑過這段程式，那麼就會在<code>rails server</code>的標準輸出中，看到這個除錯訊息。或是你也可以另開一個指令視窗執行<code>tail -f log/development.log</code>來觀察<em>log</em>檔案。</p>
+
+<blockquote>
+  <p>在<em>Production</em>環境中，<em>log/production.log</em>會逐漸長大，可以<a href="http://ihower.tw/blog/archives/3565">使用 logrotate 定期整理 Rails Log 檔案</a>。</p>
+</blockquote>
+
+<p>我們會在測試一章進一步介紹如何撰寫測試程式，撰寫單元測試可以大大降低除錯時間。</p>
+
+<h2 id="section-3">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/getting_started.html">Getting Started with Rails</a></li>
+  <li><a href="http://guides.rubyonrails.org/debugging_rails_applications.html">Debugging Rails Applications</a></li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：05 Feb 2015
+</p>
+</div>
+</div>
+</body>
+</html>

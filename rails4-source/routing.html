@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 路由(Routing)</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/routing.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="routing">路由(Routing)</h1>
+
+<blockquote>
+  <p>Weeks of programming can save you hours of planning. – Unknown</p>
+</blockquote>
+
+<p>不同於<em>PHP</em>的路由系統是直接對應於檔案的目錄結構，一個<em>Web</em>開發框架會將路由功能納入其中，來獲得最大的彈性。也就是您可以指定任意<em>URL</em>對應到任一個<em>Controller</em>的<em>Action</em>。另一方面，我們也不在<em>Views</em>中直接寫死<em>URL</em>網址，而是透過<em>Helper</em>輔助方法根據你的路由設定來產生<em>URL</em>。</p>
+
+<p>也就是，路由系統做幾件事情：</p>
+
+<p>1. 辨識<em>HTTP Request</em>的<em>URL</em>網址，然後對應到設定的<em>Controller Action</em>。</p>
+
+<p>2. 處理網址內的參數字串，例如：<em>/users/show/123</em>送到<em>Users controller</em>的<em>show action</em>時，會將<code>params[:id]</code> 設定為 123</p>
+
+<p>3. 辨識<em>link_to</em>和<em>redirect_to</em>的參數產生<em>URL</em>字串，例如</p>
+
+<pre><code>link_to 'hola!', { :controller=&gt; 'welcome', :action =&gt; 'say' }
+</code></pre>
+
+<p>會產生</p>
+
+<pre><code>&lt;a href="/welcome/say"&gt;hola!&lt;/a&gt;
+</code></pre>
+
+<p><em>Rails</em>這麼彈性的路由功能，可以怎麼用呢？例如設計一個部落格網站，如果是沒有框架的<em>PHP</em>網頁開發，會長得這樣：</p>
+
+<pre><code>http://example.org/?p=123
+</code></pre>
+
+<p>但是如果我們想要將編號放在網址列中呢？</p>
+
+<pre><code>http://example.org/posts/123
+</code></pre>
+
+<p>或是希望根據日期：</p>
+
+<pre><code>http://example.org/posts/2011/04/21/
+</code></pre>
+
+<p>或者是根據不同作者加上文章的標籤(將關鍵字放在網址中有助於<em>SEO</em>)：</p>
+
+<pre><code>http://example.org/ihower/posts/123-ruby-on-rails
+</code></pre>
+
+<p>這些在<em>Rails</em>只需要修改<em>config/routes.rb</em>這一個路由檔案，就可以完全自由自定。讓我們看看有哪些設定方式吧：</p>
+
+<h2 id="regular-routes">一般路徑<em>Regular Routes</em>
+</h2>
+
+<pre><code>get 'meetings/:id', :to =&gt; 'events#show'
+post 'meetings', :to =&gt; 'events#create'
+</code></pre>
+
+<p>這裡的<code>events#show</code>表示指向<em>events controller</em>的<em>show action</em>。通常會簡寫成：</p>
+
+<pre><code>get 'meetings/:id' =&gt; 'events#show'
+</code></pre>
+
+<p>其中有冒號<code>:id</code>的部分，會被轉成一個參數<code>params[:id]</code>傳進<em>Controller</em>裡。</p>
+
+<blockquote>
+  <p>注意到在<em>routes.rb</em>中，越上面越優先。是如果有網址同時符合多個規則，會使用最上面的規則。</p>
+</blockquote>
+
+<h2 id="section">典型路由</h2>
+
+<pre><code>match ':controller(/:action(/:id(.:format)))', :via =&gt; :all
+</code></pre>
+
+<p>這是我們在上一章所使用的方式，也是<em>Rails 3.0</em>之前版本的預設方式。其中的括弧用法表示這部份可有可無，也就是上述這一行設定就包括六種路徑方式：</p>
+
+<pre><code>match '/:controller', via: :all
+match '/:controller/:action', via: :all
+match '/:controller/:action/:id', via: :all
+match '/:controller.:format', via: :all
+match '/:controller/:action.:format', via: :all
+match '/:controller/:action/:id.:format', via: :all
+</code></pre>
+
+<p>例如，像這樣的網址<code>http://localhost:3000/welcome/say</code>便會對應到<em>welcome controller</em>的<em>say action</em>。典型路由是一種非常簡便的對應方式。這種方式的缺點當網站的<em>Action</em>變多的時候，會容易讓<em>Controller</em>的設計變得混亂沒有規則。稍後介紹的<em>RESTful</em>路由則是<em>Rails</em>對此提出的組織路由方案。</p>
+
+<p>還有，<code>(.format)</code>這一段則會讓路由可以接受<code>.json</code>、<code>.xml</code>等有副檔名的網址，並且轉成<code>params[:format]</code>參數傳進<em>Controller</em>裡，搭配<code>respond_to</code>而回傳不同的格式。</p>
+
+<h2 id="named-routes">命名路由<em>Named Routes</em>
+</h2>
+
+<p><em>Named Routes</em>可以幫助我們產生<em>URL helper</em>如<code>meetings_url</code>或<code>meetings_path</code>，而不需要用<code>{:controller =&gt; 'meetings', :action =&gt; 'index'}</code>的方式：</p>
+
+<pre><code>get '/meetings' =&gt; 'events#index', :as =&gt; "meetings"
+</code></pre>
+
+<p>其中<code>:as</code>的部份就會產生一個<code>meetings_path</code>和<code>meetings_url</code>的<em>Helpers</em>，<code>_path</code>和<code>_url</code>的差別在於前者是相對路徑，後者是絕對路徑。一般來說比較常用<code>_path</code>方法，除非像是在<em>Email</em>信件中，才必須用<code>_url</code>提供包含<em>Domain</em>的完整網址。</p>
+
+<blockquote>
+  <p>雖然<em>RESTful</em>已經是設計<em>Rails</em>最常見的路徑模式，但是在一些特殊的情況、不符合<em>CRUD</em>模型的情結就不一定適用了，例如有多重步驟的表單(又叫作<em>Wizard</em>) 時，使用命名路由反而會比較簡潔，例如<code>step1_path, step2_path, step3_path</code>等。</p>
+</blockquote>
+
+<h2 id="redirect">Redirect</h2>
+
+<p>在路由中可以直接設定轉向：</p>
+
+<pre><code>get "/foo" =&gt; redirect("/bar")
+get "/ihower" =&gt; redirect("http://ihower.tw")
+</code></pre>
+
+<h2 id="section-1">設定首頁</h2>
+
+<p>要設定網站的首頁，請設定：</p>
+
+<pre><code>root :to =&gt; 'welcome#show'
+</code></pre>
+
+<h2 id="httpverb">
+<em>HTTP</em>動詞<em>(Verb)</em>限定</h2>
+
+<p>可以透過 :via 參數指定 HTTP Verb 動詞</p>
+
+<pre><code>match "account/overview" =&gt; "account#overview", :via =&gt; :get
+match "account/setup" =&gt; "account#setup", :via =&gt; [:get, :post]
+match "account/overview" =&gt; "account#overview", :via =&gt; :all
+</code></pre>
+
+<p>或是</p>
+
+<pre><code>get "account/overview" =&gt; "account#overview"
+get "account/setup" =&gt; "account#setup"
+post "account/setup" =&gt; "account#setup"
+</code></pre>
+
+<h2 id="scope-">Scope 規則</h2>
+
+<p><code>scope</code>方法可以讓我們<em>DRY</em>我們的路由規則，將共通的<em>controller</em>、<em>constraints</em>、網址前置<em>path</em>和<em>URL Helper</em>前置名稱移到<code>scope</code>成為參數。例如</p>
+
+<pre><code>get 'foo/meetings/:id', :to =&gt; 'events#show'
+post 'foo/meetings', :to =&gt; 'events#create'
+</code></pre>
+
+<p>可以改寫成</p>
+
+<pre><code>scope :controller =&gt; "events", :path =&gt; "/foo", :as =&gt; "bar" do
+  get 'meetings/:id' =&gt; :show, :as =&gt; "meeting"
+  post 'meetings' =&gt; ':create	, :as =&gt; "meetings"
+end
+</code></pre>
+
+<p>其中<code>as</code>會產生<em>URL helper</em>是<code>bar_meeting_url</code>和<code>bar_meetings_url</code>。</p>
+
+<h3 id="scope-module">Scope Module</h3>
+
+<p><em>Module</em>參數則可以讓<em>Controller</em>分<em>Module</em>，例如</p>
+
+<pre><code>scope :path =&gt; '/api/v1/', :module =&gt; "api_v1", :as =&gt; 'v1' do
+  resources :projects
+end
+</code></pre>
+
+<p>如此<em>controller</em>會是<code>ApiV1::ProjectsController</code>，網址如<em>/api/v1/projects</em>，而<em>URL Helper</em>如<code>v1_projects_path</code>這樣的形式。</p>
+
+<h3 id="namespace">領域名稱<em>Namespace</em>
+</h3>
+
+<p><em>Namespace</em>是<em>Scope</em>的一種特定應用，特別適合例如後台介面，這樣就整組<code>controller</code>、網址<code>path</code>、<em>URL Helper</em>前置名稱`都影響到：</p>
+
+<pre><code>namespace :admin do
+  resources :projects
+end
+</code></pre>
+
+<p>如此<em>controller</em>會是<code>Admin::ProjectsController</code>，網址如<em>/admin/projects</em>，而<em>URL Helper</em>如<code>admin_projects_path</code>這樣的形式。</p>
+
+<h2 id="section-2">特殊條件限定</h2>
+
+<p>我們可以利用<code>:constraints</code>設定一些參數限制，例如限制<code>:id</code>必須是整數。</p>
+
+<pre><code>match "/events/show/:id" =&gt; "events#show", :constraints =&gt; {:id =&gt; /\d/}
+</code></pre>
+
+<p>另外也可以限定<em>subdomain</em>子網域：</p>
+
+<pre><code>namespace :admin do
+  constraints subdomain: 'admin' do
+   		 resources :photos
+  end
+end
+</code></pre>
+
+<p>甚至可以限定<em>IP</em>位置：</p>
+
+<pre><code>constraints(:ip =&gt; /(^127.0.0.1$)|(^192.168.[0-9]{1,3}.[0-9]{1,3}$)/) do
+    match "/events/show/:id" =&gt; "events#show"
+end
+</code></pre>
+
+<h2 id="restful">
+<em>RESTful</em>路由</h2>
+
+<p>我們在第六章介紹過<em>RESTful</em>路由的來龍去脈，接下來仔細看看其中的設定。</p>
+
+<h3 id="section-3">複數資源</h3>
+
+<pre><code>resources :events
+</code></pre>
+
+<h3 id="singular-resoruce">單數資源<em>Singular Resoruce</em>
+</h3>
+
+<p>除了一般複數型<em>Resources</em>，在單數的使用情境下也可以設定成單數<em>Resource</em>：</p>
+
+<pre><code>resource :map
+</code></pre>
+
+<p>特別之處在於那就沒有<em>index action</em>了，所有的<em>URL Helper</em>也皆為單數形式，顯示出來的網址也是單數。</p>
+
+<blockquote>
+  <p>但是<em>Singular resource</em>的檔案命名仍為複數，例如<em>maps_controller.rb</em></p>
+</blockquote>
+
+<h3 id="nested-resources">套疊<em>Nested Resources</em>
+</h3>
+
+<p>當一個<em>Resource</em>一定會依存另一個<em>Resource</em>時，我們可以套疊多層的<em>Resources</em>，例如以下是任務一定屬於在專案底下：</p>
+
+<pre><code>resources :projects do
+  resources :tasks
+end
+</code></pre>
+
+<p>如此產生的<em>URL Helper</em>如<code>project_tasks_path(@project)</code>和<code>project_task_path(@project, @task)</code>，它的網址會如<em>projects/123/tasks</em>和<em>projects/123/tasks/123</em>。</p>
+
+<blockquote>
+  <p>實務上不建議設計超過兩層，一來是路由會太長，二來也是不必要的依賴。</p>
+</blockquote>
+
+<h3 id="controller">指定Controller</h3>
+
+<p><em>resource</em>預設採用同名的<em>controller</em>，我們可以改指定，例如</p>
+
+<pre><code>resources :projects do
+  resources :tasks, :controller =&gt; "project_tasks"
+end
+</code></pre>
+
+<h3 id="collection">自定群集路由<em>Collection</em>
+</h3>
+
+<p>除了慣例中的七個<em>Actions</em>外，如果你需要自定群集的<em>Action</em>，可以這樣設定：</p>
+
+<pre><code>resources :products do
+  collection do
+    get  :sold
+    post :on_offer
+  end
+
+  # 或
+  get  :sold, :on =&gt; :collection
+  post :on_offer, :on =&gt; :collection
+end
+</code></pre>
+
+<p>如此便會有<code>sold_products_path</code>和<code>on_offer_products_path</code>這兩個<em>URL Helper</em>，產生出如<em>products/sold</em>和<em>products/on_offer</em>這樣的網址。</p>
+
+<h3 id="member">自定特定元素路由<em>Member</em>
+</h3>
+
+<p>如果需要自定對特定元素的<em>Action</em>：</p>
+
+<pre><code>resources :products do
+  member do
+  	get :sold
+  end
+
+  # 或
+  get :sold, :on =&gt; :member
+end
+</code></pre>
+
+<p>如此會有<code>sold_product_path(@product)</code>這個<em>URL Helper</em>，產生出如<em>products/123/sold</em>這樣的網址。</p>
+
+<h3 id="section-4">限定部分支援</h3>
+
+<p>透過<code>except</code>或<code>only</code>參數，我們不一定要啟用預設的七個<em>Resource</em>路由，例如</p>
+
+<pre><code>resource :events, :except =&gt; [:index, :show]
+resource :events, :only =&gt; :create
+</code></pre>
+
+<h3 id="patch-vs-put">PATCH v.s. PUT</h3>
+
+<p><em>PATCH</em>是一個相對新的<em>HTTP verb</em>，<em>Rails</em>為了保持相容性這兩個<em>HTTP verbs</em>都會進到<em>update action</em>之中。而編輯表單預設則是用<em>PATCH</em>。在<em>REST</em>語意上的差別是：</p>
+
+<ul>
+  <li>PATCH 用於修改部分資料</li>
+  <li>PUT 用來替換資料(replace)</li>
+</ul>
+
+<p>對<em>HTTP API</em>設計有興趣的讀者，可以參考<a href="http://ihower.tw/blog/archives/6483">http://ihower.tw/blog/archives/6483</a>一文。</p>
+
+<h2 id="rake-routes">rake routes</h2>
+
+<p>如果你不清楚這些路由設定到底最後的規則是什麼，你可以執行：</p>
+
+<pre><code>rake routes
+</code></pre>
+
+<p>這樣就會產生出所有<em>URL Helper</em>、<em>URL 網址</em>和對應的<em>Controller Action</em>都列出來。</p>
+
+<h2 id="section-5">常見錯誤</h2>
+
+<h3 id="routing-error">Routing Error</h3>
+
+<p>當<em>URL</em>找不到任何路由規則可以符合時，會出現這個錯誤。例如一個<em>GET</em>的路由，你用<code>button_to</code>送出<em>POST</em>，這樣就不符合規則。</p>
+
+<h3 id="actioncontrollerurlgenerationerror">ActionController::UrlGenerationError</h3>
+
+<p>當一個路由<em>Helper</em>的參數不夠的時候，會出現這個錯誤。例如<code>event_path(event)</code>這個方法的<em>event</em>參數不能是<code>nil</code>。如果你打錯成<code>event_path(@events)</code>而<code>@events</code>是個<code>nil</code>，就會出現這個錯誤。</p>
+
+<h2 id="section-6">結論</h2>
+
+<p>透過<em>RESTful</em>和<em>Named Route</em>，我們就不再需要透過典型路由的<em>Hash</em>來指定路由了。所有的路由規則都可以在<em>routes.rb</em>一目了然。</p>
+
+<h2 id="section-7">線上參考資料</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/routing.html">Rails Routing from the Outside In</a></li>
+</ul>
+
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：15 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

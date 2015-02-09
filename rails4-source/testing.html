@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 自動化測試</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/testing.html">
+
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="section">自動化測試</h1>
+
+<blockquote>
+  <p>Developer testing isn’t primarily about verifying code. It’s about making great code. If you can’t test something, it might be your testing skills failing you but it’s probably your code code’s design. Testable code is almost always better code. - Chad Fowler</p>
+</blockquote>
+
+<p>軟體測試可以從不同層面去切入，其中最小的測試粒度叫做<em>Unit Test</em>單元測試，會對個別的類別和方法測試結果如預期。再大一點的粒度稱作<em>Integration Test</em>整合測試，測試多個元件之間的互動正確。最大的粒度則是<em>Acceptance Test</em>驗收測試，從用戶觀點來測試整個軟體。</p>
+
+<p>其中測試粒度小的單元測試，通常會由開發者自行負責測試，因為只有你自己清楚每個類別和方法的內部結構是怎麼設計的。而粒度大的驗收測試，則常由專門的測試工程師來負責，測試者不需要知道程式碼內部是怎麼實作的，只需知道什麼是系統應該做的事即可。</p>
+
+<p>本章的內容，就是關於我們如何撰寫自動化的測試程式，也就是寫程式去測試程式。很多人對於自動化測試的印象可能是：</p>
+
+<ul>
+  <li>佈署前作一次手動測試就夠了，不需要自動化</li>
+  <li>寫測試很無聊</li>
+  <li>測試很難寫</li>
+  <li>寫測試不好玩</li>
+  <li>我們沒有時間寫測試</li>
+</ul>
+
+<p>時程緊迫預算吃緊，哪來的時間做自動化測試呢？這個想法是相當短視和業餘的想法，寫測試有以下好處：</p>
+
+<ul>
+  <li>正確(Correctness)：確認你寫的程式的正確，結果如你所預期。一旦寫好測試程式，很容易就可以檢查程式有沒有寫對，大大減少自行除錯的時間。</li>
+  <li>穩定(Stability)：之後新加功能或改寫重構時，不會影響搞爛之前寫好的功能。這又叫作「回歸測試」，你不需要手動再去測其他部分的測試，你可以用之前寫好的測試程式。如果你的軟體不是那種跑一次就丟掉的程式，而是需要長期維護的產品，那就一定有回歸測試的需求。</li>
+  <li>設計(Design)：可以採用<em>TDD</em>開發方式，先寫測試再實作。這是寫測試的最佳時機點，實作的目的就是為了通過測試。從使用<em>API</em>的呼叫者的角度去看待程式，可以更關注在介面而設計出更好用的<em>API</em>。</li>
+  <li>文件(Documentation)：測試就是一種程式規格，程式的規格就是滿足測試條件。這也是為什麼<em>RSpec</em>稱為<em>Spec</em>的原因。不知道<em>API</em>怎麼呼叫使用時，可以透過讀測試程式知道怎麼使用。</li>
+</ul>
+
+<p>其中光是第一個好處，就值得你學習如何寫測試，來加速你的開發，怎麼說呢?回想你平常是怎麼確認你寫的程式正確的呢? 是不是在命令列中實際執行看看，或是打開瀏覽器看看結果，每次修改，就重新手動重新整理看看。這些步驟其實可以透過用自動化測試取代，大大節省手工測試的時間。這其實是一種投資，如果是簡單的程式，也許你手動執行一次就寫對了，但是如果是複雜的程式，往往第一次不會寫對，你會浪費很多時間在檢查到底你寫的程式的正確性，而寫測試就可以大大的節省這些時間。更不用說你明天，下個禮拜或下個月需要再確認其他程式有沒有副作用影響的時候，你有一組測試程式可以大大節省手動檢查的時間。</p>
+
+<p>那要怎麼進行自動化測試呢？幾乎每種語言都有一套叫做<em>xUnit</em>測試框架的測試工具，它的標準流程是 1. (Setup) 設定測試資料 2. (Exercise) 執行要測試的方法 3. (Verify) 檢查結果是否正確 4. (Teardown) 清理還原資料，例如資料庫，好讓多個測試不會互相影響。</p>
+
+<p>我們將使用<em>RSpec</em>來取代<em>Rails</em>預設的<em>Test::Unit</em>來做為我們測試的工具。<em>RSpec</em>是一套改良版的<em>xUnit</em>測試框架，非常風行於<em>Rails</em>社群。讓我們先來簡單比較看看它們的語法差異:</p>
+
+<p>這是一個<em>Test::Unit</em>範例，其中一個<em>test_</em>開頭的方法，就是一個單元測試，裡面的<em>assert_equal</em>方法會進行驗證。個別的單元測試應該是獨立不會互相影響的：</p>
+
+<pre><code>class OrderTest &lt; Test::Unit::TestCase
+  def setup
+    @order = Order.new
+  end
+
+  def test_order_status_when_initialized
+    assert_equal @order.status, "New"
+  end
+
+  def test_order_amount_when_initialized
+    assert_equal @order.amount, 0
+  end
+end
+</code></pre>
+
+<p>以下是用<em>RSpec</em>語法改寫，其中的一個<em>it</em>區塊，就是一個單元測試，裡面的<em>expect</em>方法會進行驗證。在<em>RSpec</em>裡，我們又把一個小單元測試叫做<em>example</em>：</p>
+
+<pre><code>describe Order do
+  before do
+    @order = Order.new
+  end
+
+  context "when initialized" do
+    it "should have default status is New" do
+      expect(@order.status).to eq("New")
+    end
+
+    it "should have default amount is 0" do
+      expect()@order.amount).to eq(0)
+    end
+  end
+end
+</code></pre>
+
+<p><em>RSpec</em>程式碼比起來更容易閱讀，也更像是一種規格<em>Spec</em>文件，且讓我們繼續介紹下去。</p>
+
+<h2 id="rspec">
+<em>RSpec</em>簡介</h2>
+
+<p><em><a href="https://relishapp.com/rspec/">RSpec</a></em>是一套<em>Ruby</em>的測試<em>DSL(Domain-specific language)</em>框架，它的程式比<em>Test::Unit</em>更好讀，寫的人更容易描述測試目的，可以說是一種可執行的規格文件。也
+非常多的<em>Ruby on Rails</em>專案採用<em>RSpec</em>作為測試框架。它又稱為一種<em>BDD(Behavior-driven development)</em>測試框架，相較於<em>TDD</em>用<em>test</em>思維，測試程式的結果。<em>BDD</em>強調的是用<em>spec</em>思維，描述程式應該有什麼行為。</p>
+
+<h3 id="rspecrspec-rails">安裝<em>RSpec</em>與<em>RSpec-Rails</em>
+</h3>
+
+<p>在<em>Gemfile</em>中加入：</p>
+
+<pre><code>group :test, :development do
+  gem "rspec-rails"
+end
+</code></pre>
+
+<p>安裝：</p>
+
+<pre><code>rails generate rspec:install
+</code></pre>
+
+<p>這樣就會建立出<em>spec</em>目錄來放測試程式，本來的<em>test</em>目錄就用不著了。</p>
+
+<p>以下指令會執行所有放在<em>spec</em>目錄下的測試程式：</p>
+
+<pre><code>bin/rake spec
+</code></pre>
+
+<p>如果要測試單一檔案，可以這樣：</p>
+
+<pre><code>bundle exec rspec spec/models/user_spec.rb
+</code></pre>
+
+<h3 id="section-1">語法介紹</h3>
+
+<p>在示範怎麼在<em>Rails</em>中寫單元測試前，讓我們先介紹一些基本的<em>RSpec</em>用法：</p>
+
+<h3 id="describecontext">
+<em>describe</em>和<em>context</em>
+</h3>
+
+<p><em>describe</em>和<em>context</em>幫助你組織分類，都是可以任意套疊的。它的參數可以是一個類別，或是一個字串描述：</p>
+
+<pre><code>describe Order do
+  describe "#amount" do
+    context "when user is vip" do
+     # ...
+    end
+
+   context "when user is not vip" do
+      # ...
+    end
+  end
+end
+</code></pre>
+
+<p>通常最外層是我們想要測試的類別，然後下一層是哪一個方法，然後是不同的情境。</p>
+
+<h3 id="itexpect">
+<em>it</em>和<em>expect</em>
+</h3>
+
+<p>每個<em>it</em>就是一小段測試，在裡面我們會用<em>expect(…).to</em>來設定期望，例如：</p>
+
+<pre><code>describe Order do
+  describe "#amount" do
+    context "when user is vip" do
+
+      it "should discount five percent if total &gt;= 1000" do
+        user = User.new( :is_vip =&gt; true )
+        order = Order.new( :user =&gt; user, :total =&gt; 2000 )
+        expect(order.amount).to eq(1900)
+      end
+
+      it "should discount ten percent if total &gt;= 10000" { ... }
+
+    end
+
+    context "when user is vip" { ... }
+
+  end
+end
+</code></pre>
+
+<p>除了<em>expect(…).to</em>，也有相反地<em>expect(…).not_to</em>可以用。</p>
+
+<h3 id="beforeafter">
+<em>before</em>和<em>after</em>
+</h3>
+
+<p>如同<em>xUnit</em>框架的<em>setup</em>和<em>teardown</em>：</p>
+
+<ul>
+  <li>
+<code>before(:each)</code> 每段<em>it</em>之前執行</li>
+  <li>
+<code>before(:all)</code> 整段<em>describe</em>前只執行一次</li>
+  <li>
+<code>after(:each)</code> 每段<em>it</em>之後執行</li>
+  <li>
+<code>after(:all)</code> 整段<em>describe</em>後只執行一次</li>
+</ul>
+
+<p>範例如下：</p>
+
+<pre><code>describe Order do
+  describe "#amount" do
+    context "when user is vip" do
+
+      before(:each) do
+        @user = User.new( :is_vip =&gt; true )
+        @order = Order.new( :user =&gt; @user )
+      end
+
+      it "should discount five percent if total &gt;= 1000" do
+        @order.total = 2000
+        expect(@order.amount).to eq(1900)
+      end
+
+      it "should discount ten percent if total &gt;= 10000" do
+        @order.total = 10000
+        expect(@order.amount).to eq(9000)
+      end
+
+    end
+    context "when user is vip" { ... }
+  end
+end
+</code></pre>
+
+<h3 id="let--let">let 和 let!</h3>
+
+<p><em>let</em>可以用來簡化上述的<em>before</em>用法，並且支援<em>lazy evaluation</em>和<em>memoized</em>，也就是有需要才初始，並且不同單元測試之間，只會初始化一次，可以增加測試執行效率：</p>
+
+<pre><code>describe Order do
+  describe "#amount" do
+    context "when user is vip" do
+
+      let(:user) { User.new( :is_vip =&gt; true ) }
+      let(:order) { Order.new( :user =&gt; @user ) }
+
+     end
+  end
+end
+</code></pre>
+
+<p>透過<em>let</em>用法，可以比<em>before</em>更清楚看到誰是測試的主角，也不需要本來的<code>@</code>了。</p>
+
+<p><em>let!</em>則會在測試一開始就先初始一次，而不是<em>lazy evaluation</em>。</p>
+
+<h3 id="pending">pending</h3>
+
+<p>你可以先列出來預計要寫的測試，或是暫時不要跑的測試，以下都會被歸類成<em>pending</em>：</p>
+
+<pre><code>describe Order do
+
+  describe "#paid?" do
+
+    it "should be false if status is new"
+
+    xit "should be true if status is paid or shipping" do
+      # this test will not be executed
+    end
+
+  end
+
+end
+</code></pre>
+
+<h3 id="specify--example">specify 和 example</h3>
+
+<p><em>specify</em>和<em>example</em>都是<em>it</em>方法的同義字。</p>
+
+<h3 id="matcher">Matcher</h3>
+
+<p>上述的<em>expect(…).to</em>後面可以接各種<em>Matcher</em>，除了已經介紹過的<em>eq</em>之外，在 <a href="https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers">https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers</a> 官方文件上可以看到更多用法。例如驗證會丟出例外：</p>
+
+<pre><code>expect { ... }.to raise_error
+expect { ... }.to raise_error(ErrorClass)
+expect { ... }.to raise_error("message")
+expect { ... }.to raise_error(ErrorClass, "message")
+</code></pre>
+
+<p>不過別擔心，一開始先學會用<code>eq</code>就很夠用了，其他的<em>Matchers</em>可以之後邊看邊學，學一招是一招。再進階一點你可以自己寫<em>Matcher</em>，<em>RSpec</em>有提供擴充的<em>DSL</em>。</p>
+
+<h3 id="rspec-mocks">RSpec Mocks</h3>
+
+<p>用假的物件替換真正的物件，作為測試之用。主要用途有：</p>
+
+<ul>
+  <li>無法控制回傳值的外部系統 (例如第三方的網路服務)</li>
+  <li>建構正確的回傳值很麻煩 (例如得準備很多假資料)</li>
+  <li>可能很慢，拖慢測試速度 (例如耗時的運算)</li>
+  <li>有難以預測的回傳值 (例如亂數方法)</li>
+  <li>還沒開始實作 (特別是採用<em>TDD</em>流程)</li>
+</ul>
+
+<h2 id="rails">
+<em>Rails</em>中的測試</h2>
+
+<p>在<em>Rails</em>中，<em>RSpec</em>分成數種不同測試，分別是<em>Model</em>測試、<em>Controller</em>測試、<em>View</em>測試、<em>Helper</em>測試、<em>Route</em>和<em>Request</em>測試。</p>
+
+<h3 id="rspec-rails">安裝 Rspec-Rails</h3>
+
+<p>在<em>Gemfile</em>中加上</p>
+
+<pre><code>gem 'rspec-rails', :group =&gt; [:development, :test]
+</code></pre>
+
+<p>執行以下指令：</p>
+
+<pre><code>$ bundle
+$ rails g rspec:install
+</code></pre>
+
+<!--
+
+### Model 測試
+
+裝了*rspec-rails*之後，*rails g model*時也會順道建立對應的*Spec*檔案。這裡我們來寫點*Event model*的測試吧，延續[RESTful 與表單設計](restful-practices.html)中*操作 Resources 狀態*一節所示範的方法為例，新增*spec/models/event_spec.rb*如下：
+
+(TODO)
+
+要怎麼執行測試呢？輸入`bin/rake spec`就會根據目前的開發資料庫*Schema*建一個測試用資料庫，然後執行所有*spec*目錄下的`_spec.rb`檔案結尾的測試。
+
+如果測試資料庫已經建好了，例如執行過`bin/rake spec`或是`bin/rake db:test:prepare`之後，你也可以單獨執行測試`bundle exec rspec spec/models/event_spec.rb`。
+
+> 編輯`.rspec`加上`--format documentation`可以輸出完整的*Spec*文件。
+
+### Controller 測試
+
+(TODO)
+
+### View 測試
+
+(TODO)
+
+### Helper 測試
+
+(TODO)
+
+### Routes 測試
+
+(TODO)
+
+### Request 測試
+
+(TODO)
+
+-->
+
+<h3 id="fixture">如何處理<em>Fixture</em>
+</h3>
+
+<p><em>Rails</em>內建有<em>Fixture</em>功能可以建立假資料，方法是為每個<em>Model</em>使用一份<em>YAML</em>資料。<em>Fixture</em>的缺點是它是直接插入資料進資料庫而不使用<em>ActiveRecord</em>，對於複雜的<em>Model</em>資料建構或關連，會比較麻煩。因此推薦使用<em><a href="http://github.com/thoughtbot/factory_girl">FactoryGirl</a></em>這套工具，相較於<em>Fixture</em>的缺點是建構速度較慢，因此撰寫時最好能注意不要浪費時間在產生沒有用到的假資料。甚至有些資料其實不需要存到資料庫就可以進行單元測試了。</p>
+
+<p>關於測試資料最重要的一點是，記得確認每個測試案例之間的測試資料需要清除，<em>Rails</em>預設是用關聯式資料庫的<em>Transaction</em>功能，所以每次之間增修的資料都會清除。但是如果你的資料庫不支援(例如<em>MySQL</em>的<em>MyISAM</em>格式就不支援)或是用如<em>MongoDB</em>的<em>NoSQL</em>，那麼就要自己處理，推薦可以試試<em><a href="https://github.com/bmabey/database_cleaner">Database Clener</a></em>這套工具。</p>
+
+<h2 id="capybara">
+<em>Capybara</em>簡介</h2>
+
+<p><em>RSpec</em>除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以<em>Web</em>應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的<em>HTML</em>是正確的輸出。</p>
+
+<p><em><a href="https://github.com/jnicklas/capybara">Capybara</a></em>就是一套可以搭配的工具，用來模擬瀏覽器行為。使用範例如下：</p>
+
+<pre><code>describe "the signup process", :type =&gt; :request do
+  it "signs me in" do
+    within("#session") do
+      fill_in 'Login', :with =&gt; 'user@example.com'
+      fill_in 'Password', :with =&gt; 'password'
+    end
+      click_link 'Sign in'
+    end
+end
+</code></pre>
+
+<p>如果真的需要打開瀏覽器測試，例如需要測試<em>JavaScript</em>和<em>Ajax</em>介面，可以使用<em><a href="http://seleniumhq.org/">Selenium</a></em>或<em><a href="http://watir.com/">Watir</a></em>工具。真的打開瀏覽器測試的缺點是測試比較耗時，你沒辦法像單元測試一樣可以經常執行得到回饋。另外在設定<em>CI server</em>上也較麻煩，你必須另有一台桌面作業系統才能執行。</p>
+
+<h2 id="section-2">其他可以搭配測試工具</h2>
+
+<p><em><a href="https://github.com/ranmocy/guard-rails">Guard</a></em>是一種<em>Continuous Testing</em>的工具。程式一修改完存檔，自動跑對應的測試。可以大大節省時間，立即回饋。</p>
+
+<p><em><a href="https://github.com/thoughtbot/shoulda-matchers">Shoulda</a></em>提供了更多<em>Rails</em>的專屬<em>Matchers</em></p>
+
+<p><em><a href="https://github.com/colszowka/simplecov">SimpleCov</a></em>用來測試涵蓋度，也就是告訴你哪些程式沒有測試到。有些團隊會追求<em>100%</em>涵蓋率是很好，不過要記得<em>Coverage</em>只是手段，不是測試的目的。</p>
+
+<h2 id="ci-server">CI server</h2>
+
+<p><em>CI(Continuous Integration)</em>伺服器的用處是每次有人<em>Commit</em>就會自動執行編譯及測試(<em>Ruby</em>不用編譯，所以主要的用處是跑測試)，並回報結果，如果有人送交的程式搞砸了回歸測試，馬上就有回饋可以知道。推薦第三方的服務包括：</p>
+
+<ul>
+  <li>https://travis-ci.org</li>
+  <li>https://www.codeship.io</li>
+  <li>https://circleci.com</li>
+</ul>
+
+<p>如果自己架設的話，推薦老牌的<a href="http://jenkins-ci.org/">Jenkins</a>。</p>
+
+<!--
+
+## TDD 簡介
+
+(TODO)
+
+
+## BDD
+
+*[Cucumber](http://cukes.info/)*是一種透過純文字描述來進行驗收測試的框架。請參考作者的[Cucumber 簡介](http://ihower.tw/blog/archives/2979)投影片。
+
+-->
+
+<h2 id="section-3">投影片</h2>
+
+<ul>
+  <li><a href="http://www.slideshare.net/ihower/rspec-7394497">RSpec 讓你愛上寫測試</a></li>
+</ul>
+
+<h2 id="section-4">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/testing.html">A Guide to Testing Rails Applications</a></li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

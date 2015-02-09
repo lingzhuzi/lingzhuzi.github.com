@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Asset Pipeline</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./assets-pipeline.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="asset-pipeline">Asset Pipeline</h1>
+
+<blockquote>
+  <p>A language that doesn’t affect the way you think about programming is not worth knowing. - Alan Perlis</p>
+</blockquote>
+
+<p><em>Assets</em>指的是<em>JavaScript</em>、<em>Stylesheets</em>和图片等静态档案，这些档案并不会随<em>Requests</em>不同而有所不同。而在<em>Rails</em>目录中，只有<em>public</em>这个目录是公开读取的，所以通常我们会将静态档案都放在<em>public</em>这个目录下，好让浏览器可以直接读取。但是随着<em>JavaScript</em>和<em>Stylesheet</em>档案越来越多时，如何管理这些档案变为一项议题，为了加快浏览器的下载速度，我们会合并<em>JavaScript</em>和<em>Stylesheet</em>档案，来减少浏览器<em>Request</em>下载次数。更近一步的还会压缩这些档案来加速下载时间。像是<em>Yahoo!</em>和<em>Google</em>都有各自开源出自己的压缩工具<em><a href="http://developer.yahoo.com/yui/compressor/">YUI Compressor</a></em>和<em><a href="http://code.google.com/closure/compiler/">Closure Compiler</a></em>。</p>
+
+<p>而<em>Rails</em>的<em>Assets pipeline</em>可以让我们突破<em>public</em>目录限制，可以将静态档案依需求放在不同目录下，<em>Rails</em>会帮你组合并压缩起来。特别是有一些<em>Rails</em>的外掛套件需要使用<em>JavaScript</em>等静态档案，在没有这个功能之前，我们必须将<em>JavaScript</em>等档案复制放在<em>public</em>目录下，这样浏览器才能读取的到。</p>
+
+<p><em>Assets</em>的位置在<em>app/assets/</em>下，首先最重要的就是<em>app/assets/javascripts/application.js</em>和<em>app/assets/stylesheets/application.css</em>，这两个档案看起来充满註解，其实它是个<em>manifest</em>档案，列出了所有要载入的静态档案，这些档案的位置依照惯例放在<em>app/assets</em>或<em>vendor/assets</em>目录下。</p>
+
+<p>让我们先看看<em>application.js</em></p>
+
+<pre><code>// This is a manifest file that'll be compiled into application.js, which will include all the files
+// listed below.
+//
+// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,
+// or vendor/assets/javascripts of plugins, if any, can be referenced here using a relative path.
+//
+// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
+// compiled file.
+//
+// Read Sprockets README (https://github.com/sstephenson/sprockets#sprockets-directives) for details
+// about supported directives.
+//
+//= require jquery
+//= require jquery_ujs
+//= require turbolinks
+//= require_tree .
+</code></pre>
+
+<p>其中的<code>require jquery</code>和<code>require jquery_ujs</code>会载入<em>JQuery</em>和<em>Rails</em>的<em>JQuery adapater</em>，这是因为我们在<em>Gemfile</em>中有装<em>jquery-rails</em>这个套件，所以这里可以读取的到。<code>require turbolinks</code>在上一章有提到。而<code>require_tree .</code>会载入这个目录下的所有<em>JavaScript</em>档案。总之，这个<em>manifest</em>的最后输出结果就是通通压缩成一个<em>application.js</em>档案。</p>
+
+<p>同理<em>application.css</em>也是一样载入所有<em>stylesheets</em>目录下的<em>CSS</em>档案，最后压缩成<em>application.css</em>：</p>
+
+<pre><code>/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any styles
+ * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+ * file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+</code></pre>
+
+<p>让我们看看<em>View</em>，在<em>Layout</em>档案中：</p>
+
+<pre><code>&lt;%= stylesheet_link_tag    "application" %&gt;
+&lt;%= javascript_include_tag "application" %&gt;
+</code></pre>
+
+<p>因为最后输出都压缩成一个档案了，所以这里只需要载入<em>application.css</em>和<em>application.js</em>。</p>
+
+<p>除了<code>require_tree</code>之外，还有其他的用法，你都可以使用绝对或是相对路径来指定档案位置，副档名可有可无：</p>
+
+<ul>
+  <li>
+<code>require</code> [路径]:载入某支特定档案，如果这支档案被载入多次，Sprockets 也会很聪明的只帮你载入一次。</li>
+  <li>
+<code>include</code> [路径]:与<code>require</code>一样，差别在即使是被载入过的档案也会再被载入。</li>
+  <li>
+<code>require_directory</code> [路径] : 将路径下不包含子目录的档案按照字母顺序依次载入。</li>
+  <li>
+<code>require_tree</code> [路径] : 会将路径下包含子目录的档案全部载入。</li>
+  <li>
+<code>require_self</code> [路径] : 告诉 Sprockets 再载入其他的档案前，先将自己的内容插入。</li>
+  <li>
+<code>depend_on</code> [路径] : 宣告依赖于某支 js，在需要通知某支快取的 assets 过期时非常实用。</li>
+  <li>
+<code>stub</code> [路径] : 将路径中的 assets 加入黑名单，所有其他的 require 都不会将他载入。</li>
+</ul>
+
+<p>你可以看 <a href="https://github.com/sstephenson/sprockets">Sprockets 的官方说明</a> 来获得更多的信息。</p>
+
+<p>另外，在<em>Rails</em>中的<em>assets</em>目录其实有三个：</p>
+
+<ul>
+  <li>
+<code>app/assets</code>(通常放置我们自己为了自己的程式所写的 js、css 或是 images)</li>
+  <li>
+<code>lib/assets</code>(通常是我们所使用的套件中去用到的 assets)</li>
+  <li>
+<code>vendor/assets</code>(通常是放一些我们从别的地方借用的 assets，例如说一些 jQuery 的套件)</li>
+</ul>
+
+<p>这三个目录，在预设情况下这三个资料夹的东西是共通的(因为都会被打包成一个档案)，你可以把你的 rails app 跑起来后在 <code>http://localhost:3000/assets/application.js</code> 中看到你所有的 js 都在这支档案中，css 同理亦然，你可以在 terminal 中输入 <code>Rails.application.config.assets.paths</code> 来查看所有的 assets 路径。你可以发现，除了原本我们刚刚说的三个 assets 目录之外，还出现了包含在我们 GemFile 中的 jquery，这代表你的 assets 现在也可以包成 gem 来用，如果你有很多个 projects 常重复使用一些共通的 assets，不妨考虑包成 gem 来使用，方便又愉快。</p>
+
+<h2 id="section">如何处理图片</h2>
+
+<p>放在<em>app/assets/images</em>下的图片该怎麼使用呢？在实际部署后，<em>Rails</em>会将档案名称加以编码，例如<em>rails.png</em>会变成<em>rails-bd9ad5a560b5a3a7be0808c5cd76a798.png</em>。这麼做的原因是当图片有变更的时候，编码就会不同而有不同的档名，这样就可以避免浏览器快取到旧的档案。也因为档案名称会变动，所以放在<em>app/assets/images</em>下的图片，要用的时候就没有办法写死档名。在一般的<em>View</em>中，可以使用<code>image_tag</code>这个<em>Helper</em>：</p>
+
+<pre><code>&lt;%= image_tag("rails.png") %&gt;
+</code></pre>
+
+<p>如果在<em>CSS</em>裡的话，有两种办法：一是将档案命名为<em>erb</em>结尾，例如<em>app/assets/stylesheets/main.css.erb</em>，然后使用<code>asset_path</code>这个<em>Helper</em>：</p>
+
+<pre><code>h1 {
+  background-image: url('&lt;%= asset_path("rails.png") %&gt;');
+}
+</code></pre>
+
+<p>另一种方法是使用<em>Sass</em>或<em>SCSS</em>语法。其中<em>SCSS</em>相容于<em>CSS</em>。例如命名为<em>app/assets/stylesheets/main.css.scss</em>，然后使用<code>image-url</code>这个<em>Sass</em>提供的方法：</p>
+
+<pre><code>h1 {
+    background-image: image-url("rails.png")
+}
+</code></pre>
+
+<p>如果是<em>js</em>档案中想要拿图片的位置，就只能用<em>js.erb</em>的格式，然后内嵌<em>asset_path Helper</em>方法了。</p>
+
+<h2 id="helper">其他 Helper</h2>
+
+<p>Assets 提供了很多路径 helper 来让你指向你的 assets:</p>
+
+<p><code>
+audio_path("horse.wav")   # =&gt; /audios/horse.wav
+audio_tag("sound")        # =&gt; &lt;audio src="/audios/sound" /&gt;
+font_path("font.ttf")     # =&gt; /fonts/font.ttf
+image_path("edit.png")    # =&gt; "/images/edit.png"
+image_tag("icon.png")     # =&gt; &lt;img src="/images/icon.png" alt="Icon" /&gt;
+video_path("hd.avi")      # =&gt; /videos/hd.avi
+video_tag("trailer.ogg")  # =&gt; &lt;video src="/videos/trailer.ogg" /&gt;
+</code></p>
+
+<p>Sass 还提供了像是 <code>-url</code> 和 <code>-path</code> 这样的 helper 来协助你，因此你也可以这样使用：</p>
+
+<p><code>
+image-url("rails.png")         # =&gt; url(/assets/rails.png)
+image-path("rails.png")        # =&gt; "/assets/rails.png".
+asset-url("rails.png", image)  # =&gt; url(/assets/rails.png)
+asset-path("rails.png", image) # =&gt; "/assets/rails.png"
+</code></p>
+
+<h2 id="precompile">
+<em>Precompile</em>编译静态档案</h2>
+
+<p>放在<em>app/assets</em>目录下的<em>Assets</em>，<em>Rails</em>支持使用不同的语法，例如使用<em><a href="http://sass-lang.com/">Sass</a></em>语法产生<em>CSS</em>、<em><a href="http://jashkenas.github.com/coffee-script/">CoffeeScript</a></em>产生<em>JavaScript</em>，或是用<em>ERb</em>样板也可以。使用的方法是将附档名命名成<em>.css.sass</em>、<em>.css.scss</em>、<em>.js.coffee</em>、<em>.css.erb</em>或<em>.js.erb</em>，<em>Rails</em>就会编译出结果给浏览器。</p>
+
+<p><em>Sass</em>是一种<em>CSS3</em>语法的扩充，可以使用巢状、变数、混入、选择子继承等等功能，可以更有效率有弹性的撰写<em>Stylesheet</em>。<em>Sass</em>最后会编译出合法的<em>CSS</em>让浏览器使用。使用上它区分成两种形式的语法<em>scss</em>和<em>sass</em>，前者可以与现有的<em>css</em>程式码直接混合在一起，后者则通过缩排来省略了大括号<code>{}</code>(就像<em>Python</em>用缩排一样)。<em>CoffeeScript</em>也是类似原理，它是一种迷你的程式语言，编译之后会输出可读性高、符合<em><a href="http://www.javascriptlint.com/">JavaScript Lint</a></em>规范的<em>JavaScript</em>程式码。</p>
+
+<p>学习这两种新语法需要额外的时间投入，但是对需要常常撰写<em>CSS</em>和<em>JavaScript</em>的设计师来说，应该是很不错的工具，读者可以自行斟酌是否採用。如果你不打算使用的话，可以编辑<em>Gemfile</em>拿掉以下：</p>
+
+<pre><code>gem 'sass'
+gem 'coffee-script'
+</code></pre>
+
+<blockquote>
+  <p>如果採用<em>Sass</em>的话，推荐还可以採用<em><a href="http://compass-style.org/">Compass</a></em>这套<em>CSS</em>框架的框架。</p>
+</blockquote>
+
+<h2 id="section-1">编译出最后结果</h2>
+
+<p>开发的时候，<em>Rails</em>会自动将<em>Asset</em>的压缩结果快取在<em>tmp</em>下，所以开发者不需要特别处理。但是实际正式上线时，最后压缩的档案还是必须放在<em>public</em>目录下由网页服务器直接提供(或是由CDN)效能较好，以下的<em>rake</em>指令可以产生出来：</p>
+
+<pre><code>rake assets:precompile
+</code></pre>
+
+<p>产生出来的档案在<em>public/assets/</em>下。</p>
+
+<pre><code>rake assets:clobber
+</code></pre>
+
+<p>这样会删除。</p>
+
+<p>注意，如果在开发模式下执行了<code>rake assets:precompile</code>，那么因为放在<em>public/assets/</em>下的静态档案会优先丢给浏览器，所以这时候再修改<em>app/assets</em>下的原始码会没有作用。所以，开发时请记得要删除这个目录。</p>
+
+<blockquote>
+  <p>不过，如果你有很多静态档案的话，开发模式下每次都要重新编译太辛苦了。你可以先<em>compile</em>一次，然后把<em>public/assets/</em>下目前正在开发的档案砍掉即可。</p>
+</blockquote>
+
+<h2 id="section-2">如何拆成数个压缩档</h2>
+
+<p>上述的<em>application.js</em>或<em>application.css</em>中，预设会压缩所有<em>app/assets</em>目录下的档案，如果你需要拆开，只需要修改其中的内容把<code>require_tree</code>那行移除，那么就只会压缩你所指定的目录或档案。</p>
+
+<p>例如，要新增新的<em>Manifest</em>档案的话，假设叫做<em>app/assets/javascripts/search.js</em>，内容如：</p>
+
+<pre><code>//= require ./foobar
+</code></pre>
+
+<p>这样就会将<em>assets/javascripts/foobar</em>这个目录下的档案通通压缩成<em>search.js</em>，而在<em>View</em>中：</p>
+
+<pre><code>&lt;%= javascript_include_tag "application" %&gt;
+&lt;%= javascript_include_tag "search" %&gt;
+</code></pre>
+
+<p>就会载入。注意到如果啟用了<em>assets</em>功能，<code>javascript_include_tag</code>只能接受一个参数，即<em>Manifest</em>档案的名称。</p>
+
+<p>为了让<code>rake assets:precompile</code>也能产生新的压缩档案，你还需要编辑<em>config/initializers/assets.rb</em>加入：</p>
+
+<pre><code>Rails.application.config.assets.precompile += %w( search.js )
+</code></pre>
+
+<h2 id="section-3">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/asset_pipeline.html">The Asset Pipeline</a></li>
+  <li><a href="http://asciicasts.com/episodes/268-sass-basics">SASS Basic</a></li>
+  <li><a href="http://asciicasts.com/episodes/267-coffeescript-basics">CoffeeScript Basics</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | ActiveSupport - 工具函式库</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./activesupport.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="activesupport---">ActiveSupport - 工具函式库</h1>
+
+<blockquote>
+  <p>I thought of objects being like biological cells and/or individual computers on a network, only able to communicate with messages — Alan Kay, creator of Smalltalk</p>
+</blockquote>
+
+<p>Active Support 是 Rails 裡的工具函式库，它也扩充了一些 Ruby 标準函式库。除了被用在 Rails 核心程式中，你也可以在你的程式中使用。本章介绍其中的一小部分较为常用的功能。</p>
+
+<h3 id="blank--present">blank? 和 present?</h3>
+
+<p>在<em>Rails</em>中下面几种情况被定义是<em>blank</em>:</p>
+
+<ul>
+  <li>
+<code>nil</code>或是<code>false</code>
+</li>
+  <li>只由空白组成的字串</li>
+  <li>空阵列或是空<em>Hash</em>
+</li>
+  <li>任何对象当使用<code>empty?</code>方法呼叫时回应为<code>true</code>时</li>
+</ul>
+
+<blockquote>
+  <p>在<em>Ruby1.9</em>中的字串支持辨识<em>Unicode</em>字元，因此某些字元像是<em>U2029</em>(分隔线也会被视为是空白。</p>
+</blockquote>
+
+<blockquote>
+  <p>以数字来说，0或是0.0并不是<em>blank</em></p>
+</blockquote>
+
+<p>举例来说在<code>ActionDispatch::Session::AbstractStore</code>中就使用了<code>blank?</code>方法来确定<em>session key</em>是否存在:</p>
+
+<pre><code>def ensure_session_key!
+  if @key.blank?
+    raise ArgumentError, 'A key is required...'
+  end
+end
+</code></pre>
+
+<p><code>present?</code>方法就是<code>blank?</code>方法的相反，判断是否存在，因此<code>present?</code>方法与<code>!blank?</code>方法两者表达的意思是一样的。</p>
+
+<h3 id="try">try</h3>
+
+<p><code>try</code>是一个相当实用的功能，当我们去呼叫一个对象的方法，而该对象当时却是<code>nil</code>的时候，<em>Rails</em>会拋出<code>method_missing</code>的例外，最常见的例子像是我们想判断某些动作只有管理员可以进行操作，因此我们通常会这样写:</p>
+
+<pre><code>if current_user.is_admin?
+    # do something
+end
+</code></pre>
+
+<p>但这样的写法当使用者其实是未登入时我们的<code>current_user</code>便会回传<code>nil</code>，而再去呼叫<code>is_admin?</code>方法时便会发生错误拋出例外，<code>try</code>方法便是运用在这样的情况，刚刚的例子我们可以改写成</p>
+
+<pre><code>if current_user.try(:is_admin?)
+    # do something
+end
+</code></pre>
+
+<p>这样子当使用者并未登入的时候会直接回传<code>nil</code>而不会再去呼叫后面的<code>is_admin?</code>方法</p>
+
+<h3 id="toparam">to_param</h3>
+
+<p><em>Rails</em>中所有的对象都支持<code>to_param</code>方法，这个方法会帮我们将对象转为可用的数值并以字串表示：</p>
+
+<pre><code>7.to_param # =&gt; "7" to_param 方法预设会去呼叫对象的 to_s 方法
+</code></pre>
+
+<p><em>Rails</em>中某些类别去覆写了<code>to_param</code>方法，像是<code>nil</code>、<code>true</code>、<code>false</code>等在呼叫<code>to_param</code>时会回传自己本身，而阵列会将所有的元素印出来并加上”/”:</p>
+
+<pre><code>[0, true, String].to_param # =&gt; "0/true/String"
+</code></pre>
+
+<p>值得注意的是，在<em>Rails</em>的<em>Routing</em>系统中，我们常使用<code>/:id</code>来表示该对象的id，事实上是<em>Rails</em>改写了<code>ActiveRecord::Base</code>中的<code>to_param</code>方法，当然我们也可以自己去改写他:</p>
+
+<pre><code>class User
+  def to_param
+    "#{id}-#{name.parameterize}"
+  end
+end
+</code></pre>
+
+<p>那么当我们呼叫<code>user_path(@user)</code>的时候，<em>Rails</em>就会转换成 “#{id}-#{name.parameterize}”，这技巧常使用在改写<em>URL</em>的表现方式</p>
+
+<h3 id="toquery">to_query</h3>
+
+<p><code>to_query</code>会帮我们去呼叫对象的<code>to_param</code>方法，并且帮我们整理成查询的格式并输出，例如我们去改写<em>User Model</em>的<code>to_param</code>方法:</p>
+
+<pre><code>class User
+  def to_param
+    "#{id}-#{name.parameterize}"
+  end
+end
+
+current_user.to_query('user') # =&gt; user=357-john-smith
+</code></pre>
+
+<p><code>to_query</code>会将输出的符号都以逸出程式码(<em>escape</em>)取代，无论是键或是值，因此更方便去处理:</p>
+
+<pre><code>account.to_query('company[name]')
+# =&gt; "company%5Bname%5D=Johnson+%26+Johnson"
+</code></pre>
+
+<p>当呼叫阵列的<code>to_query</code>方法时会呼叫阵列中所有元素的<code>to_query</code>方法，并且使用<code>"[]"</code>做为键值，并在每个元素与元素间插入<code>"&amp;"</code>做为区隔:</p>
+
+<pre><code>[3.4, -45.6].to_query('sample')
+# =&gt; "sample%5B%5D=3.4&amp;sample%5B%5D=-45.6"
+</code></pre>
+
+<p>呼叫<em>Hash</em>的<code>to_query</code>方法时，当没有给予<em>query</em>的字串时预设会以<em>Hash</em>本身的键值做为<em>query</em>字串输出(<code>to_query(key)</code>):</p>
+
+<pre><code>{:c =&gt; 3, :b =&gt; 2, :a =&gt; 1}.to_query # =&gt; "a=1&amp;b=2&amp;c=3"
+</code></pre>
+
+<p>换句话说你也可以自己指定做为<em>query</em>的字串，这个字串会变为<em>Hash</em>本身键值的<em>namespace</em>:</p>
+
+<pre><code>{:id =&gt; 89, :name =&gt; "John Smith"}.to_query('user')
+# =&gt; "user%5Bid%5D=89&amp;user%5Bname%5D=John+Smith"
+</code></pre>
+
+<h2 id="class">扩充 Class</h2>
+
+<h3 id="class-attributes">Class Attributes</h3>
+
+<h4 id="classattribute">class_attribute</h4>
+
+<p><code>class_attribute</code>这个方法可以宣告一个或多个类别变数，且此类别变数是可以被继承的类别所覆写的：</p>
+
+<pre><code>class A
+  class_attribute :x
+end
+
+class B &lt; A; end
+
+class C &lt; B; end
+
+A.x = :a
+B.x # =&gt; :a
+C.x # =&gt; :a
+
+B.x = :b
+A.x # =&gt; :a
+C.x # =&gt; :b
+
+C.x = :c
+A.x # =&gt; :a
+B.x # =&gt; :b
+</code></pre>
+
+<p>也可以在实例变数的层级被读取或覆写：</p>
+
+<pre><code>A.x = 1
+
+a1 = A.new
+a2 = A.new
+a2.x = 2
+
+a1.x # =&gt; 1, comes from A
+a2.x # =&gt; 2, overridden in a2
+</code></pre>
+
+<p><code>class_attribute</code>同时也帮你定义了查询的方法，你可以在变数名称后面加上问号来看此变数是否已经被定义，以上面的例子来说就是<code>x?</code>，结果会回传<code>true</code>或<code>false</code></p>
+
+<h4 id="cattrreadercattrwritercattraccessor">
+<code>cattr_reader</code>、<code>cattr_writer</code>与<code>cattr_accessor</code>
+</h4>
+
+<p><code>cattr_reader</code>、<code>cattr_writer</code>与<code>cattr_accessor</code>这三个方法就像是<code>attr_*</code>的类别变数版本，通过这三个方法可以建立相对应的类别变数及存取方法：</p>
+
+<pre><code>class MysqlAdapter &lt; AbstractAdapter
+  # Generates class methods to access @@emulate_booleans.
+  cattr_accessor :emulate_booleans
+  self.emulate_booleans = true
+end
+</code></pre>
+
+<p>同时也会帮我们建立实例变数的方法，让我们可以在实例变数层级来存取：</p>
+
+<pre><code>module ActionView
+  class Base
+	cattr_accessor :field_error_proc
+	@@field_error_proc = Proc.new{ ... }
+  end
+end
+</code></pre>
+
+<p>如此我们便可以在<code>ActionView</code>中存取<code>field_error_proc</code>。</p>
+
+<blockquote>
+  <p>更多关于<em>class_attribute</em>的部份可以参考<a href="http://ihower.tw/blog/archives/4878/">深入Rails3: ActiveSupport 的 class_attribute</a></p>
+</blockquote>
+
+<h2 id="string">扩充 String</h2>
+
+<h3 id="section">安全输出</h3>
+
+<p>当输出<em>HTML</em>格式的资料时需要格外注意，例如当你文章的标题存成<code>Flanagan &amp; Matz rules!</code>时，在没有格式化的情况下<code>&amp;</code>会被逸出码所取代成<code>&amp;amp;</code>，另一方面是安全性上的问题，因为使用者可能就会在栏位中写入攻击性的<em>script</em>造成安全性问题，因此在处理字串输出时我们都会对输出进行处理:</p>
+
+<p>我们可以使用<code>html_safe?</code>方法来判断字串是否是<em>html</em>安全格式，一般字串预设是<code>false</code>:</p>
+
+<pre><code>"".html_safe? # =&gt; false
+</code></pre>
+
+<p>你可以通过<code>html_safe</code>方法来指定字串:</p>
+
+<pre><code>s = "".html_safe
+s.html_safe? # =&gt; true
+</code></pre>
+
+<p>你必须注意<code>html_safe</code>这个方法并不会帮你处理<em>html</em>中的<em>tag</em>，这方法只是单纯的指定该字串是否为<code>html_safe</code>，你必须自己去处理<em>tag</em>的部份:</p>
+
+<pre><code>s = "&lt;script&gt;...&lt;/script&gt;".html_safe
+s.html_safe? # =&gt; true
+s            # =&gt; "&lt;script&gt;...&lt;/script&gt;"
+</code></pre>
+
+<p>当你使用像是<code>concat</code>、<code>&lt;&lt;</code>或是<code>+</code>的方式将一个不是<code>html_safe</code>的字串与一个<code>html_safe</code>的字串作结合时，会输出成一个<code>html_safe</code>的字串，但将原先不是<code>html_safe</code>的字串内容作逸出码的处理:</p>
+
+<pre><code>"".html_safe + "&lt;" # =&gt; "&amp;lt;"
+"".html_safe + "&lt;".html_safe # =&gt; "&lt;" 如果是 html_safe 的内容则不会作逸出码的处理
+</code></pre>
+
+<p>但在<em>Rails3</em>的<em>View</em>中会自动帮你把不安全的部份作逸出处理，因此你大可直接在<em>View</em>中使用像是<code>&lt;%= @post.title %&gt;</code>来输出，但由于这样会直接把<em>HTML</em>的部份都去除，如果你希望保持<em>HTML</em>的格式那么你可以使用<code>raw</code>这个<em>helper</em>来帮你输出:</p>
+
+<pre><code>&lt;%= raw @post.content %&gt;
+</code></pre>
+
+<blockquote>
+  <p>基于上述安全性的前提，任何可能改变原有字串的方法都会将原先的字串变为<em>unsafe</em>的状态，像是<code>downcase</code>、<code>gsub</code>、<code>strip</code>、<code>chomp</code>、<code>underscore</code>等，但是复制的方法像是<code>dup</code>或是<code>clone</code>并不会影响。</p>
+</blockquote>
+
+<h3 id="truncated">truncated</h3>
+
+<p><code>truncate</code>方法会将字串截断为指定的长度:</p>
+
+<pre><code>"Oh dear! Oh dear! I shall be late!".truncate(20)
+# =&gt; "Oh dear! Oh dear!..."
+</code></pre>
+
+<p>你可以使用<code>omission</code>参数将擷取后的字串的后面取代为指定的文字:</p>
+
+<pre><code>"Oh dear! Oh dear! I shall be late!".truncate(20, :omission =&gt; '&amp;hellip;')
+# =&gt; "Oh dear! Oh &amp;hellip;"
+</code></pre>
+
+<p>你必须注意<code>truncate</code>后的字串不是<code>html_safe</code>的，因此在你没有使用<code>raw</code>来作处理的时候会将<code>html</code>格式直接输出:</p>
+
+<pre><code>"&lt;p&gt;Oh dear! Oh dear! I shall be late!&lt;/p&gt;".truncate(20, :omission =&gt; "(blah)")
+=&gt; "&lt;p&gt;Oh dear! Oh(blah)"
+</code></pre>
+
+<p>为了避免擷取的部分会将单字直接从中擷取，你可以用<code>:separator</code>参数来取代被擷取的单字部分:</p>
+
+<pre><code>"Oh dear! Oh dear! I shall be late!".truncate(18)
+# =&gt; "Oh dear! Oh dea..."
+"Oh dear! Oh dear! I shall be late!".truncate(18, :separator =&gt; ' ')
+# =&gt; "Oh dear! Oh..."
+</code></pre>
+
+<blockquote>
+  <p><code>:separator</code>无法使用正规表示法</p>
+</blockquote>
+
+<h3 id="inquiry">inquiry</h3>
+
+<p><code>inquiry</code>方法会将字串转型为<code>StringInquirer</code>对象，可以让我们像用一般方法的方式来比对字串是否符合，最常见的例子就是判断<em>Rails</em>正在使用的版本:</p>
+
+<pre><code>Rails.env.production? # 等同于 Rails.env == "production"
+</code></pre>
+
+<p>因此你可以用<code>inquiry</code>将一般字串转型后来达到一样的效果:</p>
+
+<pre><code>"production".inquiry.production? # =&gt; true
+"active".inquiry.inactive?       # =&gt; false
+</code></pre>
+
+<h3 id="key-based-interpolation">Key-based Interpolation</h3>
+
+<p><em>Ruby1.9</em>以后的版本支持使用<code>%</code>符号做为字串中的变数键值:</p>
+
+<pre><code>"I say %{foo}" % {:foo =&gt; "wadus"}          # =&gt; "I say wadus"
+"I say %{woo}" % {:foo =&gt; "wadus"}          # =&gt; KeyError
+</code></pre>
+
+<h3 id="section-1">字串转换相关</h3>
+
+<p><code>to_date</code>、<code>to_time</code>与<code>to_datetime</code>三个方法是与转换时间相关的方法，可以帮我们将字串转型为时间对象:</p>
+
+<pre><code>"2010-07-27".to_date              # =&gt; Tue, 27 Jul 2010
+"2010-07-27 23:37:00".to_time     # =&gt; Tue Jul 27 23:37:00 UTC 2010
+"2010-07-27 23:37:00".to_datetime # =&gt; Tue, 27 Jul 2010 23:37:00 +0000
+</code></pre>
+
+<p><code>to_time</code>另外还接受<code>:utc</code>或是<code>:local</code>的参数用来指定时区，预设为<code>:utc</code>:</p>
+
+<pre><code>"2010-07-27 23:42:00".to_time(:utc)   # =&gt; Tue Jul 27 23:42:00 UTC 2010
+"2010-07-27 23:42:00".to_time(:local) # =&gt; Tue Jul 27 23:42:00 +0200 2010
+</code></pre>
+
+<h3 id="section-2">其他实用的方法</h3>
+
+<p><code>pluralize</code>方法可以帮我们将名词字串转为复数的名词:</p>
+
+<pre><code>"table".pluralize     # =&gt; "tables"
+"ruby".pluralize      # =&gt; "rubies"
+"equipment".pluralize # =&gt; "equipment"
+</code></pre>
+
+<p>而<code>singularize</code>方法则是可以帮我们转为单数:</p>
+
+<pre><code>"tables".singularize    # =&gt; "table"
+"rubies".singularize    # =&gt; "ruby"
+"equipment".singularize # =&gt; "equipment"
+</code></pre>
+
+<p><code>camelize</code>可以帮我们将字串转为驼峰式的字串:</p>
+
+<pre><code>"product".camelize    # =&gt; "Product"
+"admin_user".camelize # =&gt; "AdminUser"
+</code></pre>
+
+<p>在<em>Rails</em>中也会将路径中”/”符号转为<em>Class</em>及<em>Module</em>中的命名空间符号<code>::</code></p>
+
+<pre><code>"backoffice/session".camelize # =&gt; "Backoffice::Session"
+</code></pre>
+
+<p>而<code>underscore</code>则是将原先驼峰式的字串转为路径式的字串:</p>
+
+<pre><code>"Product".underscore   # =&gt; "product"
+"AdminUser".underscore # =&gt; "admin_user"
+"Backoffice::Session".underscore # =&gt; "backoffice/session"
+</code></pre>
+
+<p><code>titleize</code>方法可以将字串标题化，将单字的开头皆转为大写:</p>
+
+<pre><code>"alice in wonderland".titleize # =&gt; "Alice In Wonderland"
+"fermat's enigma".titleize     # =&gt; "Fermat's Enigma"
+</code></pre>
+
+<p><code>dasherize</code>可以将字串中的底线转为横线:</p>
+
+<pre><code>"name".dasherize         # =&gt; "name"
+"contact_data".dasherize # =&gt; "contact-data"
+</code></pre>
+
+<p><code>demodulize</code>可以将整串的<code>namespace</code>去除仅留下最后的<em>Class name</em>或是<em>Module name</em>:</p>
+
+<pre><code>"Backoffice::UsersController".demodulize    # =&gt; "UsersController"
+"Admin::Hotel::ReservationUtils".demodulize # =&gt; "ReservationUtils"
+</code></pre>
+
+<p><code>deconstantize</code>则是相反的作用，将上层的部分全部找出来:</p>
+
+<pre><code>"Backoffice::UsersController".deconstantize    # =&gt; "Backoffice"
+"Admin::Hotel::ReservationUtils".deconstantize # =&gt; "Admin::Hotel"
+</code></pre>
+
+<p>必须注意的是这是处理字串，因此若直接仅给予<em>Class name</em>或是<em>Module name</em>是无法找出上层参照的</p>
+
+<pre><code>"Product".deconstantize  # =&gt; ""
+</code></pre>
+
+<p><code>parameterize</code>可以将字串转为适合<em>url</em>的方式:</p>
+
+<pre><code>"John Smith".parameterize # =&gt; "john-smith"
+"Kurt Gödel".parameterize # =&gt; "kurt-godel"
+</code></pre>
+
+<p><code>tableize</code>除了会将单数名词转为复数之外，还会将驼峰式的名词改为底线:</p>
+
+<pre><code>"InvoiceLine".tableize # =&gt; "invoice_lines"
+</code></pre>
+
+<blockquote>
+  <p><code>tableize</code>的作用其实在于帮助你找出<em>Model</em>的数据表名称</p>
+</blockquote>
+
+<p><code>classify</code>则是<code>tableize</code>的相反，能够帮你从数据表的名称转为<em>Model</em>:</p>
+
+<pre><code>"people".classify        # =&gt; "Person"
+"invoices".classify      # =&gt; "Invoice"
+"invoice_lines".classify # =&gt; "InvoiceLine"
+</code></pre>
+
+<p><code>humanize</code>可以帮你将<em>Model</em>的属性转为较容易阅读的形式:</p>
+
+<pre><code>"name".humanize           # =&gt; "Name"
+"author_id".humanize      # =&gt; "Author"
+"comments_count".humanize # =&gt; "Comments count"
+</code></pre>
+
+<h2 id="enumerable">扩充 Enumerable</h2>
+
+<h3 id="groupby">group_by</h3>
+
+<p><code>group_by</code>可以将列举依照指定的栏位分组出来，例如将记录依照日期排序出来:</p>
+
+<pre><code>latest_transcripts.group_by(&amp;:day).each do |day, transcripts|
+  p "#{day} -&gt; #{transcripts.map(&amp;:class).join(', ')}"
+end
+"2006-03-01 -&gt; Transcript"
+"2006-02-28 -&gt; Transcript"
+"2006-02-27 -&gt; Transcript, Transcript"
+"2006-02-26 -&gt; Transcript, Transcript"
+"2006-02-25 -&gt; Transcript"
+"2006-02-24 -&gt; Transcript, Transcript"
+"2006-02-23 -&gt; Transcript"
+</code></pre>
+
+<h3 id="sum">sum</h3>
+
+<p><code>sum</code>可以算出集合的加总:</p>
+
+<pre><code>[1, 2, 3].sum # =&gt; 6
+(1..100).sum  # =&gt; 5050
+</code></pre>
+
+<p><code>sum</code>的作用其实就是帮你将元素彼此用<code>+</code>方法连结起来:</p>
+
+<pre><code>[[1, 2], [2, 3], [3, 4]].sum    # =&gt; [1, 2, 2, 3, 3, 4]
+%w(foo bar baz).sum             # =&gt; "foobarbaz"
+{:a =&gt; 1, :b =&gt; 2, :c =&gt; 3}.sum # =&gt; [:b, 2, :c, 3, :a, 1]
+</code></pre>
+
+<p>对空集合呼叫<code>sum</code>预设回传0，但你也可以改写:</p>
+
+<pre><code>[].sum    # =&gt; 0
+[].sum(1) # =&gt; 1
+</code></pre>
+
+<p>如果给予一个<em>block</em>，那么会迭代执行集合中的元素运算后再将结果加总起来:</p>
+
+<pre><code>(1..5).sum {|n| n * 2 } # =&gt; 30
+[2, 4, 6, 8, 10].sum    # =&gt; 30
+</code></pre>
+
+<p>空集合的元素也可以这样被改写:</p>
+
+<pre><code>[].sum(1) {|n| n**3} # =&gt; 1
+</code></pre>
+
+<h3 id="eachwithobject">each_with_object</h3>
+
+<p><code>inject</code>方法可以为集合中的元素迭代的给予指定的元素并运算:</p>
+
+<pre><code>[2, 3, 4].inject(1) {|product, i| product*i } # =&gt; 24
+</code></pre>
+
+<p>如果给予<code>inject</code>的参数为一个空区块，那么<code>inject</code>会将结果整理成<em>Hash</em>，但需注意在运算的结尾必须回传运算结果:</p>
+
+<pre><code>%w{foo bar blah}.inject({}) do |hash, string|
+  hash[string] = "something"
+  hash # 需要回传运算结果
+end
+ =&gt; {"foo"=&gt;"something" "bar"=&gt;"something" "blah"=&gt;"something"}
+</code></pre>
+
+<p><code>each_with_object</code>这个方法也可以达到一样的效果，差别在于你不用回传运算结果:</p>
+
+<pre><code>%w{foo bar blah}.each_with_object({}){|string, hash| hash[string] = "something"}
+=&gt; {"foo"=&gt;"something", "bar"=&gt;"something", "blah"=&gt;"something"}
+</code></pre>
+
+<h3 id="indexby">index_by</h3>
+
+<p><code>index_by</code>可以帮我们将集合元素以指定的栏位做为键值整理成<em>Hash</em>:</p>
+
+<pre><code>invoices.index_by(&amp;:number)
+# =&gt; {'2009-032' =&gt; &lt;Invoice ...&gt;, '2009-008' =&gt; &lt;Invoice ...&gt;, ...}
+</code></pre>
+
+<blockquote>
+  <p>键值通常必须是唯一的，若不是唯一的话将会以最后出现的元素做为判断值。</p>
+</blockquote>
+
+<h3 id="many">many?</h3>
+
+<p><code>many?</code>是可个好用的方法可以帮助我们快速的判断集合的数量是否大于1:</p>
+
+<pre><code>&lt;% if pages.many? %&gt;
+  &lt;%= pagination_links %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>如果对<code>many?</code>传入区块运算时，<code>many?</code>仅会回传运算结果是<code>true</code>的结果:</p>
+
+<pre><code>@see_more = videos.many? {|video| video.category == params[:category]}
+</code></pre>
+
+<h2 id="array">扩充 Array</h2>
+
+<h3 id="section-3">随机挑选</h3>
+
+<pre><code>shape_type = ["Circle", "Square", "Triangle"].sample
+# =&gt; Square, for example
+
+shape_types = ["Circle", "Square", "Triangle"].sample(2)
+# =&gt; ["Triangle", "Circle"], for example
+</code></pre>
+
+<h3 id="section-4">增加元素</h3>
+
+<p><code>prepend</code>会将新元素插入在整个阵列的最前方(<code>index</code>为0的位置)</p>
+
+<pre><code>%w(a b c d).prepend('e')  # =&gt; %w(e a b c d)
+[].prepend(10)            # =&gt; [10]
+</code></pre>
+
+<p><code>append</code>会将元素插入在阵列的最后方:</p>
+
+<pre><code>%w(a b c d).append('e')  # =&gt; %w(a b c d e)
+[].append([1,2])         # =&gt; [[1,2]]
+</code></pre>
+
+<h3 id="optionsextractions">options_extractions!</h3>
+
+<p>在<em>Rails</em>中我们常常会看到一个方法可以传入不定数量的参数，例如:</p>
+
+<pre><code>my_method :arg1
+my_method :arg1, :arg2, :argN
+my_method :arg1, :foo =&gt; 1, :bar =&gt; 2
+</code></pre>
+
+<p>一个方法能够接收不定数量的多个参数主要仰赖的是<code>extract_options!</code>这个方法会帮我们将传入的集合参数展开，若没有传入参数时这个方法便会回传空<em>Hash</em></p>
+
+<pre><code>def my_method(*args)
+  options = args.extract_options!
+  puts "参数:  #{args.inspect}"
+  puts "选项:    #{options.inspect}"
+end
+
+my_method(1, 2)
+# 参数:  [1, 2]
+# 选项:    {}
+
+my_method(1, 2, :a =&gt; :b)
+# 参数:  [1, 2]
+# 选项:    {:a=&gt;:b}
+</code></pre>
+
+<p>因此<code>extract_options!</code>这个方法可以很方便的帮你展开一个阵列中选项元素，最主要的作用就是展开传入方法的参数。</p>
+
+<h3 id="grouping">Grouping</h3>
+
+<p><code>in_groups_of</code>方法可以将阵列依照我们指定的数量做分组:</p>
+
+<pre><code>[1, 2, 3].in_groups_of(2) # =&gt; [[1, 2], [3, nil]]
+</code></pre>
+
+<p>如果给予一个<em>block</em>的话可以将分组的元素做<em>yield</em>:</p>
+
+<pre><code>&lt;% sample.in_groups_of(3) do |a, b, c| %&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;%=h a %&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;%=h b %&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;%=h c %&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>在元素数量不够分组的时候预设在不足的元素部分补<code>nil</code>，像第一个例子中最后一个元素是<code>nil</code>，你也可以在呼叫<code>in_groups_of</code>方法的同时传入第二个参数做为不足元素的填充值:</p>
+
+<pre><code>[1, 2, 3].in_groups_of(2, 0) # =&gt; [[1, 2], [3, 0]]
+</code></pre>
+
+<p>你也可以传入<code>false</code>指定当元素不足的时候就不要以<code>nil</code>做为填充值，也由于这层关係你无法指定<code>false</code>来做为一个填充值:</p>
+
+<pre><code>[1, 2, 3].in_groups_of(2, false) # =&gt; [[1, 2], [3]]
+</code></pre>
+
+<p><code>in_groups_of</code>这个方法最常拿来使用在当你页面每一列想要有n个元素来呈现的时候，例如假设我们有一个待办清单的网站，我们希望页面上每一列可以有四笔清单，我们可以这样写:</p>
+
+<pre><code>&lt;% @tasks.in_groups_of(4) do |tasks| %&gt;
+  &lt;ul&gt;
+    &lt;% tasks.each do |task| %&gt;
+      &lt;li&gt;&lt;%= task.name %&gt;&lt;/li&gt;
+    &lt;% end %&gt;
+  &lt;/ul&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p><code>split</code>这个方法会依照你给的条件来判断阵列内的元素做分割:</p>
+
+<pre><code>[1, 2, 3, 4, 5].split(3)                # =&gt; [[1, 2], [4, 5]] 如果阵列内元素是3的话做分割
+(1..10).to_a.split { |i| i % 3 == 0 }   # =&gt; [[1, 2], [4, 5], [7, 8], [10]] 如果阵内元素是3的倍数就做分割
+</code></pre>
+
+<h2 id="hash">扩充 Hash</h2>
+
+<h3 id="merging-">Merging 合併</h3>
+
+<p><em>Ruby</em>本身有<em>Hash#merge</em>方法来合併两个<em>Hash</em></p>
+
+<pre><code>{:a =&gt; 1, :b =&gt; 1}.merge(:a =&gt; 0, :c =&gt; 2)
+# =&gt; {:a =&gt; 0, :b =&gt; 1, :c =&gt; 2}
+</code></pre>
+
+<h4 id="reversemergereversemerge">
+<code>reverse_merge</code>与<code>reverse_merge!</code>
+</h4>
+
+<p>在合併<em>Hash</em>时可能会遇到有一样的<em>key</em>造成需要判断以哪个<em>key</em>值做为依据的情况:</p>
+
+<pre><code>a = {:a =&gt; 1, :b =&gt; 2}
+b = {:a =&gt; 3, :c =&gt; 4}
+
+a.merge(b) # Ruby 本身的 merge 不会改变原先呼叫的 hash，并且以后面的 hash 为优先产生一个新的 hash
+=&gt; {:a=&gt;3, :b=&gt;2, :c=&gt;4}
+a # =&gt; {:a=&gt;1, :b=&gt;2}
+b # =&gt; {:a=&gt;3, :c=&gt;4}
+
+a.reverse_merge(b) # reverse_merge 不会改变原先呼叫的 hash，以前面呼叫的 hash 为优先产生一个新的 hash
+=&gt; {:a=&gt;1, :c=&gt;4, :b=&gt;2}
+a # =&gt; {:a=&gt;1, :b=&gt;2}
+b # =&gt; {:a=&gt;3, :c=&gt;4}
+
+a.reverse_merge!(b) # reverse_merge! 会以前面呼叫的 hash 优先并直接改变原先呼叫的 hash，不会产生新的 hash
+=&gt; {:a=&gt;1, :b=&gt;2, :c=&gt;4}
+a # =&gt; {:a=&gt;1, :b=&gt;2, :c=&gt;4}
+b # {:a=&gt;3, :c=&gt;4}
+</code></pre>
+
+<p>因此<code>reverse_merge</code>这个方法常用在指定<em>hash</em>的预设值:</p>
+
+<pre><code>options = options.reverse_merge(:length =&gt; 30, :omission =&gt; "...")
+</code></pre>
+
+<h4 id="deepmergedeepmerge">
+<code>deep_merge</code>与<code>deep_merge!</code>
+</h4>
+
+<p>在两个<em>hash</em>的键值相同，而值也是个<em>hash</em>的情况下，我们可以使用<code>deep_merge</code>将两个<em>hash</em>组合:</p>
+
+<pre><code>{:a =&gt; {:b =&gt; 1}}.deep_merge(:a =&gt; {:c =&gt; 2})
+# =&gt; {:a =&gt; {:b =&gt; 1, :c =&gt; 2}}
+</code></pre>
+
+<blockquote>
+  <p><code>deep_merge!</code>的版本则是会直接更改呼叫的<em>hash</em>值</p>
+</blockquote>
+
+<h3 id="key-">Key 键值</h3>
+
+<h4 id="exceptexcept">
+<code>except</code>与<code>except!</code>
+</h4>
+
+<p><code>except</code>方法可以将指定的键值从<em>hash</em>中移除:</p>
+
+<pre><code>{:a =&gt; 1, :b =&gt; 2}.except(:a) # =&gt; {:b =&gt; 2}
+</code></pre>
+
+<p><code>except</code>通常用在我们更新资料时对一些不想被更改的资料栏位做保护的动作:</p>
+
+<pre><code>params[:account] = params[:account].except(:plan_id) unless admin?
+@account.update(params[:account])
+</code></pre>
+
+<p><code>except!</code>会直接更改原本呼叫的<em>hash</em>而不是产生一个新的<em>hash</em></p>
+
+<h4 id="stringifykeys--stringifykeys">
+<code>stringify_keys</code> 与 <code>stringify_keys!</code>
+</h4>
+
+<p><code>stringify_keys</code>可以将<em>hash</em>中的键值改为字串:</p>
+
+<pre><code>{nil =&gt; nil, 1 =&gt; 1, :a =&gt; :a}.stringify_keys
+# =&gt; {"" =&gt; nil, "a" =&gt; :a, "1" =&gt; 1}
+</code></pre>
+
+<p>如果<em>hash</em>中有衝突发生，则以后者优先:</p>
+
+<pre><code>{"a" =&gt; 1, :a =&gt; 2}.stringify_keys
+=&gt; {"a"=&gt;2}
+</code></pre>
+
+<p>这方法方便我们将传入的<em>hash</em>做一致性的处理，而不用去考虑使用者传入的<em>hash</em>是用<em>symbol</em>或是字串</p>
+
+<p><code>stringify_keys!</code>的版本会直接更改呼叫的<em>hash</em>值</p>
+
+<h4 id="symbolizekeyssymbolizekeys">
+<code>symbolize_keys</code>与<code>symbolize_keys!</code>
+</h4>
+
+<p><code>symbolize_keys</code>则是会把<em>hash</em>中的键值都呼叫<code>to_sym</code>方法将之改为<em>symbol</em>:</p>
+
+<pre><code>{nil =&gt; nil, 1 =&gt; 1, "a" =&gt; "a"}.symbolize_keys
+# =&gt; {1 =&gt; 1, nil =&gt; nil, :a =&gt; "a"}
+</code></pre>
+
+<p>如果<em>hash</em>中有衝突发生，以后面的优先:</p>
+
+<pre><code>{"a" =&gt; 1, :a =&gt; 2}.symbolize_keys
+=&gt; {:a=&gt;2}
+</code></pre>
+
+<p><code>symbolize_keys!</code>版本会直接更改呼叫的<em>hash</em>值</p>
+
+<h4 id="tooptionstooptions">
+<code>to_options</code>与<code>to_options!</code>
+</h4>
+
+<p><code>to_options</code>与<code>to_options!</code>方法作用与<code>symbolize_keys</code>方法是一样的</p>
+
+<h4 id="assertvalidkeys"><code>assert_valid_keys</code></h4>
+
+<p><code>assert_valid_keys</code>是用来指定<em>hash</em>键值的白名单，没有在白名单裡的键值出现在<em>hash</em>中都会拋出例外:</p>
+
+<pre><code>{:a =&gt; 1}.assert_valid_keys(:a) # =&gt; {:a=&gt;1}
+{:a =&gt; 1}.assert_valid_keys("a") # ArgumentError: Unknown key: a
+</code></pre>
+
+<h3 id="hash-1">分割 Hash</h3>
+
+<p><code>slice</code>方法可以帮我们从<em>hash</em>中切出指定的值:</p>
+
+<pre><code>{:a =&gt; 1, :b =&gt; 2, :c =&gt; 3}.slice(:a, :c)
+# =&gt; {:c =&gt; 3, :a =&gt; 1}
+
+{:a =&gt; 1, :b =&gt; 2, :c =&gt; 3}.slice(:b, :X)
+# =&gt; {:b =&gt; 2} # 不存在的值会被忽略
+</code></pre>
+
+<blockquote>
+  <p>这方法也常用来做为检验<em>hash</em>的白名单使用，将核可的值从<em>hash</em>中抽出</p>
+</blockquote>
+
+<p><code>slice!</code>的版本会直接更改呼叫的<em>hash</em>值</p>
+
+<h3 id="section-5">抽取</h3>
+
+<p><code>extract!</code>方法会将<em>hash</em>中指定的值取出变为一个新的<em>hash</em>，并将原先的<em>hash</em>中减去我们抽取出来的部分:</p>
+
+<pre><code>hash = {:a =&gt; 1, :b =&gt; 2}
+rest = hash.extract!(:a) # =&gt; {:a =&gt; 1}
+hash                     # =&gt; {:b =&gt; 2}
+</code></pre>
+
+<h2 id="datetime">扩充 DateTime</h2>
+
+<p><code>DateTime</code>本身已经写好很多实用的方法可以方便我们计算时间:</p>
+
+<pre><code>yesterday
+tomorrow
+beginning_of_week (at_beginning_of_week)
+end_of_week (at_end_of_week)
+monday
+sunday
+weeks_ago
+prev_week
+next_week
+months_ago
+months_since
+beginning_of_month (at_beginning_of_month)
+end_of_month (at_end_of_month)
+prev_month
+next_month
+beginning_of_quarter (at_beginning_of_quarter)
+end_of_quarter (at_end_of_quarter)
+beginning_of_year (at_beginning_of_year)
+end_of_year (at_end_of_year)
+years_ago
+years_since
+prev_year
+next_year
+</code></pre>
+
+<blockquote>
+  <p><code>DateTime</code>并不支持日光节约时间</p>
+</blockquote>
+
+<p><code>DateTime.current</code>类似于<code> Time.now.to_datetime</code>，但他的结果会依使用者本身的时区而定，如果在时区有设定的情况下，还会有些其他好用的方法像是<code>DateTime.yesterday</code>、<code>DateTime.tomorrow</code>，也可以使用像是<code>past?</code>及<code>future?</code>来与<code>DateTime.current</code>做判断</p>
+
+<p><code>seconds_since_midnight</code>会回传从午夜00:00:00到指定时间所经过的秒数:</p>
+
+<pre><code>now = DateTime.current     # =&gt; Mon, 07 Jun 2010 20:26:36 +0000
+now.seconds_since_midnight # =&gt; 73596
+</code></pre>
+
+<p><code>utc</code>可以把时间转为<em>UTC</em>格式</p>
+
+<pre><code>now = DateTime.current # =&gt; Mon, 07 Jun 2010 19:27:52 -0400
+now.utc                # =&gt; Mon, 07 Jun 2010 23:27:52 +0000
+</code></pre>
+
+<p><code>utc?</code>可以判断是否为<em>UTC</em>格式</p>
+
+<pre><code>now = DateTime.now # =&gt; Mon, 07 Jun 2010 19:30:47 -0400
+now.utc?           # =&gt; false
+now.utc.utc?       # =&gt; true
+</code></pre>
+
+<p><code>advance</code>是个非常好用的方法，当我们想要找出相对于一个时间加加减减后的另一个时间非常好用:</p>
+
+<pre><code>d = DateTime.current
+# =&gt; Thu, 05 Aug 2010 11:33:31 +0000
+d.advance(:years =&gt; 1, :months =&gt; 1, :days =&gt; 1, :hours =&gt; 1, :minutes =&gt; 1, :seconds =&gt; 1)
+# =&gt; Tue, 06 Sep 2011 12:34:32 +0000
+</code></pre>
+
+<p>要注意的是你如果呼叫多次<code>advance</code>去做计算，其结果可能与呼叫一次是有差异的，你可以参考下面的例子:</p>
+
+<pre><code>d = DateTime.new(2010, 2, 28, 23, 59, 59)
+# =&gt; Sun, 28 Feb 2010 23:59:59 +0000
+d.advance(:months =&gt; 1, :seconds =&gt; 1)
+# =&gt; Mon, 29 Mar 2010 00:00:00 +0000
+d.advance(:seconds =&gt; 1).advance(:months =&gt; 1)
+# =&gt; Thu, 01 Apr 2010 00:00:00 +0000
+</code></pre>
+
+<p><code>change</code>可以传入参数给指定的时间将它改为我们想要的时间:</p>
+
+<pre><code>now = DateTime.current
+# =&gt; Tue, 08 Jun 2010 01:56:22 +0000
+now.change(:year =&gt; 2011, :offset =&gt; Rational(-6, 24))
+# =&gt; Wed, 08 Jun 2011 01:56:22 -0600 将年份跟时区指定为我们传入的参数
+</code></pre>
+
+<p>如果你传入的参数只有<code>hour</code>的时候并且为0的时候，分鐘及秒数都会被设为0:</p>
+
+<pre><code>now.change(:hour =&gt; 0)
+# =&gt; Tue, 08 Jun 2010 00:00:00 +0000
+</code></pre>
+
+<p>同样的，如果传入的参数只有<code>min</code>并且值为0的时候，秒数就会被设为0:</p>
+
+<pre><code>now.change(:min =&gt; 0)
+# =&gt; Tue, 08 Jun 2010 01:00:00 +0000
+</code></pre>
+
+<p><code>DateTime</code>也可以方便得用时间间隔来做加减:</p>
+
+<pre><code>now = DateTime.current
+# =&gt; Mon, 09 Aug 2010 23:15:17 +0000
+now + 1.year
+# =&gt; Tue, 09 Aug 2011 23:15:17 +0000
+now - 1.week
+# =&gt; Mon, 02 Aug 2010 23:15:17 +0000
+</code></pre>
+
+<h2 id="time">扩充 Time</h2>
+
+<p><code>Time</code>继承从<code>DateTime</code>来很多好用的方法:</p>
+
+<pre><code>past?
+today?
+future?
+yesterday
+tomorrow
+seconds_since_midnight
+change
+advance
+ago
+since (in)
+beginning_of_day (midnight, at_midnight, at_beginning_of_day)
+end_of_day
+beginning_of_week (at_beginning_of_week)
+end_of_week (at_end_of_week)
+monday
+sunday
+weeks_ago
+prev_week
+next_week
+months_ago
+months_since
+beginning_of_month (at_beginning_of_month)
+end_of_month (at_end_of_month)
+prev_month
+next_month
+beginning_of_quarter (at_beginning_of_quarter)
+end_of_quarter (at_end_of_quarter)
+beginning_of_year (at_beginning_of_year)
+end_of_year (at_end_of_year)
+years_ago
+years_since
+prev_year
+next_year
+</code></pre>
+
+<blockquote>
+  <p><code>Time</code>的<code>change</code>方法接受一个额外的参数<code>:usec</code></p>
+</blockquote>
+
+<blockquote>
+  <p><code>Time</code>不同于<code>DateTime</code>，是能正确计算出时区间的差异，<code>DateTime</code>是不支持时光节约时间的</p>
+</blockquote>
+
+<pre><code>Time.zone_default
+# =&gt; #&lt;ActiveSupport::TimeZone:0x7f73654d4f38 @utc_offset=nil, @name="Madrid", ...&gt;
+
+# In Barcelona, 2010/03/28 02:00 +0100 becomes 2010/03/28 03:00 +0200 due to DST.
+t = Time.local_time(2010, 3, 28, 1, 59, 59)
+# =&gt; Sun Mar 28 01:59:59 +0100 2010
+t.advance(:seconds =&gt; 1)
+# =&gt; Sun Mar 28 03:00:00 +0200 2010
+</code></pre>
+
+<p>使用<code>since</code>或是<code>ago</code>时，如果得到的时间无法用<code>Time</code>来呈现时，会自动转型为<code>DateTime</code></p>
+
+<h3 id="timecurrent">Time.current</h3>
+
+<p><code>Time.current</code>类似于<code>Time.now</code>会回传现在时间，唯一的差别在于<code>Time.current</code>会依照使用者的时区来回传，在有定义时区的情况下你也可以使用像是<code>Time.yesterday</code>、<code>Time.tomorrow</code>的方法，以及像是<code>past?</code>、<code>today?</code>、<code>future?</code>等用来与<code>Time.current</code>比较的方法</p>
+
+<blockquote>
+  <p>也因为如此，当我们在做时间的处理时尽量使用像是<code>Time.current</code>而少用<code>Time.now</code>，不然很有可能会出现时区问题所造成的错误计算</p>
+</blockquote>
+
+<h3 id="alldayallweekallmonthallquarter--allyear">all_day、all_week、all_month、all_quarter 与 all_year</h3>
+
+<p>上面所列的<code>all_*</code>方法会回传与指定时间相较的一个区间:</p>
+
+<pre><code>now = Time.current
+# =&gt; Mon, 09 Aug 2010 23:20:05 UTC +00:00
+now.all_day
+# =&gt; Mon, 09 Aug 2010 00:00:00 UTC +00:00..Mon, 09 Aug 2010 23:59:59 UTC +00:00
+now.all_week
+# =&gt; Mon, 09 Aug 2010 00:00:00 UTC +00:00..Sun, 15 Aug 2010 23:59:59 UTC +00:00
+now.all_month
+# =&gt; Sat, 01 Aug 2010 00:00:00 UTC +00:00..Tue, 31 Aug 2010 23:59:59 UTC +00:00
+now.all_quarter
+# =&gt; Thu, 01 Jul 2010 00:00:00 UTC +00:00..Thu, 30 Sep 2010 23:59:59 UTC +00:00
+now.all_year
+# =&gt; Fri, 01 Jan 2010 00:00:00 UTC +00:00..Fri, 31 Dec 2010 23:59:59 UTC +00:00
+</code></pre>
+
+<h3 id="time-constructors">Time Constructors</h3>
+
+<p><code>Active Support</code>定义了<code> Time.current</code>，等同于<code>Time.zone.now</code>，如果使用者已经有定义时区的话，那么<code>Time.now</code>也会得到一样的效果:</p>
+
+<pre><code>Time.zone_default
+# =&gt; #&lt;ActiveSupport::TimeZone:0x7f73654d4f38 @utc_offset=nil, @name="Madrid", ...&gt;
+Time.current
+# =&gt; Fri, 06 Aug 2010 17:11:58 CEST +02:00
+</code></pre>
+
+<p><code>local_time</code>这个<em>class method</em>可以帮助我们建立基于使用者时区设定的时间对象:</p>
+
+<pre><code>Time.zone_default
+# =&gt; #&lt;ActiveSupport::TimeZone:0x7f73654d4f38 @utc_offset=nil, @name="Madrid", ...&gt;
+Time.local_time(2010, 8, 15)
+# =&gt; Sun Aug 15 00:00:00 +0200 2010
+</code></pre>
+
+<p><code>utc_time</code>可以回传<em>UTC</em>格式的时间对象:</p>
+
+<pre><code>Time.zone_default
+# =&gt; #&lt;ActiveSupport::TimeZone:0x7f73654d4f38 @utc_offset=nil, @name="Madrid", ...&gt;
+Time.utc_time(2010, 8, 15)
+# =&gt; Sun Aug 15 00:00:00 UTC 2010
+</code></pre>
+
+<p><code>local_time</code>与<code>utc_time</code>这两个方法都接受七个时间参数:<code>year</code>、<code>month</code>、<code>day</code>、<code>hour</code>、<code>min</code>、<code>sec</code>以及<code>usec</code>，<code>year</code>是必填参数，<code>month</code>和<code>day</code>预设为1，而其他参数预设为0</p>
+
+<p>时间也可以使用简单的加减:</p>
+
+<pre><code>now = Time.current
+# =&gt; Mon, 09 Aug 2010 23:20:05 UTC +00:00
+now + 1.year
+#  =&gt; Tue, 09 Aug 2011 23:21:11 UTC +00:00
+now - 1.week
+# =&gt; Mon, 02 Aug 2010 23:21:11 UTC +00:00
+</code></pre>
+
+<h2 id="concerns">Concerns</h2>
+
+<p>假设我们现在有一个<em>Module A</em>与<em>Module B</em>有相依关係：</p>
+
+<pre><code>Module A
+  self.included(base)
+    include B
+    # 当 Module A 被 include 后便 include Module B
+  end
+end
+</code></pre>
+
+<p>今天当我们想要<em>include Module A</em>时，由于<em>Module A</em>与<em>Module B</em>的相依关係，我们必须同时将两个<em>Module</em>都<em>include</em>进来：</p>
+
+<pre><code>class Something
+  include A, B
+end
+</code></pre>
+
+<p>但我们其实没有必要我想要<em>include</em>的<em>Module</em>之间的相依关係，如此便有了<code>ActiveSupport::Concern</code>的意义，就是让我们只需要<em>include</em>我们想要使用的<em>Module</em>，其他的相依关係我们不需要去考虑他，你所需要作的只是在<em>Module A</em>中<code>extend ActiveSupport::Concern</code>：</p>
+
+<pre><code>Module A
+  extend ActiveSupport::Concern
+  included do
+    include B
+    # 当 Module A 被 include 后便 include Module B
+  end
+end
+</code></pre>
+
+<p>如此一来我们只需要<code>include A</code>就可以搞定了！</p>
+
+<p>更多内容请请参考：<a href="http://ihower.tw/blog/archives/3949/">深入Rails3: ActiveSupport::Concern</a></p>
+
+<h2 id="benchmarks">Benchmarks</h2>
+
+<p><code>benchmark</code>方法可以用来测试<em>template</em>的执行时间并记录起来：</p>
+
+<pre><code>&lt;% benchmark "Process data files" do %&gt;
+  &lt;%= expensive_files_operation %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>这样将会在你的<em>log</em>记录中增加一笔像是<code>“Process data files (345.2ms)”</code>的纪录，你便可用来测量并改善你的程式码。</p>
+
+<p>你也可以设定<code>log</code>的层级，预设是<code>info</code>：</p>
+
+<pre><code>&lt;% benchmark "Low-level files", :level =&gt; :debug do %&gt;
+  &lt;%= lowlevel_files_operation %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h2 id="configurable">Configurable</h2>
+
+<p><code>Configurable</code>这个模组是<em>Rails</em>本身用来作为<code>AbstractController::Base</code>的设定使用，我们可以借用这个功能来为我们的类别增加设定选项：</p>
+
+<pre><code>class Employee
+  include ActiveSupport::Configurable
+end
+
+employee = Employee.new
+employee.config.sex = male
+employee.config.permission = :normal
+employee.config.salary = 22000
+</code></pre>
+
+<p><code>config_accessor</code>方法可以帮助我们将这些设定转为方法：</p>
+
+<pre><code>class Employee
+  include ActiveSupport::Configurable
+  config_accessor  :sex, :permission, :salary
+
+  # 现在你可以使用 employee.sex, employee.permission, employee.salary 来取用这些设定
+end
+</code></pre>
+
+<p>上面的范例让每个<code>Employee</code>的实例变数都能有自己的设定，但其实我们也可以有类别层级的设定让每个实例变数都能共享设定：</p>
+
+<pre><code># 设定类别层级的设定
+Employee.config.duty_hour = 8
+
+# 新增一个employee
+employee = Employee.new
+employee.config.duty_hour # =&gt; 8
+
+# 由实例变数更改设定
+employee.config.duty_hour = 5
+
+# 会更改类别层级设定
+Employee.config.duty_hour # =&gt; 5
+</code></pre>
+
+<h2 id="section-6">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/active_support_core_extensions.html">Active Support Core Extensions</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

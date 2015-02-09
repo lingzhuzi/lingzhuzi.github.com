@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Action Controller - 控制 HTTP 流程</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/actioncontroller.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="action-controller----http-">Action Controller - 控制 HTTP 流程</h1>
+
+<blockquote>
+  <p>Controlling complexity is the essence of computer programming. — Brian Kernighan</p>
+</blockquote>
+
+<p><em>HTTP</em>通讯协定是一种<em>Request-Response</em>(请求-回应)的流程，客户端(通常是浏览器)向服务器送出一个<em>HTTP request</em>封包，然后服务器就回应一个<em>response</em>封包。在上一章中，我们介绍了<em>Rails</em>如何使用路由来分派<em>request</em>到<em>Controller</em>的其中一个<em>Action</em>。而每个<em>Action</em>的任务就是根据客户端传来的资料与<em>Model</em>互动，然后回应结果给客户端。这一章中我们将仔细介绍负责回应请求的<em>Controller</em>。</p>
+
+<h2 id="applicationcontroller">ApplicationController</h2>
+
+<p>预设产生出来的<em>Controller</em>都继承自<code>ApplicationController</code>。因此定义在这里的方法可以被所有<em>Controller</em>取用，你可以在这边定义一些共用的方法。预设的<em>application_controller.rb</em>长的如下：</p>
+
+<pre><code>class ApplicationController &lt; ActionController::Base
+  protect_from_forgery
+end
+</code></pre>
+
+<p>其中的<code>protect_from_forgery</code>方法啟动了<em>CSRF</em>安全性功能，所有非<em>GET</em>的<em>HTTP request</em>都必须带有一个<em>Token</em>参数才能存取，<em>Rails</em>会自动在所有表单中帮你插入<em>Token</em>参数，预设的<em>Layout</em>中也有一行<code>&lt;%= csrf_meta_tag %&gt;</code>标籤可以让<em>JavaScript</em>读取到这个<em>Token</em>。会需要关闭这个功能的时机是，你需要开放<em>API</em>给非浏览器客户端，这时候你会需要取消它：</p>
+
+<pre><code>class ApisController &lt; ApplicationController
+  skip_before_action :verify_authenticity_token
+end
+</code></pre>
+
+<blockquote>
+  <p>CSRF 网络攻击 http://en.wikipedia.org/wiki/Cross-site_request_forgery</p>
+</blockquote>
+
+<blockquote>
+  <p>注意，请将方法放在<em>protected</em>或<em>private</em>之下，如果是<em>public</em>方法，就会变成一个公开的<em>Action</em>可以给浏览器呼叫到。</p>
+</blockquote>
+
+<h2 id="controlleraction">产生<em>Controller</em>与<em>Action</em>
+</h2>
+
+<p>我们在<em>Part1</em>示范过，要产生一个<em>Controller</em>档案，请输入</p>
+
+<pre><code>rails g controller events
+</code></pre>
+
+<p>如此便会产生<em>app/controllers/events_controller.rb</em>，依照<em>RESTful</em>设计的惯例，所有的<em>Controller</em>命名都是复数，而档案名称依照惯例都是<em>{name}_controller.rb</em>。</p>
+
+<p>一个<em>Action</em>就是<em>Controller</em>裡的一个<em>Public</em>方法：</p>
+
+<pre><code>class EventsController &lt; ApplicationController
+  def show
+    # ...
+  end
+end
+</code></pre>
+
+<blockquote>
+  <p>除了继承自<code>ApplicationController</code>，我们也可以继承更底层的<code>ActionController::Metal</code>，请参考<a href="http://ihower.tw/blog/archives/4561">Rails3: 新的 Metal 机制</a>。</p>
+</blockquote>
+
+<p>在<em>Action</em>方法中我们要处理<em>request</em>，基本上会做三件事情:
+1. 收集<em>request</em>的信息，例如使用者传进来的参数
+2. 操作<em>Model</em>来做资料的处理
+3. 回传<em>response</em>结果，这个动作称作<em>render</em></p>
+
+<h2 id="request">
+<em>Request</em>信息收集</h2>
+
+<p>在<em>Controller</em>的<em>Action</em>之中，<em>Rails</em>提供了一些方法可以让你得知此<em>request</em>各种信息，包括：</p>
+
+<ul>
+  <li>action_name 目前的<em>Action</em>名称</li>
+  <li>cookies <em>Cookie</em> 下述</li>
+  <li>headers <em>HTTP</em>标头</li>
+  <li>params 包含用户所有传进来的参数<em>Hash</em>，这是最常使用的信息</li>
+  <li>request 各种关于此<em>request</em>的详细信息
+    <ul>
+      <li>request_method</li>
+      <li>method</li>
+      <li>delete?, get?, head?, post?, put?</li>
+      <li>xml_http_request? 或 xhr?</li>
+      <li>url</li>
+      <li>protocol, host, port, path 和 query_string</li>
+      <li>domain</li>
+      <li>host_with_port</li>
+      <li>port_string</li>
+      <li>ssl?</li>
+      <li>remote_ip?</li>
+      <li>path_without_extension, path_without_format_and_extension, format_and_extension, relative_path</li>
+      <li>env</li>
+      <li>accepts</li>
+      <li>format</li>
+      <li>mime_type</li>
+      <li>content_type</li>
+      <li>headers</li>
+      <li>body</li>
+      <li>content_length</li>
+    </ul>
+  </li>
+  <li>response 代表要回传的内容，会由<em>Rails</em>设定好。通常你会用到的时机是你想加特别的<em>Response Header</em>。</li>
+  <li>session <em>Session</em>下述</li>
+</ul>
+
+<blockquote>
+  <p>正确的说，<em>params</em>这个<em>Hash</em>是<code>ActiveSupport::HashWithIndifferentAccess</code>对象，而不是普通的<em>Hash</em>而已。<em>Ruby</em>内建的<em>Hash</em>，用<em>Symbol</em>的<code>hash[:foo]</code>和用字串的<code>hash["foo"]</code>是不一样的，这在混用的时候常常搞错而取不到值，算是常见的臭虫来源。<em>Rails</em>在这里使用的<code>ActiveSupport::HashWithIndifferentAccess</code>对象，无论键是<em>Symbol</em>或字串，都指涉相同的值，减少麻烦。</p>
+</blockquote>
+
+<h2 id="render">
+<em>Render</em>结果</h2>
+
+<p>在根据<em>request</em>信息做好资料处理之后，我们接下来就要回传结果给用户。事实上，就算你什么都不处理，<em>Action</em>方法裡面空空如也，甚至不定义<em>Action</em>，<em>Rails</em>预设也还是会执行<em>render</em>方法。这个<em>render</em>方法会回传预设的<em>Template</em>，依照<em>Rails</em>惯例就是<em>app/views/{controller_name}/{action_name}</em>。如果找不到样板档案的话，会出现<em>Template is missing</em>的错误。</p>
+
+<p>当然，有时候我们会需要自定<em>render</em>，也许是指定不同的<em>Template</em>，也许是不需要<em>Template</em>。这时候有以下参数可以使用：</p>
+
+<h3 id="section">直接回传结果</h3>
+
+<ul>
+  <li>
+<code>render :text =&gt; "Hello"</code> 直接回传字串内容，不使用任何样板。</li>
+  <li>
+<code>render :xml =&gt; @event.to_xml</code> 回传<em>XML</em>格式</li>
+  <li>
+<code>render :json =&gt; @event.to_json</code> 回传<em>JSON</em>格式(再加上<code>:callback</code>就会是<em>JSONP</em>)</li>
+  <li>
+<code>render :nothing =&gt; true</code> 空空如也</li>
+</ul>
+
+<h3 id="template">指定<em>Template</em>
+</h3>
+
+<ul>
+  <li>
+<code>:template</code> 指定<em>Template</em>，这也是预设採用的参数，例如<code>render "/events/index.html.erb"</code>
+</li>
+  <li>
+<code>:action</code> 指定同一个<em>Controller</em>中另一个<em>Action</em>的<em>Template</em>(注意到只是使用它的<em>Template</em>，而不会执行该<em>Action</em>内的程式)</li>
+</ul>
+
+<h3 id="section-1">其他参数</h3>
+
+<ul>
+  <li>
+<code>:status</code> 设定<em>HTTP status</em>，预设是<em>200</em>，也就是正常。其他常用代码包括<em>401</em>权限不足、<em>404</em>找不到页面、<em>500</em>服务器错误等。</li>
+  <li>
+<code>:layout</code> 可以指定这个<em>Action</em>的<em>Layout</em>，设成<em>false</em>即关掉<em>Layout</em>
+</li>
+</ul>
+
+<p>补充一提，在特定情况你想把<code>render</code>的结果存成一个字串，例如拿到局部样板<em>Partials</em>成为一个字串，这时候可以改使用<code>render_to_string :partial =&gt; "foobar"</code></p>
+
+<h2 id="redirect">Redirect</h2>
+
+<p>如果<em>Action</em>不要<em>render</em>任何结果，而是要使用者转向到别页，可以使用<em>redirect_to</em></p>
+
+<ul>
+  <li><code>redirect_to events_url</code></li>
+  <li>
+<code>redirect_to :back</code> 回到上一页。</li>
+</ul>
+
+<blockquote>
+  <p>注意，一个<em>Action</em>中只能有一个<code>render</code>或一个<code>redirect_to</code>。不然你会得到一个<code>DoubleRenderError</code>例外错误。</p>
+</blockquote>
+
+<h2 id="sending-data">串流 Sending data</h2>
+
+<p>如果需要回传二进位<em>Binary</em>资料，有两个方法可以使用：</p>
+
+<p><code>send_data(data, options={})</code> 回传二进位字串，接受以下参数：</p>
+
+<ul>
+  <li>其中<code>data</code>参数是二进位的字串：</li>
+  <li>
+<code>:filename</code> 使用者储存下来的档案名称</li>
+  <li>
+<code>:type</code> 预设是<em>application/octet-stream</em>
+</li>
+  <li>
+<code>:disposition</code> <em>inline</em>或<em>attachment</em>
+</li>
+  <li>
+<code>:status</code> 预设是<em>200</em>
+</li>
+</ul>
+
+<p><code>send_file(file_location, options={})</code> 回传一个档案，接受以下参数：</p>
+
+<ul>
+  <li>其中<code>file_location</code>是档案路径和档名：</li>
+  <li>
+<code>:filename</code> 使用者储存下来的档案名称</li>
+  <li>
+<code>:type</code> 预设是<em>application/octet-stream</em>
+</li>
+  <li>
+<code>:disposition</code> <em>inline</em>或<em>attachment</em>
+</li>
+  <li>
+<code>:status</code> 预设是<em>200</em>
+</li>
+</ul>
+
+<p>不过实务上我们很少在上线环境上直接用<em>Rails</em>来推送静态档案，因为大档的传输时间会浪费宝贵的<em>Rails</em>运算资源。我们会改用<em>X-Sendfile Header</em>将传档的任务委派给网页服务器(例如<em>Apache</em>或<em>Nginx</em>)处理，来降低<em>Rails</em>服务器的负担。或是搭配第三方云储存服务例如<em>AWS S3</em>将传档的任务外包出去。</p>
+
+<h2 id="respondto">respond_to</h2>
+
+<p>我们在第六章<em>RESTful</em>应用程式中曾经示范过用法，<code>respond_to</code>可以用来回应不同的资料格式。<em>Rails</em>内建支持格式包括有<code>:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json</code>等。如果需要扩充，可以编辑<em>config/initializers/mime_types.rb</em>这个档案。</p>
+
+<p>如果你想要设定一个<em>else</em>的情况，你可以用<code>:any</code>：</p>
+
+<pre><code>respond_to do |format|
+  format.html
+  format.xml { render :xml =&gt; @event.to_xml }
+  format.any { render :text =&gt; "WTF" }
+end
+</code></pre>
+
+<h2 id="sessions">Sessions</h2>
+
+<p><em>HTTP</em>是一种无状态的通讯协定，为了能够让浏览器能够在跨<em>request</em>之间记住信息，<em>Rails</em>提供了<em>Session</em>功能，像是记住登入的状态、记住使用者购物车的内容等等，都是用<em>Session</em>实作出来的。</p>
+
+<p>要操作<em>Session</em>，直接操作<code>session</code>这个<em>Hash</em>变数即可。例如：</p>
+
+<pre><code>session[:cart] = Cart.new
+</code></pre>
+
+<p>只要是可以被序列化的对象，都可以放进<em>session</em>之中。当然，你不会想放太大的资料进去，这样每次<em>request</em>读取时会降低服务器的效能。</p>
+
+<h3 id="session-storage">Session storage</h3>
+
+<p><em>Rails</em>预设採用<em>Cookies session storage</em>来储存<em>Session</em>资料，它是将<em>Session</em>资料通过<em>config/secrets.yml</em>的<code>secret_key_base</code>编码后放到浏览器的<em>Cookie</em>之中，最大的好处是对服务器的效能负担很低，缺点是大小最多<em>4Kb</em>，以及资料还是可以通过反编码后看出来，只是无法进行修改。因此安全性较低，不适合存放机密资料。</p>
+
+<p>除了<em>Cookies session storage</em>，<em>Rails</em>也支持其他方式，你可以修改<em>config/initializers/session_store.rb</em>：</p>
+
+<ul>
+  <li>
+<code>:active_record_store</code> 使用数据库来储存</li>
+  <li>
+<code>:mem_cache_store</code> 使用<em><a href="http://memcached.org/">Memcached</a></em>快取系统来储存，适合高流量的网站</li>
+</ul>
+
+<p>一般来说使用预设的<em>Cookies session storage</em>即可，如果对安全性较高要求，可以使用数据库。如果希望兼顾效能，可以考虑使用<em>Memcached</em>。</p>
+
+<p>採用<code>:active_record_store</code>的话，必须安装<em>activerecord-session_store gem</em>，然后产生<em>sessions</em>数据表：</p>
+
+<pre><code>$ rails g active_record:session_migration
+$ rake db:migrate
+</code></pre>
+
+<h2 id="cookies">Cookies</h2>
+
+<p>除了<em>Session</em>，我们也可以直接操作底层的<em>Cookie</em>，以下是一些使用范例：</p>
+
+<pre><code># Sets a simple session cookie.
+cookies[:user_name] = "david"
+
+# Sets a cookie that expires in 1 hour.
+cookies[:login] = { :value =&gt; "XJ-122", :expires =&gt; 1.hour.from_now }
+
+# Example for deleting:
+cookies.delete :user_name
+
+cookies[:key] = {
+   :value =&gt; 'a yummy cookie',
+   :expires =&gt; 1.year.from_now,
+   :domain =&gt; 'domain.com'
+}
+
+cookies.delete(:key, :domain =&gt; 'domain.com')
+</code></pre>
+
+<p>因为资料是存放在使用者浏览器，所以如果需要保护不能让使用者乱改，<em>Rails</em>也提供了<em>Signed</em>方法：</p>
+
+<pre><code>cookies.signed[:user_preference] = @current_user.preferences
+</code></pre>
+
+<p>另外，如果是尽可能永远留在使用者浏览器的资料，可以使用<em>Permanent</em>方法：</p>
+
+<pre><code>cookies.permanent[:remember_me] = [current_user.id, current_user.salt]
+</code></pre>
+
+<p>两者也可以加在一起用：</p>
+
+<pre><code>cookies.permanent.signed[:remember_me] = [current_user.id, current_user.salt]
+</code></pre>
+
+<h2 id="flash">
+<em>Flash</em>信息</h2>
+
+<p>我们在<em>Part1</em>示范过用<em>Flash</em>来传递信息。它的用处在于<em>redirect</em>时，能够从这一个<em>request</em>传递文字信息到下一个<em>request</em>，例如从<em>create Action</em>传递「成功建立」的信息到<em>show Action</em>。</p>
+
+<p><code>flash</code>是一个<em>Hash</em>，其中的键你可以自定，常用<code>:notice</code>、<code>:warning</code>或<code>:error</code>等。例如我们在第一个<em>Action</em>中设定它：</p>
+
+<pre><code>def create
+  @event = Event.create(params[:event])
+  flash[:notice] = "成功建立"
+  redirect_to :action =&gt; :show
+end
+</code></pre>
+
+<p>那么在下一个<em>Action</em>中，我们就可以在<em>Template</em>中读取到这个信息，通常我们会放在<em>Layout</em>中：</p>
+
+<pre><code>&lt;p&gt;&lt;%= flash[:notice] %&gt;&lt;/p&gt;
+</code></pre>
+
+<p>使用过一次之后，<em>Rails</em>就会自动清除<em>flash</em>。</p>
+
+<p>另外，有时候你等不及到下一个<em>Action</em>，就想让<em>Template</em>在同一个<em>Action</em>中读取到<em>flash</em>值，这时候你可以写成：</p>
+
+<pre><code>flash.now[:notice] = "foobar"
+</code></pre>
+
+<h2 id="filters">Filters</h2>
+
+<p>可将<em>Controller</em>中重复的程式抽出来，有三种方法可以定义在进入<em>Action</em>之前、之中或之后执行特定方法，分别是<code>before_action</code>、<code>after_action</code>和<code>around_action</code>，其中<code>before_action</code>最为常用。这三个方法可以接受<em>Code block</em>、一个<em>Symbol</em>方法名称或是一个对象(<em>Rails</em>会呼叫此对象的<code>filter</code>方法)。</p>
+
+<h3 id="beforeaction">before_action</h3>
+
+<p><em>before_action</em>最常用于准备跨<em>Action</em>共用的资料，或是使用者权限验证等等：</p>
+
+<pre><code>class EventsControler &lt; ApplicationController
+  before_action :find_event, :only =&gt; :show
+
+  def show
+  end
+
+  protected
+
+  def find_event
+    @event = Event.find(params[:id])
+  end
+
+end
+</code></pre>
+
+<p>每一个都可以搭配<code>:only</code>或<code>:except</code>参数。</p>
+
+<h3 id="aroundaction">around_action</h3>
+
+<pre><code># app/controllers/benchmark_filter.rb
+class BenchmarkFilter
+    def self.filter(controller)
+     timer = Time.now
+     Rails.logger.debug "---#{controller.controller_name} #{controller.action_name}"
+     yield # 这里让出来执行Action动作
+     elapsed_time = Time.now - timer
+     Rails.logger.debug "---#{controller.controller_name} #{controller.action_name} finished in %0.2f" % elapsed_time
+    end
+end
+
+# app/controller/events_controller.rb
+class EventsControler &lt; ApplicationController
+    around_action BenchmarkFilter
+end
+</code></pre>
+
+<h3 id="filter">
+<em>Filter</em>的顺序</h3>
+
+<p>当有多个<em>Filter</em>时，<em>Rails</em>是由上往下依序执行的。如果需要加到第一个执行，可以使用<code>prepend_before_action</code>方法，同理也有<code>prepend_after_action</code>和<code>prepend_around_action</code>。</p>
+
+<p>如果需要取消从父类别继承过来的<em>Filter</em>，可以使用<code>skip_before_action :filter_method_name</code>方法，同理也有<code>skip_after_action</code>和<code>skip_around_action</code>。</p>
+
+<h2 id="rescuefrom">rescue_from</h2>
+
+<p><code>rescue_from</code>可以在<em>Controller</em>中宣告救回例外，例如：</p>
+
+<pre><code>class ApplicationController &lt; ActionController::Base
+
+    rescue_from ActiveRecord::RecordNotFound, :with =&gt; :show_not_found
+    rescue_from ActiveRecord::RecordInvalid, :with =&gt; :show_error
+
+    protected
+
+    def show_not_found
+        # render something
+    end
+
+    def show_error
+        # render something
+    end
+
+end
+</code></pre>
+
+<h2 id="http-basic-authenticate">HTTP Basic Authenticate</h2>
+
+<p><em>Rails</em>内建支持<em>HTTP Basic Authenticate</em>，可以很简单实作出认证功能：</p>
+
+<pre><code>class PostsController &lt; ApplicationController
+    before_action :authenticate
+
+    protected
+
+    def authenticate
+     authenticate_or_request_with_http_basic do |username, password|
+       username == "foo" &amp;&amp; password == "bar"
+     end
+    end
+end
+</code></pre>
+
+<p>或是这样写：</p>
+
+<pre><code>class PostsController &lt; ApplicationController
+    http_basic_authenticate_with :name =&gt; "foo", :password =&gt; "bar"
+end
+</code></pre>
+
+<h2 id="section-2">侦测客户端装置提供不同内容</h2>
+
+<p>通过设定<code>request.variant</code>我们可以提供不同的<em>Template</em>内容，这可以拿来针对不同的客户端装置，提供不同的内容，例如利用<code>request.user_agent</code>来区分电脑、手机和平板装置：</p>
+
+<pre><code>class ApplicationController &lt; ActionController::Base
+
+before_action :detect_browser
+
+private
+
+def detect_browser
+  case request.user_agent
+    when /iPad/i
+      request.variant = :tablet
+    when /iPhone/i
+      request.variant = :phone
+    when /Android/i &amp;&amp; /mobile/i
+      request.variant = :phone
+    when /Android/i
+      request.variant = :tablet
+    when /Windows Phone/i
+      request.variant = :phone
+    else
+      request.variant = :desktop
+    end
+  end
+end
+</code></pre>
+
+<p>接着在需要支持的<em>action</em>中，加上</p>
+
+<pre><code>def index
+  # ...
+  respond_to do |format|
+    format.html
+    format.html.phone
+    format.html.tablet
+  end
+end
+</code></pre>
+
+<p><em>Template</em>的命名则是<em>index.html+phone.erb</em>和<em>index.html+tablet.erb</em>。</p>
+
+<!--
+
+## 限制*SSL*连线
+
+    # config/environments/production.rb
+    # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+    config.force_ssl = true
+
+    http://www.simonecarletti.com/blog/2011/05/configuring-rails-3-https-ssl/
+    https://github.com/rails/ssl_requirement
+
+-->
+
+<!--
+
+## ActionController::Live
+
+## Variants
+
+-->
+
+<h2 id="section-3">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/action_controller_overview.html">Action Controller Overview</a></li>
+</ul>
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

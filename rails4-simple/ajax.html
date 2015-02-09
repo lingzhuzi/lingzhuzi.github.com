@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | Ajax 应用程式</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./ajax.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="ajax-">Ajax 应用程式</h1>
+
+<blockquote>
+  <p>It’s not a bug - it’s an undocumented feature. - Unknown</p>
+</blockquote>
+
+<p><em>Ajax</em>是<em>Asynchronous JavaScript and XML</em>的缩写，是一种不需要重新整理页面，通过<em>JavaScript</em>来与服务器交换资料、更新网页内容的技术。目的在于改善使用者的操作介面，提昇流畅度。它主要是通过浏览器提供的<code>XMLHttpRequestObject</code>来达成，不过因为跨浏览器的困难度，大多数人们会选择使用<em>JavaScript Library</em>来处理<em>Ajax</em>，例如<em>JQuery</em>。虽然<em>Ajax</em>的缩写中包括<em>XML</em>，但是实务上并不一定要用<em>XML</em>格式，事实上也已经很少人使用<em>XML</em>当作传输的格式了。总归来说，依照<em>Ajax</em>使用的格式分类，有三种方式：</p>
+
+<ul>
+  <li>向服务器请求 HTML 片段，然后客户端浏览器上的 JavaScript 再替换掉页面上的元素</li>
+  <li>向服务器请求 JavaScript 程式脚本，然后客户端浏览器执行它</li>
+  <li>向服务器请求 JSON 或 XML 资料格式，然后客户端浏览器的 JavaScript 解析后再动作。</li>
+</ul>
+
+<p>第一种方式非常简单，但是限制是一次只能更新一小块内容。Rails 预设使用第二种方式，程式撰写容易。而第三种方式则将 JavaScript 程式都放在客户端浏览器上，相较于第二种则多了解析 JSON 或 XML 的部份。以<em>Web API</em>的设计角度来看，与表现层无关的<em>JSON</em>格式是比较乾净的，可以获得比较好的重复使用性。</p>
+
+<p>讲解<em>JavaScript</em>和<em>JQuery</em>语法已经超过本书范围，本章接下来会假设读者已经有基本认识。身为一个<em>Web</em>程式设计师，不得不对<em>JavaScript</em>要有基本了解。</p>
+
+<h2 id="unobtrusive-javascript">Unobtrusive JavaScript</h2>
+
+<p>Rails 从 3.0 后将<em>Ajax</em>使用的<em>JavaScript</em>都改成<em>Unobtrusive JavaScript(UJS)</em>方式。什么是<em>Unobtrusive</em>呢？用个范例来说吧，它会将超连结改成用表单<em>DELETE</em>送出，并且用一个提示视窗来作确认：</p>
+
+<pre><code>link_to 'Remove', event_path(1), :method =&gt; :delete, :data =&gt; { :confirm =&gt; "Sure?" }
+</code></pre>
+
+<p>在<em>Rails 3</em>之前，会输出：</p>
+
+<pre><code>&lt;a onclick="if (confirm('Sure?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;var m = document.createElement('input'); m.setAttribute('type', 'hidden'); m.setAttribute('name', '_method'); m.setAttribute('value', 'delete'); f.appendChild(m);f.submit(); };return false;" href="/events/1"&gt;Remove&lt;/a&gt;
+</code></pre>
+
+<p>在<em>Rails 3</em>之后，会输出：</p>
+
+<pre><code>&lt;a rel="nofollow" data-confirm="Sure?" data-method="delete" class="delete" href="/events/1"&gt;Remove&lt;/a&gt;
+</code></pre>
+
+<p><em>Unobtrusive</em>也就是将<em>JavaScript</em>程式与<em>HTML</em>完全分开，除了可以让<em>HTML</em>码乾净之外，也可以支持更换不同的<em>JavaScript Library</em>，例如把<em>Rails</em>内建的<em>jQuery</em>换成<em><a href="http://prototypejs.org/">Protytype.js</a></em>或<em><a href="https://angularjs.org/">angular.js</a></em>等等。</p>
+
+<blockquote>
+  <p>在<em>Layout</em>中有输出一段<code>&lt;%= csrf_meta_tag %&gt;</code>的作用就是搭配给<em>UJS</em>使用的，让<em>JavaScript</em>可以拿到<em>CSRF</em>安全验证码，我们会在<em>安全</em>一章讨论到什么是<em>CSRF</em>。</p>
+</blockquote>
+
+<h3 id="ajax--1">Ajax 表单</h3>
+
+<p>除了超连结 link_to 加上 :remote 可以变成 Ajax 之外，表单 form_for 也可以加上<code>:remote</code>变成 Ajax。</p>
+
+<pre><code>form_for @user, :remote =&gt; true
+</code></pre>
+
+<h3 id="ajax--2">Ajax 按钮</h3>
+
+<p>同理于超连结 link_to，按钮 button_to 加上<code>:remote =&gt; true</code>参数也会变成 Ajax。</p>
+
+<p>除了已经看过的<code> :data =&gt; { :confirm =&gt; "Are you Sure?" }</code>之外，<code>disable_with</code>可以避免使用者连续按下送出：</p>
+
+<pre><code>button_to "Remove", user_path(@user), :data =&gt; { :disable_with =&gt; 'Removing' }
+</code></pre>
+
+<h2 id="html-">第一种方式：替换 HTML 片段</h2>
+
+<p>编辑 app/views/events/index.html.erb 最下方加入：</p>
+
+<pre><code>&lt;%= link_to 'Hello!', welcome_say_hello_path, :id =&gt; "ajax-load"  %&gt;	&lt;div id="content"&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+    $(document).ready(function() {
+        $('#ajax-load').click( function(){
+            $('#content').load( $(this).attr("href") );
+            return false;
+        });
+
+    });
+&lt;/script&gt;
+</code></pre>
+
+<p>如此点下超连结后，就会把回传的<em>HTML</em>置入到<code>&lt;div id="content"&gt;</code>裡面。</p>
+
+<h2 id="javascript-">第二种方式：使用 JavaScript 脚本</h2>
+
+<p>编辑 app/views/events/index.html.erb，在迴圈中间加入</p>
+
+<pre><code>&lt;%= link_to 'ajax show', event_path(event), :remote =&gt; true %&gt;
+</code></pre>
+
+<p>在迴圈外插入一个<code>&lt;div id="event_area"&gt;&lt;/div&gt;</code></p>
+
+<p>编辑 app/controllers/events_controller.rb，在 show action 中加入</p>
+
+<pre><code>respond_to do |format|
+  format.html
+  format.js
+end
+</code></pre>
+
+<p>新增 app/views/events/_event.html.erb，内容与 show.html.erb 相同</p>
+
+<p>新增 app/views/events/show.js.erb，内容如下</p>
+
+<pre><code>$('#event_area').html("&lt;%= escape_javascript(render :partial =&gt; 'event') %&gt;")
+             .css({ backgroundColor: '#ffff99' });
+</code></pre>
+
+<p>浏览 http://localhost:3000/events</p>
+
+<blockquote>
+  <p><code>escape_javascript()</code>可以缩写为<code>j()</code>。</p>
+</blockquote>
+
+<h2 id="json-">第三种方式：使用 JSON 资料格式</h2>
+
+<p><em>JavaScript Object Notation(JSON)</em>是一种源自<em>JavaScript</em>的资料格式，是目前<em>Web</em>应用程式之间的準标準资料交换格式，在<em>Rails</em>之中，每个对象都有<code>to_json</code>方法可以很方便的转换资料格式。</p>
+
+<pre><code>&lt;%= link_to 'ajax show', event_path(event), :remote =&gt; true, :data =&gt; { :type =&gt; :json }, :class =&gt; "ajax_update" %&gt;
+</code></pre>
+
+<p>点击<em>ajax show</em>就会送出<em>Ajax request</em>了，但接下来要怎麼撰写处理<em>JSON</em>的程式呢？</p>
+
+<pre><code>&lt;script&gt;
+$(document).ready(function() {
+    $('.ajax_update').on("ajax:success", function(event, data) {
+        var event_area = $('#event_area');
+        event_area.html( data.name );
+    });
+});
+&lt;/script&gt;
+</code></pre>
+
+<p>当然，你也可以把<em>HTML</em>片段当做<em>JSON</em>的资料来传递。</p>
+
+<p>另一种<em>JSON</em>的变形是<em>JSONP(JSON with Padding)</em>，将<em>JSON</em>资料包在一个<em>JavaScript function</em>裡，这个做的用处是让这个<em>API</em>可以跨网域被呼叫。要回传<em>JSONP</em>格式，只需要在<code>render :json</code>时多一个参数是<code>:callback</code>即可</p>
+
+<pre><code>respond_to do |format|
+  format.json { render :json =&gt; @user.to_json, :callback =&gt; "process_user" }
+end
+</code></pre>
+
+<h2 id="turbolinks">Turbolinks</h2>
+
+<p>事实上，<em>Rails</em>预设让每个换页都用上了<em>Ajax</em>技巧，这一招叫做<em><a href="https://github.com/rails/turbolinks">Turbolinks</a></em>，在预设的<em>Gemfile</em>中可以看到<code>gem "turbolinks"</code>，以及<em>Layout</em>中的<code>data-turbolinks-track</code>。</p>
+
+<p>它的作用是让每一个超连结都只用<em>Ajax</em>的方式将整个<code>body</code>内容替换掉，这样换页时就不需要重新载入<code>head</code>部份的标籤，包括<em>JavaScript</em>和<em>CSS</em>等等，目的是可以改善换页时的速度。</p>
+
+<p>要特别注意因为它没有整页重新载入，所以如果有放在<em>application.js</em>裡面的<code>$(document).ready</code>程式就变成只有第一次载入页面才执行到，换页时就失效了。这时候必须改成<code>$(document).on("page:change", function(){ ...})</code>。</p>
+
+<p>如果想要明显体会它的效果，可以在<code>app/assets/javascripts/application.js</code>裡面加上</p>
+
+<pre><code>Turbolinks.enableProgressBar();
+</code></pre>
+
+<p>最后，因为它会影响<em>JavaScript</em>的<em>Event Bindings</em>行为，所以在搭配一些<em>JavaScript</em>比较吃重的应用程式，例如使用<em>JavaScript Framework</em>如<em>Backbone</em>、<em>AngularJS</em>、<em>Ember</em>时会移除不用，以免互相影响。</p>
+
+<h2 id="section">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/working_with_javascript_in_rails.html">Working with JavaScript in Rails</a></li>
+</ul>
+
+<!--
+
+* https://github.com/rails/jquery-ujs/wiki/ajax
+* https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery
+* http://www.alfajango.com/blog/rails-3-remote-links-and-forms
+* http://www.alfajango.com/blog/rails-3-remote-links-and-forms-data-type-with-jquery
+* http://www.alfajango.com/blog/rails-jquery-ujs-now-interactive
+* http://railsdog.com/blog/2011/02/28/callbacks-in-jquery-ujs-in-rails3
+* https://moocode.com/posts/1-deploying-a-rails-3-1-application-to-production
+* http://merbist.com/2011/08/30/deploying-a-rails-3-1-app-gotchas/
+* http://blog.madebydna.com/all/code/2011/12/05/ajax-in-rails-3.html
+
+-->
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

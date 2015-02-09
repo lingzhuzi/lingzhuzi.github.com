@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 關於本書</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./rails4/about.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="section">關於本書</h1>
+
+<p>本書涵蓋了<em>Ruby on Rails</em>絕大部分的常用功能以及介紹，為了兼顧入門及實戰，本書拆分成兩個部分：<em>Part 1</em>前八章為入門實作，逐步實作一個活動管理系統、<em>Part 2</em>深入剖析各種元件和高階議題。本書期許可以讓有些許經驗的網頁程式設計師，可以在本書中學習<em>Rails</em>之道，將之實際應用在工作之中。</p>
+
+<h2 id="section-1">關於作者</h2>
+
+<p>張文鈿，網路上的代號為<em>ihower</em>，曾擔任<em><a href="http://rubykaigi.org/2011/en/schedule/details/17M05">RubyKaigi 2011</a></em>、<em><a href="http://rubyconfchina.org">RubyConf China</a></em>、<em><a href="http://osdc.tw/">OSDC.TW</a></em>、<em><a href="http://coscup.org">COSCUP</a></em>、<em><a href="http://webconf.tw">WebConf.TW</a></em>歷屆講者。2006年開始接觸<em>Rails</em>，從此愛上<em>Ruby</em>這個極具豐富樂趣及高生產力的程式語言。他同時也是<em><a href="http://ruby.tw">Ruby Taiwan</a></em>社群和<em><a href="http://rubyconf.tw">RubyConf Taiwan</a></em>大會的創辦人。目前為創業學校<em><a href="http://www.alphacamp.tw/">ALPHACamp</a></em>的專職講師。</p>
+
+<p>筆者的部落格<em><a href="http://ihower.tw">http://ihower.tw</a></em>以及<em>Twitter</em>帳號<em><a href="http://twitter.com/ihower">@ihower</a></em>，歡迎追蹤訂閱。</p>
+
+<h2 id="section-2">軟體版本</h2>
+
+<p>本書使用的<em>Rails</em>版本是<em>4.2</em>，<em>Ruby</em>版本是<em>2.1</em>。本書出版後請參考本書網站以獲得最新相容性修改。</p>
+
+<h2 id="section-3">本書網站</h2>
+
+<p>你可以在<em><a href="http://ihower.tw/rails4">http://ihower.tw/rails4</a></em>看到本書最新版本以及紙本勘誤。如果你有任何問題，也歡迎來信給我。</p>
+
+<h2 id="section-4">本書體例</h2>
+
+<p>為了避免讀者混淆指令的使用情境，區分如下：</p>
+
+<ul>
+  <li>錢號<code>$</code>開頭的是指命令列下的指令</li>
+  <li>大於<code>&gt;</code>開頭的是指在<code>rails console</code>主控台下的指令</li>
+  <li>井號<code>#</code>是註解說明</li>
+  <li>其他則是程式原始碼</li>
+</ul>
+
+<p>例如在以下的操作中，我們先輸入了<em>rails console</em>進入<em>Rails</em>的主控台，然後輸入<code>Person.first</code>和<code>Person.count</code>：</p>
+
+<p><img src="images/about-style-screenshot.png" alt="Style screenshot"></p>
+
+<p>那麼在本書中，會這樣書寫：</p>
+
+<pre><code>$ rails console
+Loading development environment (Rails 4.2.0)
+&gt; Person.first # &lt;Person id: 1&gt;
+&gt; Person.count # 1
+</code></pre>
+
+<h2 id="section-5">本書對象</h2>
+
+<p>本書主要對象為網站程式設計師，比較不適合完全沒有網頁開發經驗的朋友，在學習<em>Rails</em>前，最好對以下知識有基本認識：</p>
+
+<ul>
+  <li>一些程式設計的經驗，例如<em>Java、C#、PHP、Python、Perl、JavaScript</em>
+</li>
+  <li>
+<em>HTML/CSS</em>網頁設計基礎，推薦<a href="http://www.codecademy.com/en/tracks/web">Codecademy</a>或<a href="https://www.codeschool.com/courses/front-end-foundations">Code School</a>教材</li>
+  <li>對網路通訊協定有基礎認識，例如<em>HTTP、DNS</em>等，推薦觀賞<a href="http://player.oreilly.com/videos/0636920031079?toc_id=151543">Web Operations 101: Web Flow</a>
+</li>
+  <li>對<em>RDBMS</em>關聯式資料庫和<em>SQL</em>語法有基本了解，推薦閱讀<a href="http://www.codedata.com.tw/database/mysql-tutorial-getting-started">MySQL 超新手入門</a>從第0章至第5章CRUD與資料維護。</li>
+  <li>熟悉指令列操作<em>(CLI: command line interface)</em>，<em>Unix-like</em>作業系統為佳，推薦<em><a href="http://wiseheartdesign.com/articles/2010/11/12/the-designers-guide-to-the-osx-command-prompt/">The designer’s guide to the OSX command prompt</a></em>和<em><a href="http://cli.learncodethehardway.org/book/">The Command Line Crash Course</a></em>教材。</li>
+</ul>
+
+<p>如果您有<em>PHP/MySQL</em>或<em>ASP、JSP</em>等網頁應用程式開發經驗，相信這些對您應該不陌生。</p>
+
+<h2 id="section-6">致謝</h2>
+
+<p>本書起初的材料來源，來自於準備<em><a href="http://www.openfoundry.org/">OSSF</a></em>主辦的<em>Ruby on Rails</em>工作坊課程，在這課程中獲得了教學相長的寶貴經驗，非常感謝中研院自由軟體鑄造場對於自由軟體和自由軟體社群的支持。本書在撰寫過程也收到非常多台灣和大陸讀者來信勘誤指教，就算只是問一個小問題或是鼓勵，也對這本書產生了良性回饋，在此也一併感謝你：<em>hSATAC、timloo0710、seekcalm、ETBlue、Michael Wang、liukai、inepalon、Ya-yu Huang、aiasfina、David Chuang、Yu-Yao Chang、yang thomas、inepalon、guan-ting chen、Eric.Xiong、pptpb.tw、saitoTK、le jerry、jeffchen1453、EvenWu、Jasper CAI、dreamy0909、JmeHsieh、逍遥、Mark GK、LiChun、tonytonyjan、Kang-Yu Li、曾小黑、Pomin Chen、jzg、ayaya、Juanito Fatas、紅音也、Vincentzh、idarfan、lixing、jerrycheng、maxz、TaopaiC、Fukuball、klobo、liyq205、EIA ANG、caiguo、良葛格、Lam、Daniel Tsai、Hillman Yang、sdjcw13、Jingqiang、foxzool、danix、Yang Weiqi、周裕波、David Chang、张杰、Sgar Wang、zw963、feynixs、Youhua Wang、韩冰、Silver Chen、Kerby Wang、贵超、everyx Lo、shch、David Huang、士揚、Dars、小強、Daniel Yuen、Kevin Shen、floydsoft、Yuan-Hong Zeng、纪东、浩翔、Cray Kao、Theresa、奕辰、WM、Po-Yu、ZhaoZijie、Sean Chen、克彥、庆冲、Gary Cruise、Lester、yousheng、詩凱、Wei-Luan</em>。</p>
+
+<p>最後，特別感謝<em><a href="http://gogojimmy.net/">gogojimmy</a></em>和<a href="http://billy3321.blogspot.tw/">雨蒼</a>協助部分章節初稿及潤稿，以及<em><a href="http://www.alphacamp.tw/">ALPHACamp</a></em>的學員們為本書的完成做了最後的衝刺。</p>
+
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：02 Feb 2015
+</p>
+</div>
+</div>
+</body>
+</html>

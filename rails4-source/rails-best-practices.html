@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | Rails 程式最佳實務</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/rails-best-practices.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="rails-">Rails 程式最佳實務</h1>
+
+<blockquote>
+  <p>Good code is its own best documentation. As you’re about to add a comment, ask yourself, ‘How can I improve the code so that this comment isn’t needed?’ Improve the code and then document it to make it even clearer. – Steve McConnell, Code Complete 作者</p>
+</blockquote>
+
+<p>到目前為止我們主要學習如何讓程式完成我們想要的功能，而真正專業的程式設計師精益求精，思考如何讓程式寫的漂亮、容易維護，打造高品質的<a href="http://manifesto.softwarecraftsmanship.org/">軟體工藝</a>。這一章我們來討論這個主題。當然，在修改重構程式前，最好擁有自動化測試，以確保程式於修改後執行無誤。</p>
+
+<h2 id="section">基本觀念</h2>
+
+<p>隨著日漸複雜的程式和多人團隊開發的演進，你的程式會變得：</p>
+
+<ul>
+  <li>僵硬 (Rigidity)：難以修改，每改一處牽一髮動全身</li>
+  <li>脆弱 (Fragility)：一旦修改，別的無關地方也炸到</li>
+  <li>固定 (Immobility)：難以分解，讓程式再重用</li>
+  <li>黏滯 (Viscosity)：彈性不夠，把事情做對比做錯還難</li>
+  <li>不需要的複雜度 (Needless Complexity)：過度設計沒直接好處的基礎設施</li>
+  <li>不需要的重複 (Needless Repetition)：相同概念的程式碼被複製貼上重複使用</li>
+  <li>晦澀 (Opacity)：難以閱讀，無法了解意圖</li>
+</ul>
+
+<p>我們希望的好程式有以下特性：</p>
+
+<ul>
+  <li>Readability 易讀，容易了解</li>
+  <li>Flexibility 彈性，容易擴充</li>
+  <li>Effective 效率，撰碼快速</li>
+  <li>Maintainability 維護性，容易找到問題</li>
+  <li>Consistency 一致性，循慣例無需死背</li>
+  <li>Testability 可測性，元件獨立容易測試</li>
+</ul>
+
+<p>具體的說，在<em>MVC</em>的框架中，我們希望可以更細節組織程式碼。</p>
+
+<h2 id="move-code-from-controller-to-model">Move Code from Controller to Model</h2>
+
+<p>Move finder to named_scope
+Use model association
+Use scope access
+Add model virtual attribute
+Use model callback
+Replace Complex Creation with Factory Method
+Move Model Logic into the Model
+model.collection_model_ids
+Nested Model Forms
+Check the return value of “save”, otherwise use “save!”</p>
+
+<h2 id="restful-best-practices">RESTful best practices</h2>
+
+<p>Overuse route customizations
+Needless deep nesting
+Not use default route</p>
+
+<h2 id="model-best-practices">Model best practices</h2>
+
+<p>Keep Finders on Their Own Model
+Love named_scope # same as Move finder to named_scope
+the Law of Demeter
+DRY: metaprogramming
+Extract into Module
+Extract to composed class
+the Law of Demeter</p>
+
+<h2 id="migration">Migration</h2>
+
+<p>Isolating Seed Data
+Always add DB index
+Use Say with Time in Migrations</p>
+
+<h2 id="controller-best-practices">Controller best practices</h2>
+
+<p>Use before_filter
+DRY Controller # not implement, use https://github.com/josevalim/inherited_resources</p>
+
+<h2 id="view-best-practices">View best practices</h2>
+
+<p>Move code into controller
+Move code into model
+Move code into helper
+Replace instance variable with local variable
+Use Form Builder # not implement, use https://github.com/justinfrench/formtastic
+Organize Helper files and Remove empty helpers</p>
+
+<h2 id="other">Other</h2>
+
+<p>Don’t rescue Exception, rescue StandardError
+Remove Trailing Whitespace</p>
+
+<h2 id="style-guide">Style Guide</h2>
+
+<p>http://guides.ruby.tw/ruby-rails-style-guides/</p>
+
+<h2 id="appconcerns">app/concerns</h2>
+
+<p>DHH 的最愛</p>
+
+<h2 id="refactor-fat-activerecord-models">Refactor Fat ActiveRecord Models</h2>
+
+<p>http://blog.codeclimate.com/blog/2012/10/17/7-ways-to-decompose-fat-activerecord-models/</p>
+
+<ul>
+  <li>Service Objects</li>
+</ul>
+
+<p>http://pivotallabs.com/object-oriented-rails-writing-better-controllers/</p>
+
+<ul>
+  <li>View Objects</li>
+  <li>Form Objects</li>
+</ul>
+
+<h2 id="view-components">View Components</h2>
+
+<p>https://github.com/apotonick/cells</p>
+
+<h2 id="section-1">投影片</h2>
+
+<ul>
+  <li><a href="http://www.slideshare.net/ihower/rails-best-practices">Rails Best Practices</a></li>
+</ul>
+
+<h2 id="section-2">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://rails-bestpractices.com/">Rails Best Practices Website</a></li>
+  <li><a href="https://github.com/railsbp/rails_best_practices">Rails Best Practices Gem</a></li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

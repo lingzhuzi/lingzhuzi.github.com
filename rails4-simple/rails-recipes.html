@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | 锦囊妙计</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/rails-recipes.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="section">锦囊妙计</h1>
+
+<blockquote>
+  <p>When you choose a language, you’re choosing more than a set of technical trade-offs—you’re choosing a community. - Joshua Bloch</p>
+</blockquote>
+
+<p>这一章介绍一些常见的<em>Rails</em>疑难杂症问题，以及常用的<em>RubyGem</em>套件。更多热门套件可以参考 <a href="http://ruby-toolbox.com/">The Ruby Toolbox</a></p>
+
+<h2 id="better-errors">Better Errors</h2>
+
+<p><a href="https://github.com/charliesome/better_errors">better_errors</a>可以替换掉<em>Rails</em>内建的错误画面，提供开发时期更好除错的介面。</p>
+
+<h2 id="rake">Rake</h2>
+
+<p><a href="http://rake.rubyforge.org/">Rake</a> 是一套类似 Make 的 Builder 工具，让我们可以撰写一些脚本任务，并且很方便设定各个任务的相依性。在 Rails 之中就内建了许多 rake 指令，除了你已经使用过的 rake db:migrate 之外，还有例如：</p>
+
+<pre><code>rake db:migrate
+rake db:drop
+rake tmp:clear
+rake notes
+</code></pre>
+
+<p>你可以输入 rake -T 看到所有的 rake 指令。而要在 Rails 环境中撰写 Rake，请将附档名为 .rake 的档案放在 lib/tasks 目录下即可，例如：</p>
+
+<p>/lib/tasks/dev.rake</p>
+
+<pre><code>namespace :dev do
+
+  desc "Rebuild system"
+  task :build =&gt; ["tmp:clear", "log:clear", "db:drop", "db:create", "db:migrate", :setup ]
+
+  desc "Setup system data"
+  task :setup =&gt; :environment do
+      puts "Create system user"
+      u = User.new( :login =&gt; "root", :password =&gt; "password", :email =&gt; "root@example.com", :name =&gt; "管理员")
+      u.is_admin = true
+      u.save!
+  end
+end
+</code></pre>
+
+<p>通过执行 rake dev:build，就会自动清除 log 档案，砍掉数据库，执行 migrate，然后执行 rake dev:setup 建立一个使用者。</p>
+
+<p>其他常见的使用情境包括：1. 修正上线的资料，这样部署到<em>Production</em>后，可以用来执行 2. 建立开发用的假资料 3. 搭配排成工具使用，例如每天凌晨三点寄出通知信、每週一产生报表等等</p>
+
+<p>更多介绍可以参考 <a href="http://codequietly.com/2010/6/rake-tasks-101">http://codequietly.com/2010/6/rake-tasks-101</a> 和 <a href="http://jasonseifer.com/2010/04/06/rake-tutorial">http://jasonseifer.com/2010/04/06/rake-tutorial</a> 两篇文章。</p>
+
+<h2 id="section-1">排程工具</h2>
+
+<p>如果您有周期性的任务需要执行，除了可以通过<em>Linux</em>的<em>crontab</em>设定去执行<em>rake</em>脚本。例如输入<em>crontab -e</em>加入：</p>
+
+<pre><code>0 2 * * * cd /home/your_project/current/ &amp;&amp; RAILS_ENV=production /usr/local/bin/rake cron:daily
+</code></pre>
+
+<p>就是每天凌晨两点执行<em>rake cron:daily</em>这个任务。</p>
+
+<p>或是你可以安装<em><a href="https://github.com/javan/whenever">whenever</a></em>这个 gem，就可以用<em>Ruby</em>的语法来定义周期性的任务，可以很方便的设定服务器上的<em>cron</em>排程。</p>
+
+<h2 id="activerecord-">ActiveRecord 加强搜寻</h2>
+
+<p><a href="https://github.com/activerecord-hackery/ransack">Ransack</a>可以很快的针对<em>ActiveRecord</em>做出排序和复杂的条件搜寻。</p>
+
+<h2 id="yaml">YAML</h2>
+
+<p>Rails 的数据库设定档 database.yml 是用一种叫 : <a href="http://www.yaml.org/">YAML Ain’t Markup Language</a> 的格式所撰写，档案打开来，看起来就像一般的 plain 设定档，非常容易修改。</p>
+
+<p>YAML 的设计首要目标就是要让使用者容易看懂，可以和 script 语言搭配良好。用途有 资料序列化 data serialization、设定档 configuration settings、log files、Internet messaging、filtering 等。网站上已知有支持的 script 语言有 Python,Ruby,Java,PHP,Perl,Javascript 等。</p>
+
+<pre><code>require ‘yaml’
+
+ps2 = YAML.load_file(‘example.yaml’)
+ps2.each do |it|
+  puts it.inspect
+end
+</code></pre>
+
+<h2 id="json">JSON</h2>
+
+<p>Rails 内建就有 <a href="http://caboo.se/doc/classes/ActiveSupport/JSON.html">ActiveSupport JSON</a>，用法如下：</p>
+
+<pre><code>ActiveSupport::JSON.encode( [ {:a =&gt; 1 , :b =&gt; 2 } , "c", "d" ] )
+=&gt; "[{\"a\":1,\"b\":2},\"c\",\"d\"]"
+
+ActiveSupport::JSON.decode( "[{\"a\":1,\"b\":2},\"c\",\"d\"]" )
+=&gt; [{"a"=&gt;1, "b"=&gt;2}, "c", "d"]
+</code></pre>
+
+<p><a href="http://github.com/brianmario/yajl-ruby">yajl-ruby</a> 则是一套底层用C，比较快很多的 JSON parser，建议可以让<em>Rails</em>底层改用这套函式库，请在<code>Gemfile</code>档案中加入</p>
+
+<pre><code>gem 'yajl-ruby', :require =&gt; 'yajl'
+</code></pre>
+
+<h2 id="xml">XML</h2>
+
+<p>Rails 内建使用 Ruby 的 XML 函式库 <a href="http://builder.rubyforge.org/">Builder</a></p>
+
+<p><a href="http://github.com/tenderlove/nokogiri">Nokogiri</a> 是一套基于 <a href="http://xmlsoft.org/">libxml2</a> 的函式库，效能较佳。可参考 <a href="http://www.engineyard.com/blog/2010/getting-started-with-nokogiri/">Getting Started with Nokogiri</a> 一文介绍用法。</p>
+
+<p>如果要替换 Rails 内建的 XML 函式库，请在<code>Gemfile</code>档案中加入	</p>
+
+<pre><code>gem 'nokogiri'
+</code></pre>
+
+<blockquote>
+  <p>有些函式库为了执行效率，底层会改用 C 的函式库，适合于正式上线环境，缺点是需要编译，在一些特殊环境可能无法运作，例如最新版的 Nokogiri 就不支持 Windows 了。而纯 Ruby 实作的版本就没有这个问题。</p>
+</blockquote>
+
+<h2 id="http">处理 HTTP</h2>
+
+<p>请参考 <a href="http://ihower.tw/blog/archives/2941">HTTP client</a> 这篇文章。推荐 <a href="https://github.com/nahi/httpclient">httpclient</a> 或 <a href="https://github.com/lostisland/faraday">faraday</a>。</p>
+
+<h2 id="pdf">PDF</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/sandal/prawn">Prawn</a> 可以产生 PDF，支持 Unicode。</li>
+  <li>
+<a href="http://thinkrelevance.com/blog/2010/06/15/rethinking-pdf-creation-in-ruby.html">PDFKit</a> 则是另一个有趣的产生方式，通过 HTML/CSS 转 PDF。</li>
+  <li>
+<a href="http://www.princexml.com/">Prince</a> 是一套商用方案，将 HTML/CSS 转 PDF</li>
+</ul>
+
+<h2 id="csv">CSV</h2>
+
+<p><em>Ruby</em>就有内建这个函式库了，只需要<code>require "csv"</code>即可使用。</p>
+
+<h2 id="admin-">Admin 介面</h2>
+
+<ul>
+  <li><a href="http://activeadmin.info/">ActiveAdmin</a></li>
+  <li><a href="https://github.com/sferik/rails_admin">RailsAdmin</a></li>
+</ul>
+
+<h2 id="section-2">表单</h2>
+
+<p>除了用<em>Rails</em>内建的表单<em>Helper</em>，也有一些提供表单设计更方便的套件：</p>
+
+<ul>
+  <li><a href="https://github.com/plataformatec/simple_form">simple_form</a></li>
+  <li><a href="https://github.com/justinfrench/formtastic">formtastic</a></li>
+</ul>
+
+<h2 id="section-3">分页</h2>
+
+<ul>
+  <li><a href="https://github.com/mislav/will_paginate">will_paginate</a></li>
+  <li><a href="https://github.com/amatsuda/kaminari">kaminari</a></li>
+</ul>
+
+<h2 id="section-4">档案上传</h2>
+
+<p>有两套选择：</p>
+
+<ul>
+  <li>
+<a href="http://github.com/thoughtbot/paperclip">Paperclip</a> 是目前使用上最为方便的档案上传 plugin。</li>
+  <li><a href="https://github.com/jnicklas/carrierwave">CarrierWave</a></li>
+</ul>
+
+<h2 id="acts-as-">acts as 系列</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/rails/acts_as_list">ActsAsList</a> 帮 ActiveRecord 加上列表操作功能。</li>
+  <li>
+<a href="http://github.com/rails/acts_as_tree">ActsAsTree</a> 帮 ActiveRecord 加上树状操作功能。</li>
+  <li>
+<a href="http://github.com/mbleigh/acts-as-taggable-on">acts-as-taggable-on</a> 製作 Tag 功能。</li>
+  <li><a href="http://asciicasts.com/episodes/262-trees-with-ancestry">http://asciicasts.com/episodes/262-trees-with-ancestry</a></li>
+</ul>
+
+<h2 id="section-5">如何画图表</h2>
+
+<p>使用 <a href="http://googlecharts.rubyforge.org/">GoogleCharts</a> 是最简单的方式。
+如果您使用 jQuery，<a href="http://code.google.com/p/flot/">flot</a> 是一套不错的图表工具。</p>
+
+<h2 id="section-6">有限状态机</h2>
+
+<ul>
+  <li><a href="http://github.com/rubyist/aasm">aasm</a></li>
+</ul>
+
+<h2 id="recapache">Recapache</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/ambethia/recaptcha">Recaptcha</a> 是做 captcha 最简单快速的方式。</li>
+</ul>
+
+<h2 id="annotatemodels">annotate_models</h2>
+
+<ul>
+  <li>
+<a href="http://github.com/ctran/annotate_models">AnnotateModels</a> 可以帮助您将数据库格式註解在 model 档案中。</li>
+</ul>
+
+<h2 id="section-7">全文搜寻</h2>
+
+<p>请参考效能与快取一章的全文搜寻一节。</p>
+
+<h2 id="section-8">自动备份</h2>
+
+<ul>
+  <li><a href="https://github.com/meskyanichi/backup">https://github.com/meskyanichi/backup</a></li>
+</ul>
+
+<p>可以搭配 whenever 就可以定期备份了</p>
+
+<!--
+
+## Soft Deletion
+
+## Versioning
+
+-->
+
+<h2 id="rails">升级<em>Rails</em>
+</h2>
+
+<p>小版号的升级，通常通过以下步骤即可完成：</p>
+
+<ul>
+  <li>修改<code>Gemfile</code>的<em>Rails</em>版本： <code>gem 'rails', '3.1.1'</code>
+</li>
+  <li>执行<code>bundle update</code>
+</li>
+  <li>执行<code>rake rails:update</code> 会尝试更新<em>Rails</em>自己产生的档案，例如<em>config/boot.rb</em>，请一一手动检查。</li>
+</ul>
+
+<p>升级前，也请参阅官方公告的升级注意事项。</p>
+
+<h2 id="activerecord--1">如何变更 ActiveRecord 预设的数据表和主键名称</h2>
+
+<p>如果要将<em>Rails</em>沿用上旧有的数据库上，就会发生的数据表名称和主键名称不是 Rails 预设惯例的情况，也就是表格名称不是<em>Model</em>名称的复数型，主键不叫<em>id</em>。这时候我们可以手动设定过，例如以下 Model 预设的数据表和主键是<em>legacy_comments</em>和<em>id</em>，但是我们想要改成<em>comment</em>和<em>comment_id</em>：</p>
+
+<pre><code>class LegacyComment &lt; ActeveRecord::Base
+    self.table_name = :comment
+    self.primary_key = :comment_id
+end
+</code></pre>
+
+<h2 id="section-9">其他</h2>
+
+<ul>
+  <li><a href="http://asciicasts.com/episodes/255-undo-with-papertrail">http://asciicasts.com/episodes/255-undo-with-papertrail</a></li>
+  <li><a href="http://intridea.com/2011/5/13/rails3-gems">http://intridea.com/2011/5/13/rails3-gems</a></li>
+  <li><a href="http://erik.debill.org/2011/12/04/rake-for-rails-developers">http://erik.debill.org/2011/12/04/rake-for-rails-developers</a></li>
+</ul>
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

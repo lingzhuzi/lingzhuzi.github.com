@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | Ruby on Rails 簡介</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/intro.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="ruby-on-rails-">Ruby on Rails 簡介</h1>
+
+<blockquote>
+  <p>“Life’s too short to build something nobody wants” - Ash Maurya, Running Lean 作者</p>
+</blockquote>
+
+<p><em>Ruby on Rails</em>是一套非常有生產力、維護性高、容易佈署的<em>Web</em>開發框架。從一開始不知名的玩具，到現在它已經成為全世界<em>Web</em>應用程式開發的首選框架之一。進入學習的旅程之前，我們先了解為什麼它如此特別？</p>
+
+<h2 id="web-framework">什麼是網站開發框架<em>(Web framework)</em>？</h2>
+
+<p>從<em>1990</em>年<em>Tim Berners-Lee</em>發明全球資訊網之後，就開始有了動態網頁的需求，早期最風行的方法是使用<em>Perl CGI</em>，會在<em>Perl</em>程式中，輸出<em>HTML</em>內容，例如以下是一個簡單的計數器：</p>
+
+<pre><code>#!/usr/bin/perl
+
+open(FILE, "count.txt");
+$num = &lt;FILE&gt;; $num++;
+close (FILE);
+
+open(WRITETO, "&gt;count.txt");
+print WRITETO "$num";
+close (WRITETO);
+
+print &lt;&lt;PRINTAREA;
+content-type:text/html\n\n
+&lt;style&gt;
+&lt;!--
+body {background-color: black; line-height:1;
+margin-top: 0cm;
+margin-left: 0cm;
+margin-right: 0cm}
+--&gt;
+&lt;/style&gt;
+&lt;body&gt;&lt;center&gt;
+&lt;b&gt;&lt;font size=1 color=white&gt;
+$num&lt;/font&gt;&lt;/b&gt;
+PRINTAREA
+</code></pre>
+
+<p>讀者可以發現，這樣的方式在<em>HTML</em>內容佔多數的情況，顯著十分不容易維護及閱讀。大約在2000年左右，<em>PHP</em>、<em>ASP</em>等以樣板<em>(Template)</em>為主的程式語言出現了，同時期搭配著關聯式資料庫如<em>MySQL</em>一起流行起來。這種寫法與上述的<em>Perl CGI</em>恰巧相反，是在<em>HTML</em>樣板中內嵌入程式和<em>SQL</em>指令，例如以下是一個<em>PHP&amp;MySQL</em>程式，其中用<code>&lt;?php ... ?&gt;</code>括起來的部份，就是<em>PHP</em>程式：</p>
+
+<pre><code>&lt;?php
+  $db = mysql_connect("localhost", "root", "password");
+  mysql_query("SET NAMES 'utf8'");
+  mysql_select_db($SERVER['db']);
+?&gt;
+&lt;html&gt;
+  &lt;?php
+    $sql="select * from news where Class='1' or Class='3' order by CTDate desc limit 0,5";
+    $result= mysql_query($sql);
+    while ( $arr=mysql_fetch_array($result) ) {
+      echo &lt;&lt;&lt;NEWSEND
+        &lt;div class="box"&gt;
+          &lt;span class="box-title-1"&gt; &lt;b&gt;【$arr[Title]】&lt;/b&gt; $arr[CTDate] &lt;/span&gt;
+          &lt;div class="box-content"&gt;
+            $arr[Text]
+          &lt;/div&gt;
+        &lt;/div&gt;
+      NEWSEND;
+    }
+  ?&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>這種用法非常容易使用。特別像是討論區、部落格<em>(Blog)</em>、內容管理系統<em>(CMS)</em>、<em>Wiki</em>這類系統，重點主要在資料的保存和顯示，牽扯的複雜商業邏輯不多，特別適合這樣的開發方式。程式只是資料庫系統的糖衣介面，不需要<em>MVC</em>架構、不需要頁面與程式邏輯分開、不需要物件導向技術，也可以開發的很好。</p>
+
+<p>但是近年來隨著<em>Web 2.0</em>和雲端風潮帶來越來越多的<em>Web</em>應用程式開發需求，網站軟體的規模開始增加，需要加入更多的商業邏輯和功能，這樣的開發方式，導致了整個專案的結構變得十分混雜，不利於團隊合作開發。要接手維護這樣的網站，常常會不知道如何閱讀及修改起，因為所有的商務邏輯與<em>HTML</em>混雜在一起，不同人開發就有不同的程式架構，缺乏程式文件是常有的事情，也不容易進行測試。</p>
+
+<p>於是我們有了<em>Web</em>開發框架的需求，引入完整的物件導向觀念和技術。而所謂的框架就是制定好了一套規範和慣例，讓開發者在該架構下來進行開發。</p>
+
+<blockquote>
+  <p>維基百科是這樣定義的：「軟體框架<em>(Software framework)</em>」是為了實現某個業界標準或完成特定基本任務的軟體組件規範，也指為了實現某個軟體組件規範時，提供規範所要求之基礎功能的軟體產品。框架的功能類似於基礎設施，與具體的軟體應用無關，但是提供並實現最為基礎的軟體架構和體系。軟體開發者通常依據特定的框架實現更為複雜的商業運用和業務邏輯。這樣的軟體應用可以在支持同一種框架的軟體系統中運行。</p>
+</blockquote>
+
+<p>非常多的<em>Web</em>框架都實踐一個叫做<em>MVC</em>的軟體架構設計模式，將軟體分成三個部分：</p>
+
+<ul>
+  <li>
+<em>Model</em>物件包裝了資料與商業邏輯，例如操作資料庫</li>
+  <li>
+<em>View</em>表示使用者介面，顯示及編輯表單，可內嵌<em>Ruby</em>程式的<em>HTML</em>
+</li>
+  <li>
+<em>Controller</em>負責將資料送進送出<em>Model</em>，處理從外界(也就是瀏覽器)來的<em>HTTP Request</em>請求，與<em>Model</em>互動後輸出<em>View</em>(也就是<em>HTML</em>)</li>
+</ul>
+
+<p><img src="images/intro-mvc-diagram.jpg" alt="MVC diagram"></p>
+
+<p>這張圖示中的執行步驟是：</p>
+
+<ol>
+  <li>瀏覽器發出<em>HTTP request</em>請求</li>
+  <li>負責處理的<em>Controller</em>操作<em>Model</em>資料</li>
+  <li>
+<em>Model</em>存取資料庫</li>
+  <li>
+<em>Controller</em>將得到的資料餵給<em>View</em>樣板</li>
+  <li>回傳最後的<em>HTML</em>成品給瀏覽器</li>
+</ol>
+
+<p>透過<em>MVC</em>模式，我們可以有系統的組織程式碼，並且分離商業邏輯和使用者介面，讓前端與後端開發者可以獨立作業，也讓程式碼有著一致性的結構，檔案位置清楚，這些慣例<em>Web</em>框架都幫你想好了。有了程式規範，也就比較容易維護開發了。</p>
+
+<blockquote>
+  <p>也有不實踐<em>MVC</em>的小型<em>Web</em>框架，通常稱做<em>Micro-framework</em>，例如<em><a href="http://www.sinatrarb.com/">Sinatra</a></em>，我們會在<em>Ruby</em>錦囊妙計一章中簡單介紹這個不同思維的<em>Web</em>開發框架。</p>
+</blockquote>
+
+<blockquote>
+  <p>桌面軟體的<em>MVC</em>和<em>Web MVC</em>有一些差異，主要是因為<em>Web MVC</em>中的<em>View</em>沒有辦法透過<em>Observer</em>模式來進行更新。有興趣的朋友可以參考<em><a href="http://amix.dk/blog/post/19615">Model View Controller: History, theory and usage</a></em>這篇文章。</p>
+</blockquote>
+
+<p><em>Web</em>框架通常包括以下功能，</p>
+
+<h3 id="orm">ORM</h3>
+
+<p>ORM<em>(Object-relational mapping)</em>可以用物件導向語法來操作關聯式資料庫，容易使用、撰碼十分有效率，不需要撰寫繁瑣的<em>SQL</em>語法，也增加了程式碼維護性。例如：</p>
+
+<pre><code>SELECT * FROM orders, users WHERE orders.user_id = users.id AND orders.status = "Paid" LIMIT 5 ORDER BY orders.created_at;
+</code></pre>
+
+<p>這一段<em>SQL</em>敘述，在<em>Rails</em>中的語法是：</p>
+
+<pre><code>Order.where(:status =&gt; "paid").includes(:user).limit(5).order("created_at")
+</code></pre>
+
+<h3 id="url">
+<em>URL</em>路由</h3>
+
+<p>不同於<em>PHP</em>直接使用檔案目錄結構來對應網址，例如網址是<code>/foo/bar</code>，就得有個檔案在<code>/foo/bar.php</code>下。這種一對一的方式雖然直覺，但是卻大大限制了程式架構和開發，網址也常常不漂亮，不利於<em>SEO(Search engine optimization)</em>。</p>
+
+<p>使用<em>Web</em>框架則沒有這種問題，你擁有最大的彈性，您可以指定任意<em>URL</em>對應到任一個<em>Controller</em>的動作，跟檔案位置是無關的。</p>
+
+<p>此外，<em>Web</em>框架也附帶了非常多開發<em>Web</em>會用到的函式庫，例如<em>Template</em>、<em>Email</em>、<em>Session</em>、快取、<em>JavaScript/Ajax</em>、測試等等。這也是為什麼使用<em>Web</em>框架可以大大加速網站專案的開發時程，因為開發<em>Web</em>應用程式會用到的功能大部分都內建了，我們不需要重複開發輪子。</p>
+
+<h2 id="ruby-on-rails">什麼是<em>Ruby on Rails</em>？</h2>
+
+<p><em>Ruby on Rails</em>(官方簡稱為<em>Rails</em>，<em>RoR</em>非官方簡稱)是使用<em>Ruby</em>這套開放原始碼(採用<em>MIT</em>授權)、物件導向程式語言所開發的<em>Web</em>開發框架，主要用於開發資料庫網站應用程式。<em>Rails</em>是一套專業的開發框架，採用了<em>MVC(Model-View-Control)</em>模式、內建支援單元測試和整合測試、支援<em>Ajax</em>和<em>RESTful</em>介面、<em>ORM</em>機制，以及支援各種最新的業界標準像是<em>HTML5</em>、<em>JQuery</em>等等功能。它的發明人是<em>David Heinemeier Hanson(DHH)</em>，<em>DHH</em>是<em>2004</em>年將<em>Rails</em>從<em><a href="http://www.37signals.com/">37signals</a></em>商業產品中獨立出來成為開源專案。</p>
+
+<p>它的設計目標是只要開發者熟悉它的慣例，它就可以讓網站開發變的非常容易。而相對於其他程式語言和框架，<em>Rails</em>可以讓你用更少的程式碼達成更多的功能，它甚至讓網站開發變得更有趣。</p>
+
+<p><em>Rails</em>的哲學包括以下指導原則：</p>
+
+<ul>
+  <li>不要重複自己(<em>DRY: Don’t Repeat Yourself</em>) – 撰寫出重複的程式碼是件壞事</li>
+  <li>慣例勝於設定(<em>Convention Over Configuration</em>) – <em>Rails</em>會預設各種好的設定跟慣例，而不是要求你設定每一個細節到設定檔中。</li>
+  <li>
+<em>REST</em>是網站應用程式的最佳模式 – 使用<em>Resources</em>和標準的<em>HTTP verbs</em>(動詞)來組織你的應用程式是最快的方式(我們會在路徑一章詳細介紹這個強大的設計)</li>
+</ul>
+
+<h2 id="rails">為何選擇<em>Rails</em>？</h2>
+
+<p>這是一個開發框架的時代，熟悉開發框架的人，可以很快的完成任務以及熟悉網站程式的架構。而各種程式語言要入門上手，其實都不會太困難。我認為重點會在於你不能夠熟悉做事情的框架。</p>
+
+<p>所以，撇開程式語言的偏好，<em>Ruby on Rails</em>是目前網站開發框架中做前端(提供動態<em>HTML</em>給瀏覽器)應用伺服器最為成功和技術先進的。它的概念也深深影響了非常多其他程式語言的後進網站開發框架，例如<em>ASP.NET MVC</em>、<em>CakePHP</em>、<em>Grails</em>、<em>TurboGears</em>、<em>Pylons</em>、<em>web2py</em>、<em>catalyst</em>等等(模仿是最大的恭維)。我們可以用非常有效率的程式碼開發出網站應用程式。另外，可能會讓你感到意外的是，它也是目前動態語言中，生態圈最為豐富的網站開發框架，相關的書籍、研討會、顧問公司、第三方服務、外掛套件等等十分豐富。因為使用<em>Rails</em>的人數眾多，所以在開發上各個方向都有人提供了最佳實務，像是如何寫出好的程式碼、網站安全性、網站性能、擴充性、全文搜尋、非同步處理等等，這是一個非常活躍的社群。</p>
+
+<p>當然，最重要的一個理由，就是採用<em>Rails</em>後生產力暴增：寫新的應用程式、增加新功能變成容易地多。讓你可以用更少程式碼做更多的事情，而且程式也更容易維護。當然，學習新工具總是需要時間投資的，一開始可能沒辦法立刻見效。但是如果你有長期的開發工作，而且網站有一定的複雜性，那麼一個短期學習<em>Ruby on Rails</em>的投資，長期來說將會是非常值得的。</p>
+
+<h2 id="rails-">Rails 不是什麼</h2>
+
+<ul>
+  <li>如上所述，<em>Rails</em>是一個打造網站應用程式的開發框架，如果你只需要靜態的<em>HTML</em>，那是絕不需要用到<em>Rails</em>的。</li>
+  <li>
+<em>Rails</em>不是<em>CMS(Content Management System)</em>內容管理系統。<em>CMS</em>是一套寫好的架站系統，可以讓你不需要寫程式就可以架站。市面上流行成熟的<em>CMS</em>系統多為<em>PHP</em>寫成，例如<em>Drupal</em>、<em>WordPress</em>等。當然也有用<em>Ruby</em>寫的，例如<em>Radiant</em>。如果這些架站系統剛好符合你的需求，那就不一定需要<em>Rails</em>。</li>
+  <li>
+<em>Rails</em>是一套網站開發框架幫助你建立網站應用程式，它不是程式語言。</li>
+</ul>
+
+<h2 id="ruby">什麼是<em>Ruby</em>？</h2>
+
+<p><em>Rails</em>是一套使用<em>Ruby</em>開發的網站框架。如果您對<em>Ruby</em>一無所知就一頭栽進<em>Rails</em>，恐怕不是個好主意。</p>
+
+<p><em>Ruby</em>是一套開放原碼、物件導向的動態直譯式<em>(interpreted)</em>程式語言，它有著簡單哲學、高生產力、精巧、自然的語法。他的創造者是來自日本的松本行弘(又名<em>Matz</em>)，設計的靈感來自於<em>Lisp</em>、<em>Perl</em>和<em>Smalltalk</em>，設計的目的是要讓程式設計師能夠快樂地寫程式。</p>
+
+<p>讓我們看一個非常簡單的範例：</p>
+
+<pre><code>str = "May Ruby be with you!"
+5.times { puts str }
+</code></pre>
+
+<p>這的範例就簡單告訴我們有關<em>Ruby</em>的三件事情了：</p>
+
+<ul>
+  <li>動態分型<em>(typing)</em>，不需要宣告型態</li>
+  <li>每樣東西都是物件，包括數字</li>
+  <li>匿名函式<em>(code block)</em>隨處可見</li>
+</ul>
+
+<p>我們會在<em>Ruby</em>一章介紹基本的語法，讓各位讀者可以很快的入門。</p>
+
+<h2 id="section">動態語言的好處</h2>
+
+<p>為什麼開發伺服器端應用程式，使用動態語言(<em>Ruby</em>、<em>Python</em>、<em>PHP</em>、<em>Perl</em>等)比起靜態語言(<em>Java</em>、<em>C++</em>等)有更好的優勢呢？</p>
+
+<blockquote>
+  <p>靜態語言和動態語言的差別在於，前者的變數型別需要事前宣告，後者則是執行期才動態決定。實務上，就看程式需不需要事前編譯這個動作了。</p>
+</blockquote>
+
+<p>著名的”人月神話”一書作者<em>Fred Brooks</em>曾說：「一個程式設計師一天能產生的程式碼行數是差不多的，無論什麼程式語言」。因此一個具有表達能力的高階程式語言，就會比低階的程式語言能完成更多功能。相較於靜態程式語言，使用更高階的動態腳本語言可以幫助我們：</p>
+
+<ol>
+  <li>用更少程式碼做更多事情，大大增加生產力</li>
+  <li>更快因應客戶開發需求，敏捷開發</li>
+</ol>
+
+<p>不過，動態語言也不是沒有缺點：</p>
+
+<ol>
+  <li>執行效能是絕對比不上靜態語言的</li>
+  <li>沒有編譯期可以檢查型別錯誤</li>
+</ol>
+
+<p>但是，我們知道現在的電腦越來越快、越來越便宜、上網越來越容易、記憶體越來越多、硬碟越來越大。另外，行動裝置也越來越多，需要搭配的網路服務需求也增加了。這些趨勢告訴我們有更多的軟體的需求，另一方面由於硬體效能的增強，人力開發成本比起軟體的執行期的效能，也越來越重要。同樣一個程式，用動態語言執行的效能已經可以達到實用(例如每秒可以處理<em>50~500</em>個的<em>HTTP</em>請求，也可以透過增加伺服器來擴展架構)，也許用靜態語言後的執行速度可以再快一倍，但是卻需要十倍以上的時間來開發，這件事情是不是值得呢？</p>
+
+<blockquote>
+  <p>在硬體資源有限的行動裝置及嵌入式系統上，仍是靜態語言的天下，這一點需要更多時間才有動態語言的生存空間。</p>
+</blockquote>
+
+<p>沒有編譯期可以檢查型別錯誤的問題，也隨著單元測試和<em>TDD(Test-driven development)</em>測試驅動開發等敏捷最佳實務而逐漸降低重要性。而大部分的<em>Bug</em>會出自於商業邏輯錯誤，而不是型別錯誤上。</p>
+
+<h2 id="ruby-1">為何選擇<em>Ruby</em>？</h2>
+
+<p>Ruby 是一套非常重視使用性(<em>Usability</em>)的物件導向程式語言，非常看重程式碼的可讀性及維護性。<em>Matz</em>在設計<em>Ruby</em>時，就特別考量一般人容不容易了解(他說我們都是凡人，像<em>Lisp</em>是給神人用的)。這也是為什麼你常常會聽到<em>Ruby</em>的程式碼自然簡潔又漂亮。您可以看看這份 <em>Ruby</em>創造者<em>Matz</em>的<a href="files/whyruby-matz-rubyconfchina.pdf"><em>Why Ruby?</em>投影片</a>或是<em>Matz</em>的演講:<em><a href="http://rubyconf2008.confreaks.com/matzs-keynote.html">RubyConf 2008</a></em>、<em><a href="http://confreaks.net/videos/159-rubyconf2009-keynote-address">RubyConf 2009</a></em>、<em><a href="http://confreaks.net/videos/11-mwrc2010-ruby124c41">Mountain West Ruby Conference 2010</a></em>，相信您會更了解及喜愛<em>Ruby</em>的哲學。</p>
+
+<p><em>Ruby</em>也是目前做<em>Domain-specific language(DSL)</em>，特別是<em>Internal DSL</em>最為成功的程式語言。透過<em>DSL</em>，程式不但可以擁有非常好的可讀性，也可以大幅增加生產力。成功的<em>DSL</em>函式庫例如有：<em>Rake</em>建構工具、<em>RSpec</em>測試工具、<em>Chef</em>伺服器設定工具、<em>Cucumber</em>驗收測試等。這些函式庫正積極地影響我們對軟體開發的想法。我們相信，還會有更多更有趣的<em>DSL</em>函式庫出現。</p>
+
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

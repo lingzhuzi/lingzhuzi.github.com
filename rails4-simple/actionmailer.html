@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | ActionMailer - E-mail 发送</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/actionmailer.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="actionmailer---e-mail-">ActionMailer - E-mail 发送</h1>
+
+<blockquote>
+  <p>Talk is cheap. Show me the code. - Linus Torvalds</p>
+</blockquote>
+
+<p>举凡使用者注册认证信、忘记密码通知信、电子报、各种信息通知，<em>E-mail</em>寄送都是现代网站必备的一项功能。<em>Rails</em>的<em>ActionMailer</em>元件提供了很方便的<em>Email</em>整合。</p>
+
+<h2 id="actionmailer">
+<em>ActionMailer</em>设定</h2>
+
+<p><em>Rails</em>在<em>config/environments</em>目录下针对不同执行环境会有不同的邮件服务器设定：</p>
+
+<pre><code>config.action_mailer.delivery_method
+</code></pre>
+
+<p>支持的选项包括<code>:test</code>、<code>:sendmail</code>和<code>smtp</code>。在<em>config/environments/test.rb</em>中，预设是<code>:test</code>，也就是并不会实际寄信，而是将信件存在<code>ActionMailer::Base.deliveries</code>阵列中方便做功能测试。<code>sendmail</code>则是使用服务器的<em>/usr/bin/sendmail</em>程式，不过因为因为不是每台服务器都有适当安装<em>sendmail</em>，所以最推荐的方式是採用<code>:smtp</code>协定来寄信，例如以下是一个使用<em>Gmail</em>寄信的范例，请修改<em>config/environments/development.rb</em>或<em>config/environments/production.rb</em>：</p>
+
+<pre><code>config.action_mailer.delivery_method = :smtp
+config.action_mailer.default_url_options = { host: "http://localhost:3000" }
+config.action_mailer.smtp_settings = {
+    :address =&gt; "smtp.gmail.com",
+    :port =&gt; "587",
+    :domain =&gt; "gmail.com",
+    :authentication =&gt; "plain",
+    :user_name =&gt; "example@gmail.com",
+    :password =&gt; "123456",
+    :enable_starttls_auto =&gt; true
+ }
+</code></pre>
+
+<p>其中<code>default_url_options</code>设定是因为在<em>Email</em>这个情境下，如果要在<em>Email</em>中放超连结，必须是绝对网址。所以我们必须设定网站的网址。</p>
+
+<h2 id="mailer">建立一个<em>Mailer</em>寄信程式</h2>
+
+<p>和<em>Controller</em>一样，<em>Rails</em>也用<em>generate</em>指令产生<em>Mailer</em>类别，此类别中的一个方法就对应一个<em>Email</em>样板。以下是一个产生<em>Mailer</em>的范例：</p>
+
+<pre><code>rails generate mailer UserMailer confirm
+</code></pre>
+
+<p>如此便会产生<em>app/mailers/user_mailer.rb</em>档案，并包含一个<code>confirm</code>的动作，其<em>template</em>在<em>app/views/user_mailer/confirm.text.erb</em>(纯文字格式)和 <em>confirm.html.erb</em>(HTML格式)。如果两种格式的样板档案都有，那么<em>Rails</em>会合併成一封<em>Multiple Content Types</em>的<em>Email</em>。</p>
+
+<p>让我们看看 user_mailer.rb 的程式：</p>
+
+<pre><code>class UserMailer &lt; ActionMailer::Base
+    default :from =&gt; "foobar@example.org"
+
+    def confirm(email)
+        @message = "Thank you for confirmation!"
+        mail(:to =&gt; email, :subject =&gt; "Registered")
+    end
+end
+</code></pre>
+
+<p>其中<em>default</em>方法可以设定预设的寄件人。而 mail 方法可以设定收件人和邮件主旨。和<em>View</em>一样，<code>@user</code>对象变数可以在<em>app/views/user_mailer/confirm.text.erb</em>或<em>app/views/user_mailer/confirm.html.erb</em>或样板中存取到。而<em>mail</em>方法则还可以接受其他参数包括<code>cc</code>、<code>bcc</code>。</p>
+
+<p>我们可以在<em>rails console</em>中测试，执行<code>UserMailer.confirm("someone@example.org").deliver</code>就会寄信出去。</p>
+
+<p>实务上，我们会在<em>controller</em>之中，例如使用者注册之后寄发信件：</p>
+
+<pre><code>def create
+    user = User.new(params[:user])
+    if user.save
+        UserMailer.confirm(user.email).deliver
+        redirect_to users_path
+    else
+        render :action =&gt; :new
+    end
+end
+</code></pre>
+
+<p>如果只需要纯文字版，就砍掉<em>app/views/user_mailer/confirm.html.erb</em>这个档案，然后在<em>app/views/user_mailer/confirm.text.erb</em>纯文字格式中，可以加入以下文字跟网址：</p>
+
+<pre><code>欢迎在 &lt;%= url_for(root_url) %&gt; 注册！
+</code></pre>
+
+<p>另外，因为寄信这个动作比较耗时，通常我们也会搭配使用非同步的机制，详见非同步处理一章。</p>
+
+<h2 id="smtp">第三方<em>SMTP</em>服务</h2>
+
+<p>由于<em>Gmail</em>是个人用途使用，用量有限，并不适合开站做生意使用。我们实务上我们会使用第三方服务来确保<em>Email</em>递送的可靠性，例如：</p>
+
+<ul>
+  <li><a href="http://www.mailgun.com/">mailgun</a></li>
+  <li><a href="http://sendgrid.com/">SendGrid</a></li>
+  <li><a href="https://postmarkapp.com/">Postmark</a></li>
+  <li><a href="http://mailchimp.com/">MailChimp</a></li>
+  <li><a href="http://aws.amazon.com/ses/">AWS SES</a></li>
+</ul>
+
+<blockquote>
+  <p>大量寄送 Email 会是一门学问，请参考 <a href="http://ihower.tw/blog/archives/3481">如何正确发送(大量) Email 信件</a> 这篇文章</p>
+</blockquote>
+
+<h2 id="section">开发预览</h2>
+
+<p>开发期间我们需要常常测试预览寄出的<em>Email</em>内容，但是实际寄送出去又很没效率。我们可以安装<em>letter_opener</em>这个<em>gem</em>，修改<em>Gemfile</em>加入：</p>
+
+<pre><code>gem "letter_opener", :group =&gt; :development
+</code></pre>
+
+<p>然后将<code>config.action_mailer.delivery_method</code>改成<code>:letter_opener</code></p>
+
+<p>这样在开发模式下，就会开浏览器进行预览，而不会真的寄信出去。</p>
+
+<h2 id="section-1">收信</h2>
+
+<p><em>Active Mailer</em>也可以办到收信，请参考：</p>
+
+<ul>
+  <li><a href="http://steve.dynedge.co.uk/2010/09/07/incoming-email-in-rails-3-choosing-the-right-approach/">Receiving Incoming Email in Rails 3</a></li>
+  <li><a href="http://jasonseifer.com/2009/04/24/receving-email-with-rails">Receiving Email with Rails</a></li>
+  <li><a href="http://railspikes.com/2007/6/1/rails-email-processing">Stress-free Incoming E-Mail Processing with Rails</a></li>
+</ul>
+
+<p>或是使用第三方服务，例如<a href="http://mailchimp.com/">MailChimp</a>有提供收信的<em>Webhook</em>服务：信寄到<em>MailChimp</em>服务，然后<em>Mailchimp</em>再呼叫网站的<em>HTTP API</em>。</p>
+
+<h2 id="section-2">更多线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/action_mailer_basics.html">Action Mailer Basics</a></li>
+</ul>
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

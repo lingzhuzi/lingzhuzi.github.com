@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | 网站效能</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/performance.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="section">网站效能</h1>
+
+<blockquote>
+  <p>We should forget about small efficiencies, say about 97% of the time: premature optimization is the root of all evil - Donald Knuth</p>
+</blockquote>
+
+<p>即使程式的执行结果正确，但是如果你的网站效能不佳，载入页面需要花很久时间，那们网站的使用性就会变得很差，甚至慢到无法使用。硬件的进步虽然可以让我们不必再斤斤计较程式码的执行速度，但是开发者还是需要拥有合理的成本观念，要买快十倍的<em>CPU</em>或硬碟不只花十倍的钱也买不到，带来的效能差异还不如你平常就避免写出拖慢效能十倍甚至百倍的程式码。</p>
+
+<p>效能问题其实可以分成两种，一种是完全没有意识到抽象化工具、开发框架的效能盲点，而写下了执行效能差劲的程式码。另一种则是对现有程式的效能不满意，研究如何最佳化，例如利用快取机制隔离执行速度较慢的高阶程式，来大幅提昇执行效能。</p>
+
+<p>这一章会先介绍第一种问题，这是一些使用<em>Rails</em>这种高阶框架所需要注意的效能盲点<em>(anti-patterns)</em>，避免写出不合理执行速度的程式。接下来，我们再进一步学习如何最佳化<em>Rails</em>程式。下一章则介绍使用快取机制来大幅增加网站效能。</p>
+
+<blockquote>
+  <p>另一个你会常听到的名词是扩展性(Scalability)。网站的扩展性不代表绝对的效能，而是研究如何在合理的硬件成本下，可以通过水平扩展持续增加系统容量。</p>
+</blockquote>
+
+<h2 id="activerecordsql">
+<em>ActiveRecord</em>和<em>SQL</em>
+</h2>
+
+<p><em>ActiveRecord</em>抽象化了<em>SQL</em>操作，是头号第一大效能盲点所在，你很容易沉浸在他带来的开发高效率上，忽略了他的效能盲点直到上线爆炸。存取数据库是一种相对很慢的<em>I/O</em>的操作：每一条<em>SQL query</em>都得耗上时间、执行回传的结果也会被转成<em>ActiveRecord</em>对象全部放进内存，会不会占用太多？因此你得对会产生出怎样的<em>SQL queries</em>有基本概念。</p>
+
+<!--
+> *Engine Yard*有一篇*[That’s Not a Memory Leak, It’s Bloat](https://blog.engineyard.com/2009/thats-not-a-memory-leak-its-bloat/)*讲解了*ActiveRecord*的常见使用问题。
+-->
+
+<h3 id="n1-queries">N+1 queries</h3>
+
+<p><em>N+1 queries</em>是数据库效能头号杀手。<em>ActiveRecord</em>的<em>Association</em>功能很方便，所以很容易就写出以下的程式：</p>
+
+<pre><code># model
+class User &lt; ActieRecord::Base
+  has_one :car
+end
+
+class Car &lt; ActiveRecord::Base
+  belongs_to :user
+end
+
+# your controller
+def index
+  @users = User.page(params[:page])
+end
+
+# view
+&lt;% @users.each do |user| %&gt;
+ &lt;%= user.car.name %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>我们在<em>View</em>中读取<code>user.car.name</code>的值。但是这样的程式导致了<em>N+1 queries</em>问题，假设<em>User</em>有10笔，这程式会产生出11笔<em>Queries</em>，一笔是查<em>User</em>，另外10笔是一笔一笔去查<em>Car</em>，严重拖慢效能。</p>
+
+<pre><code>SELECT * FROM `users` LIMIT 10 OFFSET 0
+SELECT * FROM `cars` WHERE (`cars`.`user_id` = 1)
+SELECT * FROM `cars` WHERE (`cars`.`user_id` = 2)
+SELECT * FROM `cars` WHERE (`cars`.`user_id` = 3)
+...
+...
+...
+SELECT * FROM `cars` WHERE (`cars`.`user_id` = 10)
+</code></pre>
+
+<p>解决方法，加上<code>includes</code>：</p>
+
+<pre><code># your controller
+def index
+  @users = User.includes(:car).page(params[:page])
+end
+</code></pre>
+
+<p>如此<em>SQL query</em>就只有两个，只用一个就捞出所有<em>Cars</em>资料。</p>
+
+<pre><code>SELECT * FROM `users` LIMIT 10 OFFSET 0
+SELECT * FROM `cars` WHERE (`cars`.`user_id` IN('1','2','3','4','5','6','7','8','9','10'))
+</code></pre>
+
+<blockquote>
+  <p><em><a href="http://github.com/flyerhzm/bullet">Bullet</a></em>是一个外掛可以在开发时侦测<em>N+1 queries</em>问题。</p>
+</blockquote>
+
+<h3 id="indexes">索引<em>(Indexes)</em>
+</h3>
+
+<p>没有帮数据表加上索引也是常见的效能杀手，作为搜寻条件的资料栏位如果没有加索引，<em>SQL</em>查询的时候就会一笔笔检查数据表中的所有资料，当资料一多的时候相差的效能就十分巨大。一般来说，以下的栏位都必须记得加上索引：</p>
+
+<ul>
+  <li>外部键<em>(Foreign key)</em>
+</li>
+  <li>会被排序的栏位(被放在<code>order</code>方法中)</li>
+  <li>会被查询的栏位(被放在<code>where</code>方法中)</li>
+  <li>会被<em>group</em>的栏位(被放在<code>group</code>方法中)</li>
+</ul>
+
+<p>如何帮数据库加上索引请参考<em><a href="migrations.html">Migrations</a></em>一章。</p>
+
+<blockquote>
+  <p><em><a href="http://github.com/eladmeidar/rails_indexes">rails_indexes</a></em>提供了<em>Rake</em>任务可以帮忙找忘记加的索引。</p>
+</blockquote>
+
+<h3 id="select">使用<em>select</em>
+</h3>
+
+<p><em>ActiveRecord</em>预设的<em>SQL</em>会把所有栏位的资料都读取出来，如果其中有<em>text</em>或<em>binary</em>栏位资料量很大，就会每次都占用很多不必要的内存拖慢效能。使用<em>select</em>可以只读取出你需要的资料：</p>
+
+<pre><code>Event.select(:id, :name, :description).limit(10)
+</code></pre>
+
+<p>进一步我们可以利用<em>scope</em>先设定好<em>select</em>范围：</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+  scope :short, -&gt; { select(:id, :name, :description) }
+end
+
+User.short.limit(10)
+</code></pre>
+
+<h3 id="joinsincludes">有些情况可以用<em>joins</em>取代<em>includes</em>
+</h3>
+
+<pre><code>Group.includes(:group_memberships).where( ["group_memberships.created_at &gt; ?", Time.now - 30.days ] )
+</code></pre>
+
+<p>以上的查询只有在条件中用到<em>group_memberships</em>，所以可以换成<em>joins</em>增加效率：</p>
+
+<pre><code>Group.joins(:group_memberships).where( ["group_memberships.created_at &gt; ?", Time.now - 30.days ] )
+</code></pre>
+
+<h3 id="counter-cache">Counter cache</h3>
+
+<p>如果需要常计算<em>has_many</em>的<em>Model</em>有多少笔资料，例如显示文章列表时，也要显示每篇有多少留言回覆。</p>
+
+<pre><code>&lt;% @topics.each do |topic| %&gt;
+  主题：&lt;%= topic.subject %&gt;
+  回覆数：&lt;%= topic.posts.size %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>这时候<em>Rails</em>会产生一笔笔的<em>SQL count</em>查询：</p>
+
+<pre><code>SELECT * FROM `posts` LIMIT 5 OFFSET 0
+SELECT count(*) AS count_all FROM `posts` WHERE (`posts`.topic_id = 1 )
+SELECT count(*) AS count_all FROM `posts` WHERE (`posts`.topic_id = 2 )
+SELECT count(*) AS count_all FROM `posts` WHERE (`posts`.topic_id = 3 )
+SELECT count(*) AS count_all FROM `posts` WHERE (`posts`.topic_id = 4 )
+SELECT count(*) AS count_all FROM `posts` WHERE (`posts`.topic_id = 5 )
+</code></pre>
+
+<p><em>Counter cache</em>功能可以把这个数字存进数据库，不再需要一笔笔的<em>SQL count</em>查询，并且会在<em>Post</em>数量有更新的时候，自动更新这个值。</p>
+
+<p>首先，你必须要在<em>Topic Model</em>新增一个栏位叫做<em>posts_count</em>，依照惯例是<code>_count</code>结尾，型别是<em>integer</em>，有预设值0。</p>
+
+<pre><code>rails g migration add_posts_count_to_topic
+</code></pre>
+
+<p>编辑<em>Migration</em>：</p>
+
+<pre><code>class AddPostsCountToTopic &lt; ActiveRecord::Migration
+  def change
+    add_column :topics, :posts_count, :integer, :default =&gt; 0
+  end
+end
+</code></pre>
+
+<p>编辑<em>Models</em>，加入<code>:counter_cache =&gt; true</code>：</p>
+
+<pre><code>class Topic &lt; ActiveRecord::Base
+  has_many :posts
+end
+
+class Posts &lt; ActiveRecord::Base
+  belongs_to :topic, :counter_cache =&gt; true
+end
+</code></pre>
+
+<p>这样同样的<code>@topic.posts.size</code>程式，就会自动变成使用<code>@topic.posts_count</code>，而不会用<em>SQL count</em>查询一次。</p>
+
+<h3 id="batch-finding">Batch finding</h3>
+
+<p>如果需要捞出全部的资料做处理，强烈建议最好不要用<em>all</em>方法，因为这样会把全部的资料一次放进内存中，如果资料有成千上万笔的话，效能就坠毁了。解决方法是分次捞，每次几捞几百或几千笔。虽然自己写就可以了，但是<em>Rails</em>提供了<em>Batch finding</em>方法可以很简单的使用：</p>
+
+<pre><code>Article.find_each do |a|
+  # iterate over all articles, in chunks of 1000 (the default)
+end
+
+Article.find_each( :batch_size =&gt; 100 ) do |a|
+  # iterate over published articles in chunks of 100
+end
+</code></pre>
+
+<p>或是</p>
+
+<pre><code>Article.find_in_batches do |articles|
+  articles.each do |a|
+    # articles is array of size 1000
+  end
+end
+
+Article.find_in_batches( :batch_size =&gt; 100 ) do |articles|
+  articles.each do |a|
+    # iterate over all articles in chunks of 100
+  end
+end
+</code></pre>
+
+<h3 id="transaction-for-group-operations">Transaction for group operations</h3>
+
+<p>在<em>Transaction</em>交易范围内的<em>SQL</em>效能会加快，如果是相关的<em>SQL</em>可以包在一起。</p>
+
+<pre><code>my_collection.each do |q|
+  Quote.create({:phrase =&gt; q})
+end
+
+# Add transaction
+Quote.transaction do
+  my_collection.each do |q|
+    Quote.create({:phrase =&gt; q})
+ end
+end
+</code></pre>
+
+<h3 id="use-constant-for-domain-data">Use Constant for domain data</h3>
+
+<p>不会变的资料可以用常数在<em>Rails</em>啟动时就放到内存。</p>
+
+<pre><code>class Rating &lt; ActiveRecord::Base
+  G  = Rating.find_by_name('G')
+  PG = Rating.find_by_name('PG')
+  R  = Rating.find_by_name('R')
+  #....
+end
+
+Rating::G
+Rating::PG
+Rating::R
+</code></pre>
+
+<blockquote>
+  <p>注意在<em>development mode</em>中不会作用，要在<em>production mode</em>才有快取效果。</p>
+</blockquote>
+
+<h3 id="full-text-search-engine">全文搜寻<em>Full-text search engine</em>
+</h3>
+
+<p>如果需要搜寻<em>text</em>栏位，因为数据库没办法加索引，所以会造成<em>table scan</em>把数据表所有资料都扫描一次，效能会非常低落。这时候可以使用外部的全文搜寻服务器来做索引，目前常见有以下选择：</p>
+
+<ul>
+  <li>
+<em><a href="http://www.elasticsearch.org/">Elasticsearch</a></em>全文搜寻引擎和<em><a href="https://github.com/elasticsearch/elasticsearch-rails">elasticsearch-rails</a> gem</em>
+</li>
+  <li>
+<em><a href="http://lucene.apache.org/solr/">Apache Solr(Lucenel)</a></em>全文搜寻引擎和<em><a href="https://github.com/sunspot/sunspot">Sunspot</a> gem</em>
+</li>
+  <li>
+<em>PostgreSQL</em>内建有全文搜寻功能，可以搭配 <em><a href="https://github.com/textacular/textacular">texticle</a> gem</em>或 <em><a href="https://github.com/Casecommons/pg_search">pg_search</a> gem</em>
+</li>
+  <li>
+<em><a href="http://sphinxsearch.com/">Sphinx</a></em>全文搜寻引擎和<em><a href="http://freelancing-god.github.com/ts/en/">thinking_sphinx</a> gem</em>
+</li>
+</ul>
+
+<h3 id="sql-">SQL 分析</h3>
+
+<p><em><a href="https://github.com/nesquena/query_reviewer">QueryReviewer</a></em>这个套件通过<code>SQL EXPLAIN</code>分析<em>SQL query</em>的效率。</p>
+
+<p>另外在<em>Rails 3.2</em>的开发模式中，有以下的设定：</p>
+
+<pre><code># Log the query plan for queries taking more than this (works
+# with SQLite, MySQL, and PostgreSQL).
+# config.active_record.auto_explain_threshold_in_seconds = 0.5
+</code></pre>
+
+<p>当<em>SQL</em>执行超过0.5秒，就会自动帮你分析在<em>Log</em>裡。</p>
+
+<h3 id="de-normalization">逆正规化(de-normalization)</h3>
+
+<p>一般在设计关联式数据库的<em>table</em>时，思考的都是正规化的设计。通过正规化的设计，可以将资料不重复的储存，省空间，更新也不易出错。但是这对于复杂的查询有时候就力有未逮。因此必要时可以採用逆正规化的设计。牺牲空间，增加修改的麻烦，但是让读取这事件变得更快更简单。</p>
+
+<p>上述章节的<em>Counter cache</em>，其实就是一种逆正规化的应用，只是<em>Rails</em>帮你包装好了。如果你要自己实作的话，可以善用<em>Callback</em>或<em>Observer</em>来作更新。以下是一个应用的范例，<em>Event</em>的总金额，是通过<em>Invoice#amount</em>的总和得知。另外，我们也想知道该活动最后一笔<em>Invoice</em>的时间：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+	has_many :invoices
+
+	def amount
+		self.invoices.sum(:amount)
+	end
+
+	def last_invoice_time
+		self.invoices.last.created_at
+	end
+end
+
+class Invoice &lt; ActiveRecord::Base
+	belongs_to :event
+end
+</code></pre>
+
+<p>如果有一页是列出所有活动的总金额和最后<em>Invoice</em>时间，那么这一页就会产生<em>2N+1</em>笔<em>SQL</em>查询(N是活动数量)。为了改善这一页的读取效能，我们可以在<em>events</em>数据表上新增两个栏位<em>amount</em>和<em>last_invoice_time</em>。首先，我们新增一个<em>Migration</em>:</p>
+
+<pre><code>add_column :events, :amount, :integer, :default =&gt; 0
+add_column :events, :last_invoice_time, :datetime
+
+# Data migration current data
+Event.find_each do |e|
+	e.amount = e.invoices.sum(:amount)
+	e.last_invoice_time = e.invoices.last.try(:created_at) # e.invoices.last 可能是 nil
+	e.save(:validate =&gt; false)
+end
+</code></pre>
+
+<p>接着程式就可以改成:</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+	has_many :invoices
+
+	def update_invoice_cache
+		self.amount_cache = self.invoices.sum(:amount)
+		self.last_invoice_time = self.invoices.last.try(:created_at)
+		self.save(:validate =&gt; false)
+	end
+end
+
+class Invoice &lt; ActiveRecord::Base
+	belongs_to :event
+
+	after_save :update_event_cache_data
+
+	protected
+
+	def update_event_cache_data
+		self.event.update_invoice_cache
+	end
+end
+</code></pre>
+
+<p>如此就可以将成本转嫁到写入，而最佳化了读取时间。</p>
+
+<h2 id="section-1">最佳化效能</h2>
+
+<p>关于程式效能最佳化，<em>Donald Knuth</em>大师曾开示「<em>We should forget about small efficiencies, say about 97% of the time: premature optimization is the root of all evil”</em>」，在效能还没有造成问题前，就为了优化效能而修改程式和架构，只会让程式更混乱不好维护。</p>
+
+<p>也就是说，当效能还不会造成问题时，程式的维护性比考虑效能重要。<em>80/20</em>法则：会拖慢整体效能的程式，只佔全部程式的一小部分而已，所以我们只最佳化会造成问题的程式。接下来的问题就是，如何找到那一小部分的效能瓶颈，如果用猜的去找那<em>3%</em>造成效能问题的程式，再用感觉去比较改过之后的效能好像有比较快，这种作法一点都不科学而且浪费时间。善用分析工具找效能瓶颈，最佳化前需要测量，最佳化后也要测量比较。</p>
+
+<p>把所有东西都快取起来并不是解决效能的作法，这只会让程式有更多的一致性问题，更难维护。另外也不要跟你的框架过不去，硬是要去改<em>Rails</em>核心，这会导致程式有严重的维护性问题。最后，思考出正确的演算法总是比埋头改程式有效，只要资料一大，不论程式怎麼改，挑选<em>O(1)</em>的演算法一定就是比<em>O(n)</em>快。</p>
+
+<h2 id="section-2">效能分析工具</h2>
+
+<p>效能分析工具可以帮助我们找到哪一部分的程式最需要效能优化，哪些部分最常被使用者执行，如果能够优化效益最高。</p>
+
+<ul>
+  <li>
+<em><a href="http://github.com/wvanbergen/request-log-analyzer">request-log-analyzer</a></em>这套工具可以分析<em>Rails log</em>档案</li>
+  <li>通过商业<em>Monitor</em>產品：<a href="http://www.newrelic.com">New Relic</a>、<a href="http://www.scoutapp.com">Scout</a>
+</li>
+  <li>Rack::Bug Rails middleware 可以在开发的时候，插入一个工具列分析每个<em>request</em>
+</li>
+  <li>ruby-prof gem</li>
+  <li>Rails command line</li>
+</ul>
+
+<h2 id="section-3">效能量测</h2>
+
+<ul>
+  <li>Benchmark standard library</li>
+  <li>Rails command line</li>
+  <li>Rails helper methods: Creating report in your log file</li>
+</ul>
+
+<h3 id="section-4">一般性工具(黑箱)</h3>
+
+<ul>
+  <li>
+<a href="https://code.google.com/p/httperf/">httperf</a>: 可以参考<a href="http://ihower.tw/blog/archives/1749">使用 httperf 做网站效能分析</a>一文</li>
+  <li>
+<a href="https://github.com/wg/wrk">wrk</a>: Modern HTTP benchmarking tool</li>
+  <li>
+<a href="http://httpd.apache.org/docs/2.2/programs/ab.html">Apache ab</a>: Apache HTTP server benchmarking tool</li>
+</ul>
+
+<p>How fast can this server serve requests?</p>
+
+<ul>
+  <li>Use web server to serve static files as baseline measurement</li>
+  <li>Do not run from the same server (I/O and CPU)</li>
+  <li>Run from a machine as close as possible</li>
+</ul>
+
+<p>You need know basic statistics</p>
+
+<ul>
+  <li>compare not just their means but their standard deviations and confidence intervals as well.</li>
+  <li>Approximately 68% of the data points lie within one standard deviation of the mean</li>
+  <li>95% of the data is within 2 standard deviation of the mean</li>
+</ul>
+
+<h2 id="ruby">如何写出执行速度较快的<em>Ruby</em>程式码</h2>
+
+<ul>
+  <li><a href="http://ihower.tw/blog/archives/1691">如何写出有效率的 Ruby Code</a></li>
+  <li><a href="https://speakerdeck.com/sferik/writing-fast-ruby">Writing Fast Ruby</a></li>
+  <li><a href="https://github.com/JuanitoFatas/fast-ruby">JuanitoFatas/fast-ruby</a></li>
+</ul>
+
+<p>不过有时候「执行速度较快」的程式码不代表好维护、好除错的程式码，这一点需要多加注意。</p>
+
+<h2 id="ruby-1">使用更快的<em>Ruby</em>函式库</h2>
+
+<p>有<em>C Extension</em>的<em>Ruby</em>函式库总是比较快的，如果常用可以考虑安装：</p>
+
+<ul>
+  <li>XML parser <a href="http://nokogiri.org/">http://nokogiri.org/</a>
+</li>
+  <li>JSON parser <a href="http://github.com/brianmario/yajl-ruby/">http://github.com/brianmario/yajl-ruby/</a>
+</li>
+  <li>HTTP client <a href="http://github.com/pauldix/typhoeus">http://github.com/pauldix/typhoeus</a>
+</li>
+  <li>
+<a href="https://github.com/brianmario/escape_utils">escape_utils</a>: 请参考 <a href="https://github.com/blog/1475-escape-velocity">Escape Velocity</a>
+</li>
+</ul>
+
+<h2 id="web">由<em>Web</em>服务器提供静态档案</h2>
+
+<p>由<em>Web</em>服务器提供档案会比你用<em>Application</em>服务器快上十倍以上，如果是不需要权限控管的静态档案，可以直接放在<em>public</em>目录下让使用者下载。</p>
+
+<p>如果是需要权限控管得经过<em>Rails</em>，你会在<em>controller</em>才用<code>send_file</code>送出档案，这时候可以打开<code>:x_sendfile</code>表示你将传档的工作委交由<em>Web</em>服务器的<em>xsendfile</em>模组负责。当然，<em>Web</em>服务器得先安装好<em>x_sendfile</em>功能：</p>
+
+<ul>
+  <li><a href="https://tn123.org/mod_xsendfile">Apache mod_xsendfile</a></li>
+  <li><a href="http://wiki.nginx.org/XSendfile">Nginx XSendfile</a></li>
+</ul>
+
+<h2 id="cdn-">由 CDN 提供静态档案</h2>
+
+<p>静态档案也放在<em>CDN</em>上让全世界的使用者在最近的下载点读取。<em>CDN</em>需要专门的<em>CDN</em>厂商提供服务，其中推荐<em><a href="http://aws.amazon.com/cloudfront/">AWS CloudFront</a></em>和<em><a href="https://www.cloudflare.com">CloudFlare</a></em>线上就可以完成申请和设定的。</p>
+
+<p>如果要让你的<em>Assets</em>例如<em>CSS, JavaScript, Images</em>也让使用者通过<em>CDN</em>下载，只要修改<em>config/environments/production.rb</em>的<code>config.action_controller.asset_host</code>为<em>CDN</em>网址即可。</p>
+
+<h2 id="client-side-web-performance">Client-side web performance</h2>
+
+<p>参考<a href="http://ihower.tw/blog/archives/1707">Rails Front-End 优化</a></p>
+
+<ul>
+  <li><a href="http://yslow.org/">YSlow</a></li>
+  <li><a href="http://code.google.com/speed/page-speed/">Google PageSpeed</a></li>
+</ul>
+
+<h2 id="section-5">使用外部程式</h2>
+
+<p><em>Ruby</em>不是万能，有时候直接呼叫外部程式是最快的作法：</p>
+
+<pre><code>def thumbnail(temp, target)
+  system("/usr/local/bin/convert #{escape(temp)} -resize 48x48! #{escape(target}")
+end
+</code></pre>
+
+<h2 id="section-6">投影片</h2>
+
+<ul>
+  <li><a href="http://www.slideshare.net/ihower/rails-performance">Rails Performance Best Practices</a></li>
+</ul>
+
+<h2 id="section-7">其他线上资源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/v3.2.13/performance_testing.html">Performance Testing Rails Applications</a></li>
+</ul>
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

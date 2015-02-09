@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | ActiveRecord - 進階功能</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="https://ihower.tw/rails4/activerecord-others.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="activerecord---">ActiveRecord - 進階功能</h1>
+
+<blockquote>
+  <p>Most of you are familiar with the virtues of a programmer. There are three, of course: laziness, impatience, and hubris. - Larry Wall</p>
+</blockquote>
+
+<p>本章介紹其他<em>ActiveRecord</em>的常用進階功能。</p>
+
+<h2 id="stisingle-table-inheritance">單一表格繼承<em>STI(Single-table inheritance)</em>
+</h2>
+
+<p>如何將物件導向中的繼承概念，對應到關聯式資料庫的設計，是個大哉問。<em>Rails</em>內建了其中最簡單的一個解法，只用一個資料表儲存繼承體系中的物件，搭配一個<code>type</code>欄位用來指名這筆資料的類別名稱。</p>
+
+<p>要開啟<em>STI</em>功能，依照慣例只要有一個欄位叫做<code>type</code>，型態字串即可。假設以下的<code>posts</code>資料表有欄位叫做<code>type</code>，那麼這三個<em>Models</em>實際上就會共用<code>posts</code>一個資料表，當然，還有這兩個子類別也都繼承到父類別的<code>validates_presence_of :subject</code>：</p>
+
+<pre><code>class Post &lt; ActiveRecord::Base
+    validates_presence_of :subject
+end
+
+class GuestPost &lt; Post
+end
+
+class MemberPost &lt; Post
+end
+</code></pre>
+
+<p>讓我們進入<em>rails console</em>實驗看看，<em>Rails</em>會根據你使用的類別，自動去設定<code>type</code>欄位：</p>
+
+<pre><code>post = GuestPost.create( :subject =&gt; "guest")
+post.type # "GuestPost"
+post.id # 1
+post = MemberPost.create( :subject =&gt; "member" )
+post.id # 2
+post.type # "MemberPost"
+GuestPost.last # 1
+</code></pre>
+
+<blockquote>
+  <p>很遺憾，也因為這個慣例的關係，你不能將<code>type</code>這麼名字挪做它用。</p>
+</blockquote>
+
+<p><em>STI</em>最大的問題在於欄位的浪費，如果繼承體系中交集的欄位不多，那麼使用<em>STI</em>就會非常的浪費空間。如果有較多的不共用的欄位，筆者會建議不要使用這個功能，讓個別的類別有自己的資料表。要關閉<em>STI</em>，請父類別加上<code>self.abstract_class = true</code></p>
+
+<pre><code>class Post &lt; ActiveRecord::Base
+    self.abstract_class = true
+    validates_presence_of :subject
+end
+
+class GuestPost &lt; Post
+end
+
+class MemberPost &lt; Post
+end
+</code></pre>
+
+<p>這裡的<em>GuestPost</em>和<em>MemberPost</em>就需要有自己的<em>Migrations</em>建立<em>guest_posts</em>和<em>member_posts</em>資料表。</p>
+
+<h2 id="transactions">交易<em>Transactions</em>
+</h2>
+
+<p><em>Transaction</em>(交易)保證所有資料的操作都只有在成功的情況下才會寫入到資料庫，最著名的例子也就是銀行的帳戶交易，只有在帳戶提領金額及存入帳戶這兩個動作都成功的情況下才會將這筆操作寫入資料庫，否則在其中一個動作因為某些原因失敗的話就會放棄所有已做的操作將資料回復到交易前的狀態。在<em>Rails</em>中使用交易的方式像這樣：</p>
+
+<pre><code>ActiveRecord::Base.transaction do
+  david.withdrawal(100)
+  mary.deposit(100)
+end
+</code></pre>
+
+<p>你可以在一個交易中包含不同<em>Active Record</em>的類別或物件，這是因為交易是以資料庫連線為範圍，而不是個別<em>Model</em>：</p>
+
+<pre><code>User.transaction do
+  User.create!(:name =&gt; 'ihower')
+  Feed.create!
+end
+</code></pre>
+
+<p>注意到這裡我們要使用<code>create!</code>而不是<code>create</code>，這是因為前者驗證失敗才會丟出例外，好讓整個交易失敗。同理，在交易裡做更新應該使用<code>update!</code>而不是<code>update</code>。</p>
+
+<p>單一<em>Model</em>的<code>save</code>及<code>destroy</code>方法已經幫你使用<em>transaction</em>包起來了，當資料驗證失敗或其中的回呼發生例外時，<em>Rails</em>就會觸發<em>rollback</em>。所以下述的交易區塊是多餘的不需要寫：</p>
+
+<pre><code>User.transaction do # 這是多餘的
+  User.create!(:name =&gt; 'ihower')
+end
+</code></pre>
+
+<p>另外，由於資料的更新要在交易完成後才能被讀取到，所以如果你在<code>after_save</code>回呼裡讓外部服務存取(例如呼叫全文搜尋引擎做索引)，很可能因為交易尚未完成，會讀取不到更新。這時候必須改用<code>after_commit</code>這個回呼，才能確保讀取到交易完成後的資料。</p>
+
+<h2 id="dirty-objects">Dirty objects</h2>
+
+<p><em>Dirty Objects</em>功能可以追蹤<em>Model</em>的屬性是否有改變：</p>
+
+<pre><code>person = Person.find_by_name('Uncle Bob')
+person.changed?       # =&gt; false 沒有改變任何值
+
+# 讓我們來改一些值
+person.name = 'Bob'
+person.changed?       # =&gt; true 有改變
+person.name_changed?  # =&gt; true 這個屬性有改變
+person.name_was       # =&gt; 'Uncle Bob' 改變之前的值
+person.name_change    # =&gt; ['Uncle Bob', 'Bob']
+person.name = 'Bill'
+person.name_change    # =&gt; ['Uncle Bob', 'Bill']
+
+# 儲存進資料庫
+person.save
+person.changed?       # =&gt; false
+person.name_changed?  # =&gt; false
+
+# 看看哪些屬性改變了
+person.name = 'Bob'
+person.changed        # =&gt; ['name']
+person.changes        # =&gt; { 'name' =&gt; ['Bill', 'Bob'] }
+</code></pre>
+
+<blockquote>
+  <p>注意到<em>Model</em>資料一旦儲存進資料庫，追蹤記錄就重算消失了。</p>
+</blockquote>
+
+<p>什麼時候會用到這個功能呢？通常是在儲存進資料庫前的回呼、驗證或<em>Observer</em>中，你想根據修改了什麼來做些動作，這時候<em>Dirty Objects</em>功能就派上用場了。</p>
+
+<h2 id="serialize">序列化<em>Serialize</em>
+</h2>
+
+<p>序列化(<em>Serialize</em>)通常指的是將一個物件轉換成一個可被資料庫儲存及傳輸的純文字形態，反之將這筆資料從資料庫讀出後轉回物件的動作我們就稱之為反序列(<em>Deserialize</em>)，<em>Rails</em>提供了<code>serialize</code>讓你指定需要序列化資料的欄位，任何物件在存入資料庫時就會自動序列化成<em>YAML</em>格式，而當從資料庫取出時就會自動幫你反序列成原先的物件。這個欄位通常用<em>text</em>型態，有比較大的空間可以儲存資料，然後將一個<em>Hash</em>物件序列化之後存進去。</p>
+
+<p>常用的情境例如雜七雜八的使用者<em>settings</em>：</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+  serialize :settings
+end
+
+&gt; user = User.create(:settings =&gt; { "sex" =&gt; "male", "url" =&gt; "foo" })
+&gt; User.find(user.id).settings # =&gt; { "sex" =&gt; "male", "url" =&gt; "foo" }
+</code></pre>
+
+<p>或是一些不需要資料庫索引和正規化的一整包資料，例如<em>KML</em>軌跡資料等等。</p>
+
+<blockquote>
+  <p>雖然序列化很方便可以讓你儲存任意的物件，但是缺點是序列化資料就失去了透過資料庫查詢索引的功效，你無法在<em>SQL</em>的<em>where</em>條件中指定序列化後的資料。</p>
+</blockquote>
+
+<h2 id="store">Store</h2>
+
+<p><em>Store</em>又在包裹了上一節的序列化功能，是個簡單又實用的功能，讓你可以將某個欄位指定儲存為<em>Hash</em>值。舉例來說，上一節的<em>settings</em>也可以改用<em>store</em>來設定：</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+  store :settings, :accessors =&gt; [:sex, :url]
+end
+</code></pre>
+
+<p>特別的是其中<code>accessors</code>用來設定可以直接存取的屬性，這樣就可以像平常一樣那樣操作<em>sex</em>和<em>url</em>這兩個屬性，讓我們進<em>console</em>實驗看看:</p>
+
+<pre><code>&gt; user = User.new(:sex =&gt; "male", :url =&gt; "http://example.com")
+&gt; user.sex
+ =&gt; "male"
+&gt; user.url
+ =&gt; "http://example.com"
+&gt; user.settings
+ =&gt; {:sex =&gt; "male", :url =&gt; "http://example.com"}
+</code></pre>
+
+<p>因為<code>store</code>就像使用<em>hash</em>一樣，你也可以直接操作它，加入新的資料：</p>
+
+<pre><code>&gt; user.settings[:food] = "pizza"
+&gt; user.settings
+ =&gt; {:sex =&gt; "male", :url =&gt; "http://example.com", :food =&gt; "pizza"}
+</code></pre>
+
+<h2 id="observers">觀察者<em>Observers</em>
+</h2>
+
+<p><em>Observer</em>(觀察者)是一種常見的<a href="http://en.wikipedia.org/wiki/Observer_pattern">設計模式</a>，可以讓你可以針對<em>Model</em> 的生命週期中的某些階段做出對應的行為，例如你想在使用者註冊完帳號的時寄送一封確認信給他，這時候你就可以註冊一個觀察者來觀察<em>User Model</em>，當<em>User</em>建立成功的時候便寄送<em>Email</em>。</p>
+
+<p>需要安裝<a href="https://github.com/rails/rails-observers">rails-observers</a>來啟用這個功能，然後使用<em>generator</em>來建立<em>Observer</em>：</p>
+
+<pre><code>$ rails generate observer user
+    invoke  active_record
+    create    app/models/user_observer.rb
+    invoke    rspec
+    create      spec/models/user_observer_spec.rb
+</code></pre>
+
+<p>建立好後需要在<code>config/application.rb</code>中註冊這個觀察者：</p>
+
+<pre><code>config.active_record.observers = :user_observer
+</code></pre>
+
+<p>在所建立的觀察者類別中，撰寫需要觸發的行為，例如：</p>
+
+<pre><code>class PageObserver &lt; ActiveRecord::Observer
+  observe :user
+
+  def after_save(user)
+    UserMailer.registration_confirmation(user).deliver # 寄送註冊確認信給 user
+  end
+end
+</code></pre>
+
+<p>一個<em>Observer</em>中也可同時觀察多個不同的<em>Model</em>:</p>
+
+<pre><code>class ContentObserver &lt; ActiveRecord::Observer
+    observe :article, :comment
+
+    def update_update(record)
+      # do something
+    end
+end
+</code></pre>
+
+<p><em>Observer</em>支援的觸發條件，和<em>Callback</em>所定義的七種觸發條件是相同的，詳見<a href="http://ihower.tw/rails3/activerecord-lifecycle.html">ActiveRecord 資料驗證及回呼</a> 中的<a href="http://ihower.tw/rails3/activerecord-lifecycle.html#_callback">回呼</a>一節</p>
+
+<blockquote>
+  <p>與<em>Callback</em>不同的地方是，<em>Observer</em>通常是設計來做所觀察的<em>Model</em>以外的行為，例如在我們的例子中我們觀察了<em>User</em>，而在觸發的行為我們呼叫了其他類別的方法(<em>UserMailer</em>)，這不屬於<em>User Model</em>的責任範圍，因此在應用上我們會將自己<em>Model</em>責任範圍內的行為使用<em>Callback</em>，像是資料驗證或是更新。本身責任範圍外的行為則使用<em>Observer</em>，像是寄送<em>Email</em>或是呼叫背景處理等。</p>
+</blockquote>
+
+<h2 id="section">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a></li>
+</ul>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="https://ihower.tw/rails4/">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 使用者認證</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./auth.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="section">使用者認證</h1>
+
+<blockquote>
+  <p>Quality, Speed or Cheap. Pick two. - Unknown</p>
+</blockquote>
+
+<p>使用者認證<em>Authentication</em>用以識別使用者身分，而授權<em>Authorization</em>則用來處理使用者有沒有權限可以作哪些事情。</p>
+
+<h2 id="authentication--devise">Authentication: 使用 Devise</h2>
+
+<p><a href="http://github.com/plataformatec/devise">devise</a>是一套使用者認證(Authentication)套件，是<em>Rails</em>社群中最廣為使用的一套。</p>
+
+<ul>
+  <li>
+    <p>編輯 Gemfile 加上</p>
+
+    <pre><code>  gem 'devise'
+</code></pre>
+  </li>
+  <li>輸入<code>bundle install</code>安裝此套件</li>
+  <li>輸入<code>rails g devise:install</code>產生<em>devise</em>設定檔</li>
+  <li>
+    <p>編輯 config/environments/development.rb 和 production.rb 加入寄信時預設的網站網址：</p>
+
+    <pre><code>  config.action_mailer.default_url_options = { :host =&gt; 'localhost:3000' }
+</code></pre>
+  </li>
+  <li>
+    <p>確認 app/views/layouts/application.html.erb layout 中可以顯示 flash 訊息，例如</p>
+
+    <pre><code>  &lt;p class="notice"&gt;&lt;%= notice %&gt;&lt;/p&gt;
+  &lt;p class="alert"&gt;&lt;%= alert %&gt;&lt;/p&gt;
+</code></pre>
+  </li>
+  <li>
+    <p>確認 routes.rb 中有設定網站首頁位置，例如</p>
+
+    <pre><code>  root :to =&gt; "welcome#index"
+</code></pre>
+  </li>
+  <li>輸入<code>rails g devise user</code>產生 User model 及 Migration</li>
+  <li>如果需要<em>E-mail</em>驗證功能，可以編輯<code>app/models/user.rb</code>和<code>migration</code>將<em>confirmable</em>功能打開</li>
+  <li>輸入<code>rails generate devise:views</code>產生樣板，這會包括有註冊、登入、忘記密碼、<em>Email</em>等等頁面，放在<em>app/views/devise</em>目錄下。</li>
+  <li>輸入<code>bin/rake db:migrate</code>建立資料表</li>
+</ul>
+
+<h3 id="section-1">用法</h3>
+
+<ul>
+  <li>在需要登入的 controller 加上<code>before_action :authenticate_user!</code>
+</li>
+  <li>
+    <p>可以在 Layout 中加上登入登出選單</p>
+
+    <pre><code>      &lt;% if current_user %&gt;
+          &lt;%= link_to('登出', destroy_user_session_path, :method =&gt; :delete) %&gt; |
+          &lt;%= link_to('修改密碼', edit_registration_path(:user)) %&gt;
+      &lt;% else %&gt;
+          &lt;%= link_to('註冊', new_registration_path(:user)) %&gt; |
+          &lt;%= link_to('登入', new_session_path(:user)) %&gt;
+      &lt;% end %&gt;
+</code></pre>
+  </li>
+</ul>
+
+<h3 id="section-2">加上自訂欄位</h3>
+
+<p><em>Devise</em>預設沒有產生出<em>first_name</em>、<em>last_name</em>等等欄位，我們可以加一些欄位到<em>User Model</em>：</p>
+
+<ul>
+  <li>
+    <p><code>rails g migration add_username_to_users</code>，加上</p>
+
+    <pre><code>  add_column :users, :username, :string
+</code></pre>
+  </li>
+  <li>
+<code>rake db:migrate</code> 新增這個欄位</li>
+  <li>
+    <p>編輯<em>application_controller.rb</em>補上<em>configure_permitted_parameters</em>方法：</p>
+
+    <pre><code>  class ApplicationController &lt; ActionController::Base
+    before_action :configure_permitted_parameters, if: :devise_controller?
+
+    # ...
+
+    protected
+
+    def configure_permitted_parameters
+      devise_parameter_sanitizer.for(:sign_up) &lt;&lt; :username
+      devise_parameter_sanitizer.for(:account_update) &lt;&lt; :username
+    end
+  end
+</code></pre>
+  </li>
+  <li>
+    <p>編輯<em>views/devise/registrations/edit.html.erb</em>和<em>views/devise/registrations/new.html.erb</em>，加上<em>username</em>欄位</p>
+
+    <pre><code>  &lt;div&gt;&lt;%= f.label :username %&gt;&lt;br /&gt;
+  &lt;%= f.text_field :username %&gt;&lt;/div&gt;
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="authentication--omniauth">Authentication: 使用 Omniauth</h2>
+
+<p>除了使用上述的<em>Devise</em>自行處理使用者帳號密碼之外，現在也非常流行直接使用外部的使用者認證系統，例如<em>Google</em>、<em>Facebook</em>、<em>Yahoo</em>、<em>GitHub</em>等等，一來絕大部分的使用者都已經有了這些大網站的帳號，不需要再註冊一次。二來你也不需要擔心儲存密碼的安全性問題。</p>
+
+<p>這方面利用的套件是<em><a href="https://github.com/intridea/omniauth">Omniauth</a></em>，他可以搭配各種不同的<em>Provider</em>廠商：</p>
+
+<ul>
+  <li><a href="https://github.com/mkdynamic/omniauth-facebook">omniauth-facebook</a></li>
+  <li><a href="http://www.rubydoc.info/gems/omniauth-google-oauth2/0.2.5/frames">omniauth-google-oauth2</a></li>
+  <li><a href="https://github.com/timbreitkreutz/omniauth-yahoo">omniauth-yahoo</a></li>
+  <li><a href="https://github.com/intridea/omniauth-github">omniauth-github</a></li>
+</ul>
+
+<!--
+
+### Authentication: DIY
+
+* [Authentication in Rails 3.1](http://asciicasts.com/episodes/270-authentication-in-rails-3-1)
+
+-->
+
+<h2 id="authentication-sso">Authentication: SSO</h2>
+
+<p>如果你有多個網站需要實作<em>SSO(single sign-on)</em>，可以考慮採用<em><a href="http://en.wikipedia.org/wiki/Central_Authentication_Service">CAS</a></em>的解決方案。推薦以下的<em>Sinatra</em>實作：</p>
+
+<ul>
+  <li><a href="http://rubycas.github.io/">rubycas-server</a></li>
+</ul>
+
+<h2 id="authorization">Authorization</h2>
+
+<p>在讓使用者登入之後，如果需要進一步設計使用者權限，除了自行實作之外，也有一些函式庫可以幫助你設計，例如：</p>
+
+<ul>
+  <li><a href="https://github.com/CanCanCommunity/cancancan">cancancan</a></li>
+  <li><a href="pundit">pundit</a></li>
+</ul>
+
+<h2 id="oauth">OAuth</h2>
+
+<p>OAuth 是一個開放的標準，允許用戶讓第三方應用訪問該用戶在某一網站上存儲的私密的資源（如照片，影片，聯繫人列表），而無需將用戶名和密碼提供給第三方應用。</p>
+
+<ul>
+  <li>OAuth Client: <a href="https://github.com/intridea/oauth2">oauth2</a>
+</li>
+  <li>OAuth Server: <a href="https://github.com/doorkeeper-gem/doorkeeper">doorkeeper</a>
+</li>
+</ul>
+
+<p>進一步關於<em>OAuth</em>的介紹，推薦<a href="http://blog.yorkxin.org/tags/OAuth">鴨七的OAuth 2.0 筆記</a></p>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

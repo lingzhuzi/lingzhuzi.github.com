@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 实战圣经 | 关于本书</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./rails4/about.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 实战圣经<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">电子书</a>和简体版本准备中。如果您有任何意见、鼓励或勘误，欢迎<a href="mailto:ihower@gmail.com">来信给我</a>，谢谢。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">关于本书</a></h3>
+            <h3><a href="index.html">回首页</a></h3>
+            <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
+       </div>
+       <div class="content body">
+	      <h1 id="section">关于本书</h1>
+
+<p>本书涵盖了<em>Ruby on Rails</em>绝大部分的常用功能以及介绍，为了兼顾入门及实战，本书拆分成两个部分：<em>Part 1</em>前八章为入门实作，逐步实作一个活动管理系统、<em>Part 2</em>深入剖析各种元件和高阶议题。本书期许可以让有些许经验的网页程式设计师，可以在本书中学习<em>Rails</em>之道，将之实际应用在工作之中。</p>
+
+<h2 id="section-1">关于作者</h2>
+
+<p>张文鈿，网络上的代号为<em>ihower</em>，曾担任<em><a href="http://rubykaigi.org/2011/en/schedule/details/17M05">RubyKaigi 2011</a></em>、<em><a href="http://rubyconfchina.org">RubyConf China</a></em>、<em><a href="http://osdc.tw/">OSDC.TW</a></em>、<em><a href="http://coscup.org">COSCUP</a></em>、<em><a href="http://webconf.tw">WebConf.TW</a></em>歷届讲者。2006年开始接触<em>Rails</em>，从此爱上<em>Ruby</em>这个极具丰富乐趣及高生产力的程式语言。他同时也是<em><a href="http://ruby.tw">Ruby Taiwan</a></em>社群和<em><a href="http://rubyconf.tw">RubyConf Taiwan</a></em>大会的创办人。目前为创业学校<em><a href="http://www.alphacamp.tw/">ALPHACamp</a></em>的专职讲师。</p>
+
+<p>笔者的部落格<em><a href="http://ihower.tw">http://ihower.tw</a></em>以及<em>Twitter</em>帐号<em><a href="http://twitter.com/ihower">@ihower</a></em>，欢迎追踪订阅。</p>
+
+<h2 id="section-2">软件版本</h2>
+
+<p>本书使用的<em>Rails</em>版本是<em>4.2</em>，<em>Ruby</em>版本是<em>2.1</em>。本书出版后请参考本书网站以获得最新相容性修改。</p>
+
+<h2 id="section-3">本书网站</h2>
+
+<p>你可以在<em><a href="http://ihower.tw/rails4">http://ihower.tw/rails4</a></em>看到本书最新版本以及纸本勘误。如果你有任何问题，也欢迎来信给我。</p>
+
+<h2 id="section-4">本书体例</h2>
+
+<p>为了避免读者混淆指令的使用情境，区分如下：</p>
+
+<ul>
+  <li>钱号<code>$</code>开头的是指命令列下的指令</li>
+  <li>大于<code>&gt;</code>开头的是指在<code>rails console</code>主控台下的指令</li>
+  <li>井号<code>#</code>是註解说明</li>
+  <li>其他则是程式原始码</li>
+</ul>
+
+<p>例如在以下的操作中，我们先输入了<em>rails console</em>进入<em>Rails</em>的主控台，然后输入<code>Person.first</code>和<code>Person.count</code>：</p>
+
+<p><img src="images/about-style-screenshot.png" alt="Style screenshot"></p>
+
+<p>那么在本书中，会这样书写：</p>
+
+<pre><code>$ rails console
+Loading development environment (Rails 4.2.0)
+&gt; Person.first # &lt;Person id: 1&gt;
+&gt; Person.count # 1
+</code></pre>
+
+<h2 id="section-5">本书对象</h2>
+
+<p>本书主要对象为网站程式设计师，比较不适合完全没有网页开发经验的朋友，在学习<em>Rails</em>前，最好对以下知识有基本认识：</p>
+
+<ul>
+  <li>一些程式设计的经验，例如<em>Java、C#、PHP、Python、Perl、JavaScript</em>
+</li>
+  <li>
+<em>HTML/CSS</em>网页设计基础，推荐<a href="http://www.codecademy.com/en/tracks/web">Codecademy</a>或<a href="https://www.codeschool.com/courses/front-end-foundations">Code School</a>教材</li>
+  <li>对网络通讯协定有基础认识，例如<em>HTTP、DNS</em>等，推荐观赏<a href="http://player.oreilly.com/videos/0636920031079?toc_id=151543">Web Operations 101: Web Flow</a>
+</li>
+  <li>对<em>RDBMS</em>关联式数据库和<em>SQL</em>语法有基本了解，推荐阅读<a href="http://www.codedata.com.tw/database/mysql-tutorial-getting-started">MySQL 超新手入门</a>从第0章至第5章CRUD与资料维护。</li>
+  <li>熟悉指令列操作<em>(CLI: command line interface)</em>，<em>Unix-like</em>作业系统为佳，推荐<em><a href="http://wiseheartdesign.com/articles/2010/11/12/the-designers-guide-to-the-osx-command-prompt/">The designer’s guide to the OSX command prompt</a></em>和<em><a href="http://cli.learncodethehardway.org/book/">The Command Line Crash Course</a></em>教材。</li>
+</ul>
+
+<p>如果您有<em>PHP/MySQL</em>或<em>ASP、JSP</em>等网页应用程式开发经验，相信这些对您应该不陌生。</p>
+
+<h2 id="section-6">致谢</h2>
+
+<p>本书起初的材料来源，来自于准备<em><a href="http://www.openfoundry.org/">OSSF</a></em>主办的<em>Ruby on Rails</em>工作坊课程，在这课程中获得了教学相长的宝贵经验，非常感谢中研院自由软件铸造场对于自由软件和自由软件社群的支持。本书在撰写过程也收到非常多台湾和大陆读者来信勘误指教，就算只是问一个小问题或是鼓励，也对这本书产生了良性回馈，在此也一併感谢你：<em>hSATAC、timloo0710、seekcalm、ETBlue、Michael Wang、liukai、inepalon、Ya-yu Huang、aiasfina、David Chuang、Yu-Yao Chang、yang thomas、inepalon、guan-ting chen、Eric.Xiong、pptpb.tw、saitoTK、le jerry、jeffchen1453、EvenWu、Jasper CAI、dreamy0909、JmeHsieh、逍遥、Mark GK、LiChun、tonytonyjan、Kang-Yu Li、曾小黑、Pomin Chen、jzg、ayaya、Juanito Fatas、红音也、Vincentzh、idarfan、lixing、jerrycheng、maxz、TaopaiC、Fukuball、klobo、liyq205、EIA ANG、caiguo、良葛格、Lam、Daniel Tsai、Hillman Yang、sdjcw13、Jingqiang、foxzool、danix、Yang Weiqi、周裕波、David Chang、张杰、Sgar Wang、zw963、feynixs、Youhua Wang、韩冰、Silver Chen、Kerby Wang、贵超、everyx Lo、shch、David Huang、士扬、Dars、小强、Daniel Yuen、Kevin Shen、floydsoft、Yuan-Hong Zeng、纪东、浩翔、Cray Kao、Theresa、奕辰、WM、Po-Yu、ZhaoZijie、Sean Chen、克彦、庆冲、Gary Cruise、Lester、yousheng、诗凯、Wei-Luan</em>。</p>
+
+<p>最后，特别感谢<em><a href="http://gogojimmy.net/">gogojimmy</a></em>和<a href="http://billy3321.blogspot.tw/">雨苍</a>协助部分章节初稿及润稿，以及<em><a href="http://www.alphacamp.tw/">ALPHACamp</a></em>的学员们为本书的完成做了最后的衝刺。</p>
+
+
+        <p><a href="#">》回到页首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./rails4/">Ruby on Rails 实战圣经</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">创用 CC 授权</a>释出，文字及图片等内容保留所有权利。<br>
+本网页样式来自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本网页最后产生时间：02 Feb 2015
+</p>
+</div>
+</div>
+</body>
+</html>

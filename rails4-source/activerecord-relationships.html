@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | ActiveRecord - 資料表關聯</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./activerecord-relationships.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="activerecord---">ActiveRecord - 資料表關聯</h1>
+
+<blockquote>
+  <p>Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it. — Brian W. Kernighan</p>
+</blockquote>
+
+<p>在「ActiveRecord - 基本操作與關聯設計」一章我們已經有了關聯設計的基本概念，這一章我們將進一步深入了解細節的設定，以及多型關聯設計。</p>
+
+<h2 id="hasmany-">has_many 的集合物件</h2>
+
+<p>在關聯的集合上，我們有以下方法可以使用：</p>
+
+<ul>
+  <li>«(*records) and create</li>
+  <li>any? and empty?</li>
+  <li>build and new</li>
+  <li>count</li>
+  <li>delete_all</li>
+  <li>destroy_all</li>
+  <li>find(id)</li>
+  <li>ids</li>
+  <li>include?(record)</li>
+  <li>first, last</li>
+  <li>reload</li>
+</ul>
+
+<p>例如：</p>
+
+<pre><code>&gt; e = Event.first
+&gt; e.attendees.destroy_all
+</code></pre>
+
+<h2 id="hasmany--1">has_many 的設定</h2>
+
+<h3 id="classname">class_name</h3>
+
+<p>可以變更關聯的類別名稱，例如：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :paid_attendees, :class_name =&gt; "Attendee" # 外部鍵是user_id
+end
+</code></pre>
+
+<h3 id="foreignkey">foreign_key</h3>
+
+<p>可以變更<em>Foreign Key</em>的欄位名稱，例如改成<code>user_id</code>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    belongs_to :paid_attendees, :class_name =&gt; "Attendee", :foreign_key =&gt; "user_id"
+end
+</code></pre>
+
+<h3 id="order">order</h3>
+
+<p><code>has_many</code>可以透過<code>:order</code>參數指定順序：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :attendees, :order =&gt; "id desc"
+    #...
+end
+</code></pre>
+
+<h3 id="dependent">dependent</h3>
+
+<p>可以設定當物件刪除時，也會順便刪除它的<code>has_many</code>物件：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :attendees, :dependent =&gt; :destroy
+ end
+</code></pre>
+
+<p><code>:dependent</code>可以有三種不同的刪除方式，分別是：</p>
+
+<ul>
+  <li>
+<code>:destroy</code> 會執行<em>attendee</em>的<em>destroy</em>回呼</li>
+  <li>
+<code>:delete</code> 不會執行<em>attendee</em>的<em>destroy</em>回呼</li>
+  <li>
+<code>:nullify</code> 這是預設值，不會幫忙刪除<em>attendee</em>
+</li>
+</ul>
+
+<blockquote>
+  <p>要不要執行<em>attendee</em>的刪除回呼效率相差不少，如果需要的話，必須一筆筆把<em>attendee</em>讀取出來變成<em>attendee</em>物件，然後呼叫它的<em>destroy</em>。如果用<code>:delete</code>的話，只需要一個<em>SQL</em>語句就可以刪除全部<em>attendee</em>。</p>
+</blockquote>
+
+<h3 id="where">where</h3>
+
+<p>這可以加上額外的條件在關聯上，例如</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    has_many :paid_attendees, -&gt; { where(:status =&gt; "paid) }, :class_name =&gt; 'Attendee'
+ end
+</code></pre>
+
+<h3 id="through">through</h3>
+
+<p>透過關聯來建立另一個關聯集合，用於建立多對多的關係。</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+	has_many :event_groupships
+   has_many :groups, :through =&gt; :event_groupships
+end
+</code></pre>
+
+<h3 id="source">source</h3>
+
+<p>搭配<code>through</code>設定使用，當關聯的名稱不一致的時候，需要加上<code>source</code>指名是哪一種物件。</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+	has_many :event_groupships
+   has_many :classifications, :through =&gt; :event_groupships, :source =&gt; :group
+end
+</code></pre>
+
+<h2 id="hasone-">has_one 的集合物件</h2>
+
+<p>多了兩個方法可以新增關聯物件：</p>
+
+<ul>
+  <li><code>build_{association_name}</code></li>
+  <li><code>create_{association_name}</code></li>
+</ul>
+
+<p>例如：</p>
+
+<pre><code>e = Event.first
+e.build_location
+</code></pre>
+
+<h2 id="hasone--1">has_one 的設定</h2>
+
+<p><code>class_name</code>、<code>dependent</code>、<code>where</code>、<code>order</code>等設定，都和<em>has_many</em>一樣。</p>
+
+<h2 id="belognsto-">belogns_to 的設定</h2>
+
+<h3 id="classname-1">class_name</h3>
+
+<p>可以變更關聯的類別名稱，例如：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    belongs_to :manager, :class_name =&gt; "User" # 外部鍵是user_id
+end
+</code></pre>
+
+<h3 id="foreignkey-1">foreign_key</h3>
+
+<p>可以變更<em>Foreign Key</em>的欄位名稱，例如改成<code>manager_id</code>：</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    belongs_to :manager, :class_name =&gt; "User", :foreign_key =&gt; "manager_id"
+end
+</code></pre>
+
+<h3 id="touch">touch</h3>
+
+<p>這會在修改時，也順道修改關聯資料的<code>updated_at</code>時間：</p>
+
+<pre><code>class Attendee &lt; ActiveRecord::Base
+	belongs_to :event, :touch =&gt; true
+end
+</code></pre>
+
+<h3 id="countercache">counter_cache</h3>
+
+<p>針對關聯作計數的快取，假設<em>Event</em>身上有<em>attendees_count</em>這個欄位，那麼：</p>
+
+<pre><code>class Attendee &lt; ActiveRecord::Base
+	belongs_to :event, :counter_cache =&gt; true
+end
+</code></pre>
+
+<p>這樣<em>ActiveRecord</em>就會自動更新<em>attendees_count</em>的數字。</p>
+
+<h2 id="joins--includes-">joins 和 includes 查詢</h2>
+
+<p>針對<em>Model</em>中的<code>belongs_to</code>和<code>has_many</code>關連，可以使用<code>joins</code>，也就是<em>INNER JOIN</em></p>
+
+<pre><code>Event.joins(:category)
+# SELECT "events".* FROM "events" INNER JOIN "categories" ON "categories"."id" = "events"."category_id"
+</code></pre>
+
+<p>可以一次關連多個：</p>
+
+<pre><code> Event.joins(:category, :location)
+</code></pre>
+
+<p><em>joins</em>主要的用途是來搭配<em>where</em>的條件查詢：</p>
+
+<pre><code>Event.joins(:category).where("categories.name is NOT NULL")
+# SELECT "events".* FROM "events" INNER JOIN "categories" ON "categories"."id" = "events"."category_id" WHERE (categories.name is NOT NULL)
+</code></pre>
+
+<p>透過<em>joins</em>抓出來的<em>event</em>物件是沒有包括其關連物件的。如果需要其關連物件的資料，會使用<code>includes</code>。<em>includes</em>可以預先將關連物件的資料也讀取出來，避免<em>N+1</em>問題(見效能一章)</p>
+
+<pre><code>Event.includes(:category)
+# SELECT * FROM events
+# SELECT * FROM categories WHERE categories.id IN (1,2,3...)
+</code></pre>
+
+<p>同理，也可以一次載入多個關連：</p>
+
+<pre><code>Event.includes(:category, :attendees)
+# SELECT "events".* FROM "events"
+# SELECT "categories".* FROM "categories" WHERE "categories"."id" IN (1,2,3...)
+# SELECT "attendees".* FROM "attendees" WHERE "attendees"."event_id" IN (4, 5, 6, 7, 8...)
+</code></pre>
+
+<p><code>includes</code>方法也可以加上條件：</p>
+
+<pre><code>Event.includes(:category).where( :category =&gt; { :position =&gt; 1 } )
+</code></pre>
+
+<h2 id="polymorphic-associations">多型關聯(Polymorphic Associations)</h2>
+
+<p>多型關連<em>(Polymorphic Associations)</em>可以讓一個 Model 不一定關連到某一個特定的 Model，秘訣在於除了整數的<code>_id</code>外部鍵之外，再加一個字串的<code>_type</code>欄位說明是哪一種<em>Model</em>。</p>
+
+<p>例如一個<code>Comment model</code>，我們可以透過多型關連讓它<code>belongs_to</code>到各種不同的 <em>Model</em>上，假設我們已經有了<em>Article</em>與<em>Photo</em>這兩個<em>Model</em>，然後我們希望這兩個<em>Model</em>都可以被留言。不用多型關連的話，你得分別建立<em>ArticleComment</em>和<em>PhotoComment</em>的<em>model</em>。用多型關連的話，無論有多少種需要被留言的<em>Model</em>，只需要一個<em>Comment model</em>即可：</p>
+
+<pre><code>rails g model comment content:text commentable_id:integer commentable_type
+</code></pre>
+
+<p>這樣會產生下面的 Migration 檔案：</p>
+
+<pre><code>class CreateComments &lt; ActiveRecord::Migration
+  def change
+    create_table :comments do |t|
+      t.text :content
+      t.integer :commentable_id
+      t.string :commentable_type
+
+      t.timestamps
+    end
+  end
+end
+</code></pre>
+
+<p>這個<em>Migration</em>檔案中，我們用<em>content</em>這個欄位來儲存留言的內容，<em>commentable_id</em>用來儲存被留言的物件的<em>id</em>而<em>commentable_type</em>則用來儲存被留言物件的種類，以這個例子來說被留言的對象就是<em>Article</em>與<em>Photo</em>這兩種<em>Model</em>，這個<em>Migration</em>檔案也可以改寫成下面這樣：</p>
+
+<pre><code>class CreateComments &lt; ActiveRecord::Migration
+  def change
+    create_table :comments do |t|
+      t.text :content
+      t.belongs_to :commentable, :polymorphic =&gt; true
+
+      t.timestamps
+    end
+  end
+end
+</code></pre>
+
+<p>回到我們的<em>Model</em>，我們必須指定他們的關聯關係：</p>
+
+<pre><code>class Comment &lt; ActiveRecord::Base
+  belongs_to :commentable, :polymorphic =&gt; true
+end
+
+class Article &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+
+class Photo &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+</code></pre>
+
+<p>這樣會告訴<em>Rails</em>如何去設定你的多型關係，現在讓我們進<em>console</em>實驗看看：</p>
+
+<pre><code>article = Article.first
+
+# 透過關連新增留言
+comment = article.comments.create(:content =&gt; "First Comment")
+
+# 你可以發現 Rails 很聰明的幫我們指定了被留言物件的種類和id
+comment.commentable_type =&gt; "Article"
+comment.commentable_id =&gt; 1
+
+# 也可以透過 commentable 反向回查關連的物件
+comment.commentable =&gt; #&lt;Article id: 1, ....&gt;
+</code></pre>
+
+<blockquote>
+  <p><em>DBA</em>背景的同學可能會注意到<em>PolymorphicAassociations</em>無法做到保證<em>Referential integrity</em>特性。原因很簡單，既然不知道<code>_id</code>會指到哪個<code>table</code>，自然也就沒辦法在資料庫層級加上<em>Foreign key constraint</em>。</p>
+</blockquote>
+
+<h2 id="section">更多線上資源</h2>
+
+<ul>
+  <li><a href="http://guides.rubyonrails.org/association_basics.html">Active Record Associations</a></li>
+</ul>
+
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：04 Jan 2015
+</p>
+</div>
+</div>
+</body>
+</html>

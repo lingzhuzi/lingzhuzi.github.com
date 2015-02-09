@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>Ruby on Rails 實戰聖經 | 手工打造 CRUD 應用程式</title>
+		<link rel="stylesheet" type="text/css" href="./style.css">
+		<link rel="canonical" href="./basic.html">
+	</head>
+<body>
+<div class="container">
+    <div class="page_header">
+        <h1 class="logo"><a href="./index.html">Ruby on Rails 實戰聖經<span>使用 Rails 4.2 及 Ruby 2.1</span></a></h1>
+        <div class="search_box">
+            <form class="search" action="https://www.google.com/search">
+            <input type="hidden" value="ihower.tw/rails4" name="as_sitesearch">
+            <input class="search_field" type="text" value="" name="as_q">
+            <input class="search_btn" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+
+    <div class="notice">
+    <p class="inner info_bubble">
+      <a href="https://leanpub.com/ihower-rails-book">電子書</a>和簡體版本準備中。如果您有任何意見、鼓勵或勘誤，歡迎<a href="mailto:ihower@gmail.com">來信給我</a>，謝謝。
+    </p>
+    </div>
+
+    <div class="inner wrap">
+       <div class="sidebar">
+            <h3><a href="about.html">關於本書</a></h3>
+            <h3><a href="index.html">回首頁</a></h3>
+       </div>
+       <div class="content body">
+	      <h1 id="crud-">手工打造 CRUD 應用程式</h1>
+
+<blockquote>
+  <p>Much of the essence of building a program is in fact the debugging of the specification. - Fred Brooks, The Mythical Man-Month 作者</p>
+</blockquote>
+
+<blockquote>
+  <p>請注意本章內容銜接後一章，請與後一章一起完成。</p>
+</blockquote>
+
+<p>初入門像<em>Rails</em>這樣的功能豐富的開發框架，難處就像雞生蛋、蛋生雞的問題：要了解運作的原理，你必須了解其中的元件，但是如果個別學習其中的元件，又將耗費許多的時間而見樹不見林。因此，為了能夠讓各位讀者能夠儘快建構出一個基本的應用程式，有個大局觀。我們將從一個<em>CRUD</em>程式開始。所謂的<em>CRUD</em>即為<em>Create</em>、<em>Read</em>、<em>Update</em>、<em>Delete</em>等四項基本資料庫操作，本章將示範如何做出這個基本的應用程式，以及幾項<em>Rails</em>常用功能。細節的原理說明則待<em>Part 2</em>後續章節。</p>
+
+<h2 id="railsmvc">
+<em>Rails</em>的<em>MVC</em>元件</h2>
+
+<p>我們在第一章<em>Ruby on Rails</em>簡介有介紹了什麼是<em>MVC</em>架構，而在<em>Rails</em>中分成幾個不同元件來對應：</p>
+
+<ul>
+  <li>
+<em>ActiveRecord</em>是<em>Rails</em>的<em>Model</em>元件</li>
+  <li>
+<em>ActionPack</em>包含了<em>ActionDispatch</em>、<em>ActionController</em>和<em>ActionView</em>，分別是<em>Rails</em>的<em>Routing</em>、<em>Controller</em>和<em>View</em>元件</li>
+</ul>
+
+<p><img src="images/basic-mvc-diagram.png" alt="MVC diagram"></p>
+
+<p>這張圖示中的執行步驟是：</p>
+
+<ol>
+  <li>瀏覽器發出<em>HTTP request</em>請求給<em>Rails</em>
+</li>
+  <li>路由(Routing)根據規則決定派往哪一個<em>Controller</em>的<em>Action</em>
+</li>
+  <li>負責處理的<em>Controller Action</em>操作<em>Model</em>資料</li>
+  <li>
+<em>Model</em>存取資料庫或資料處理</li>
+  <li>
+<em>Controller Action</em>將得到的資料餵給<em>View</em>樣板</li>
+  <li>回傳最後的<em>HTML</em>成品給瀏覽器</li>
+</ol>
+
+<p>其中，路由主要是根據<em>HTTP Method</em>方法(<em>GET</em>、<em>POST</em>或是<em>PATCH</em>、<em>DELETE</em>等)以及網址來決定派往到哪一個<em>Controller</em>的<em>Action</em>。例如，我們在「Rails起步走」一章中的<code>get "welcome/say_hello" =&gt; "welcome#say"</code>意思就是，將<em>GET welcome/say_hello</em>的這個<em>HTTP request</em>請求，派往到<em>welcome controller</em>的<em>say action</em>。</p>
+
+<h2 id="activerecord">認識<em>ActiveRecord</em>操作資料庫</h2>
+
+<p><em>ActiveRecord</em>是<em>Rails</em>的<em>ORM(Object-relational mapping)</em>元件，負責與資料庫溝通，讓你可以使用物件導向語法來操作關聯式資料庫，它的對應概念如下：</p>
+
+<ul>
+  <li>將資料庫表格<em>(table)</em>對應到一個類別<em>(class)</em>
+</li>
+  <li>類別方法就是操作這個表格<em>(table)</em>，例如新增資料、多筆資料更新或多筆資料刪除</li>
+  <li>資料表中的一筆資料<em>(row)</em>對應到一個物件<em>(object)</em>
+</li>
+  <li>物件方法就是操作這筆資料，例如更新或刪除這筆資料</li>
+  <li>資料表的欄位<em>(column)</em>就是物件的屬性<em>(object attribute)</em>
+</li>
+</ul>
+
+<p>所以說資料庫裡面的資料表，我們用一個<em>Model</em>類別表示。而其中的一筆資料，就是一個<em>Model</em>物件。</p>
+
+<blockquote>
+  <p>不了解關聯式資料庫的讀者，推薦閱讀<a href="http://www.codedata.com.tw/database/mysql-tutorial-getting-started">MySQL 超新手入門</a>從第0章至第5章CRUD與資料維護。</p>
+</blockquote>
+
+<blockquote>
+  <p>ActiveRecord 這個名稱的由來是它使用了 Martin Fowler 的<em><a href="http://martinfowler.com/eaaCatalog/activeRecord.html">Active Record</a></em>設計模式。</p>
+</blockquote>
+
+<p>第三章「<em>Rails</em>起步走」我們提到了<em>Scaffold</em>鷹架功能，有經驗的<em>Rails</em>程式設計師雖然不用鷹架產生程式碼，不過還是會使用<em>Rails</em>的<em>generator</em>功能來分別產生<em>Model</em>和<em>Controller</em>檔案。這裡讓我們來產生一個<em>Model</em>：</p>
+
+<pre><code>$ rails g model event name:string description:text is_public:boolean capacity:integer
+</code></pre>
+
+<blockquote>
+  <p>這些指令必須要在<em>Rails</em>專案目錄下執行，承第三章也就是<em>demo</em>目錄下。</p>
+</blockquote>
+
+<p>接著執行以下指令就會建立資料表(如果是使用<em>SQLite3</em>資料庫話，會產生<em>db/development.sqlite3</em>這個檔案)：</p>
+
+<pre><code>$ bin/rake db:migrate
+</code></pre>
+
+<p>接著，讓我們使用<code>rails console</code>(可以簡寫為<code>rails c</code>) 進入主控台模式做練習：</p>
+
+<pre><code># 新增
+&gt; event = Event.new
+&gt; event.name = "Ruby course"
+&gt; event.description = "fooobarrr"
+&gt; event.capacity = 20
+&gt; event.save # 儲存進資料庫，讀者可以觀察另一個指令視窗
+&gt; event.id # 輸出主鍵 1，在 Rails 中的主鍵皆為自動遞增的整數 ID
+
+&gt; event = Event.new( :name =&gt; "another ruby course", :capacity =&gt; 30)
+&gt; event.save
+&gt; event.id # 輸出主鍵 2，這是第二筆資料
+
+# 查詢
+&gt; event = Event.where( :capacity =&gt; 20 ).first
+&gt; events = Event.where( ["capacity &gt;= ?", 20 ] ).limit(3).order("id desc")
+
+# 更新
+&gt; e = Event.find(1) # 找到主鍵為 1 的資料
+&gt; e.name # 輸出 Ruby course
+&gt; e.update( :name =&gt; 'abc', :is_public =&gt; false )
+
+# 刪除
+&gt; e.destroy
+</code></pre>
+
+<p>和<em>irb</em>一樣，要離開<em>rails console</em>請輸入<code>exit</code>。如果輸入的程式亂掉沒作用時，直接<code>Ctrl+Z</code>離開也沒關係。</p>
+
+<h2 id="migration">認識<em>Migration</em>建立資料表</h2>
+
+<p><em>Rails</em>使用了<em>Migration</em>資料庫遷移機制來定義資料庫結構<em>(Schema)</em>，檔案位於<em>db/migrate/</em>目錄下。它的目的在於:</p>
+
+<ul>
+  <li>讓資料庫的修改也可以納入版本控制系統，所有的變更都透過撰寫<em>Migration</em>檔案執行</li>
+  <li>方便應用程式更新升級，例如讓軟體從第三版更新到第五版，資料庫更新只需要執行<code>rake db:migrate</code>
+</li>
+  <li>跨資料庫通用，不需修改程式就可以用在<em>SQLite3</em>、<em>MySQL</em>、<em>Postgres</em>等不同資料庫</li>
+</ul>
+
+<p>在上一節產生<em>Model</em>程式時，<em>Rails</em>就會自動幫你產生對應的<em>Migration</em>檔案，也就是如<em>db/migrate/20110519123430_create_events.rb</em>的檔案。<em>Rails</em>會用時間戳章來命名檔案，所以每次產生檔名都不同，這樣可以避免多人開發時的衝突。其內容如下：</p>
+
+<pre><code># db/migrate/20110519123430_create_events.rb
+class CreateEvents &lt; ActiveRecord::Migration
+  def change
+    create_table :events do |t|
+      t.string :name
+      t.text :description
+      t.boolean :is_public
+      t.integer :capacity
+
+      t.timestamps
+    end
+  end
+end
+</code></pre>
+
+<p>其中的<em>create_table</em>區塊就是定義資料表結構的程式。上一節中我們已經執行過<code>bin/rake db:migrate</code>來建立此資料表。</p>
+
+<p><em>Migration</em>檔案不需要和<em>Model</em>一一對應，像我們來新增一個<em>Migration</em>檔案來新增一個資料庫欄位，請執行:</p>
+
+<pre><code>$ rails g migration add_status_to_events
+</code></pre>
+
+<p>如此就會產生一個空的 migration 檔案在 db/migrate 目錄下。Migration 有提供 API 讓我們可以變更資料庫結構。例如，我們可以新增一個欄位。輸入<code>rails g migration add_status_to_events</code>然後編輯這個<em>Migration</em>檔案：</p>
+
+<pre><code># db/migrate/20110519123819_add_status_to_events.rb
+class AddStatusToEvents &lt; ActiveRecord::Migration
+  def change
+    add_column :events, :status, :string
+  end
+end
+</code></pre>
+
+<p>接著執行<code>bin/rake db:migrate</code>就會在<em>events</em>表格中新增一個<em>status</em>的欄位，欄位型別是<em>string</em>。<em>Rails</em>會記錄你已經對資料庫操作過哪些<em>Migrations</em>，像此例中就只會跑這個<em>Migration</em>而已，就算你多執行幾次<code>bin/rake db:migrate</code>也只會對資料庫操作一次。</p>
+
+<blockquote>
+  <p><em>Rails</em>透過資料庫中的<em>schema_migrations</em>這張<em>table</em>來記錄已經跑過哪些<em>Migrations</em>。</p>
+</blockquote>
+
+<h2 id="activerecordvalidation">認識<em>ActiveRecord</em>資料驗證<em>(Validation)</em>
+</h2>
+
+<p><em>ActiveRecord</em>的資料驗證<em>(Validation)</em>功能，可以幫助我們檢查資料的正確性。如果驗證失敗，就會無法存進資料庫。</p>
+
+<p>編輯<em>app/models/event.rb</em>加入</p>
+
+<pre><code>class Event &lt; ActiveRecord::Base
+    validates_presence_of :name
+end
+</code></pre>
+
+<p>其中的<em>validates_presence_of</em>宣告了<em>name</em>這個屬性是必填。我們按<em>Ctrl+Z</em>離開主控台重新進入，或是輸入 <em>reload!</em>，這樣才會重新載入。</p>
+
+<pre><code>&gt; e = Event.new
+&gt; e.save # 回傳 false
+&gt; e.errors.full_messages
+&gt; e.name = 'ihower'
+&gt; e.save
+&gt; e.errors.full_messages # 顯示驗證失敗的原因
+</code></pre>
+
+<p>呼叫<em>save</em>時，<em>ActiveRecord</em>就會驗證資料的正確性。而這裡因為沒有填入<em>name</em>，所以回傳<em>false</em>表示儲存失敗。</p>
+
+<h2 id="crud">實做基本的<em>CRUD</em>應用程式</h2>
+
+<h3 id="section">典型路由</h3>
+
+<p>我們在「<em>Rails</em>起步走」一章分別為<em>welcome/say_hello</em>和<em>welcome</em>設定路由，如果每個路徑都需要一條條設定會太麻煩了。這一章我們使用一種典型路由的設定，編輯<em>config/routes.rb</em>加入：</p>
+
+<pre><code>match ':controller(/:action(/:id(.:format)))', :via =&gt; :all
+</code></pre>
+
+<p>典型路由很容易理解，它會將<em>/foo/bar</em>這樣的網址自動對應到<em>Controller foo</em>的<em>bar Action</em>。我們再下一章中我們會再改用另一種稱作<em>RESTful</em>路由方式。</p>
+
+<h3 id="section-1">列出所有資料</h3>
+
+<p>執行<em>rails g controller events</em>，首先編輯<em>app/controllers/events_controller.rb</em>加入</p>
+
+<pre><code>def index
+  @events = Event.all
+end
+</code></pre>
+
+<p><code>Event.all</code>會抓出所有的資料，回傳一個陣列給實例變數<em>(instance variables)</em>指派給<code>@events</code>。在<em>Rails</em>會讓<em>Action</em>裡的實例變數(也就是有<code>@</code>開頭的變數)通通傳到<em>View</em>樣板裡面可以使用。這個<em>Action</em>預設使用的樣板是<em>app/views/events/</em>目錄下與<em>Action</em>同名的檔案，也就是接下來要編輯的<em>app/views/events/index.html.erb</em>，內容如下:</p>
+
+<pre><code>&lt;ul&gt;
+&lt;% @events.each do |event| %&gt;
+  &lt;li&gt;
+ 	  &lt;%= event.name %&gt;
+  &lt;%= link_to 'Show', :controller =&gt; 'events', :action =&gt; 'show', :id =&gt; event %&gt;
+  &lt;%= link_to 'Edit', :controller =&gt; 'events', :action =&gt; 'edit', :id =&gt; event %&gt;
+  &lt;%= link_to 'Delete', :controller =&gt; 'events', :action =&gt; 'destroy', :id =&gt; event %&gt;
+  &lt;/li&gt;
+&lt;% end %&gt;
+&lt;/ul&gt;
+&lt;%= link_to 'New Event', :controller =&gt; 'events', :action =&gt; 'new' %&gt;
+</code></pre>
+
+<p>這個<em>View</em>迭代了<code>@events</code>陣列並顯示內容跟超連結，有幾件值得注意的事情：</p>
+
+<p><code>&lt;%</code>和<code>&lt;%=</code>不太一樣，前者只執行不輸出，像用來迭代的<code>each</code>和<code>end</code>這兩行就不需要輸出。而後者<code>&lt;%=</code> 裡的結果會輸出給瀏覽器。</p>
+
+<p><code>link_to</code>建立超連結到一個特定的位置，這裡為瀏覽、編輯和刪除都提供了超連結。</p>
+
+<p>連往<em>http://localhost:3000/events</em>就會看到這一頁。目前還沒有任何資料，讓我們繼續實作點擊<em>New Event</em>超連結之後的動作。</p>
+
+<h3 id="section-2">新增資料</h3>
+
+<p>建立一篇新的活動需要兩個<em>Actions</em>。第一個是<em>new Action</em>，它用來實例化一個空的<code>Event</code>物件，編輯<em>app/controllers/events_controller.rb</em>加入</p>
+
+<pre><code>def new
+  @event = Event.new
+end
+</code></pre>
+
+<p>這個<em>app/views/events/new.html.erb</em>會顯示空的<code>Event</code>給使用者：</p>
+
+<pre><code>&lt;%= form_for @event, :url =&gt; { :controller =&gt; 'events', :action =&gt; 'create' } do |f| %&gt;
+    &lt;%= f.label :name, "Name" %&gt;
+    &lt;%= f.text_field :name %&gt;
+
+    &lt;%= f.label :description, "Description" %&gt;
+    &lt;%= f.text_area :description %&gt;
+
+    &lt;%= f.submit "Create" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>這個<code>form_for</code>的程式碼區塊<em>(Code block)</em>被用來建立<em>HTML</em>表單。在區塊中，你可以使用各種函式來建構表單。例如<code>f.text_field :name</code>建立出一個文字輸入框，並填入<code>@event</code>的<em>name</em>屬性資料。但這個表單只能基於這個<em>Model</em>有的屬性(在這個例子是<em>name</em>跟<em>description</em>)。<em>Rails</em>偏好使用<code>form_for</code>而不是讓你手寫表單<em>HTML</em>，這是因為程式碼可以更加簡潔，而且可以明確地連結在<em>Model</em>物件上。</p>
+
+<p><code>form_for</code>區塊也很聰明，<em>New Event</em>的表單跟<em>Edit Event</em>的表單，其中的送出網址跟按鈕文字會不同的(根據<code>@event</code>的不同，前者是新建的，後者是已經建立過的)。</p>
+
+<blockquote>
+  <p>如果你需要建立任意欄位的<em>HTML</em>表單，而不綁在某一個<em>Model</em>上，你可以使用<code>form_tag</code>函式。它也提供了建構表單的函式而不需要綁在<em>Model</em>實例上。我們會在<em>Action View: Helpers</em>一章介紹。</p>
+</blockquote>
+
+<p>當一個使用者點擊表單的<em>Create</em>按鈕時，瀏覽器就會送出資料到<em>Controller</em>的<em>create Action</em>。也是一樣編輯<em>app/controllers/events_controller.rb</em>加入：</p>
+
+<pre><code>def create
+  @event = Event.new(params[:event])
+  @event.save
+
+  redirect_to :action =&gt; :index
+end
+</code></pre>
+
+<p><em>create Action</em>會透過從表單傳進來的資料，也就是<em>Rails</em>提供的<code>params</code>參數(這是一個<em>Hash</em>)，來實例化一個新的<code>@event</code>物件。成功儲存之後，便將使用者重導<em>(redirect)</em>至<em>index Action</em>顯示活動列表。</p>
+
+<p>讓我們來實際測試看看，在瀏覽器中實際按下表單的<em>Create</em>按鈕後，出現了<code>ActiveModel::ForbiddenAttributesError in EventsController#create</code>的錯誤訊息，這是因為<em>Rails</em>會檢查使用者傳進來的參數必須經過一個過濾的安全步驟，這個機制叫做<em>Strong Parameters</em>，讓我們回頭修改<em>app/controllers/events_controller.rb</em></p>
+
+<pre><code>def create
+  @event = Event.new(event_params)
+  @event.save
+
+  redirect_to :action =&gt; :index
+end
+
+private
+
+def event_params
+  params.require(:event).permit(:name, :description)
+end
+</code></pre>
+
+<p>我們新加了一個<code>event_params</code>方法，其中透過<code>require</code>和<code>permit</code>將<code>params</code>這個<em>Hash</em>過濾出<code>params[:event][:name]</code>和<code>params[:event][:description]</code>。</p>
+
+<blockquote>
+  <p><code>private</code>以下的所有方法都會變成<em>private</em>方法，所以記得放在檔案的最底下。</p>
+</blockquote>
+
+<p>再次測試看看，應該就可以順利新增資料了。</p>
+
+<h3 id="section-3">顯示個別資料</h3>
+
+<p>當你在<em>index</em>頁面點擊<em>show</em>的活動連結，就會前往<em>http://localhost:3000/events/show/1</em>這個網址。<em>Rails</em>會呼叫<em>show action</em>並設定<code>params[:id]</code>為<code>1</code>。以下是<em>show Action</em>：</p>
+
+<p>編輯<em>app/controllers/events_controller.rb</em>加入</p>
+
+<pre><code>def show
+  @event = Event.find(params[:id])
+end
+</code></pre>
+
+<p>這個<em>show Action</em>用<code>find</code>方法從資料庫中找出該篇活動。找到資料之後，<em>Rails</em>用<em>show.html.erb</em>樣板顯示出來。新增<em>app/views/events/show.html.erb</em>，內容如下:</p>
+
+<pre><code>&lt;%= @event.name %&gt;
+&lt;%= simple_format(@event.description) %&gt;
+
+&lt;p&gt;&lt;%= link_to 'Back to index', :controller =&gt; 'events', :action =&gt; 'index' %&gt;&lt;/p&gt;
+</code></pre>
+
+<p>其中<code>simple_format</code>是一個內建的<em>View Helper</em>，它的作用是可以將換行字元<code>\n</code>置換成<code>&lt;br /&gt;</code>，有基本的<em>HTML</em>換行效果。</p>
+
+<h3 id="section-4">編輯資料</h3>
+
+<p>如同建立新活動，編輯活動也有兩個步驟。第一個是請求特定一篇活動的<em>edit</em>頁面。這會呼叫<em>Controller</em>的<em>edit Action</em>，編輯<em>app/controllers/events_controller.rb</em>加入</p>
+
+<pre><code>def edit
+  @event = Event.find(params[:id])
+end
+</code></pre>
+
+<p>找到要編輯的活動之後，<em>Rails</em>接著顯示<em>edit.html.erb</em>頁面，新增<em>app/views/events/edit.html.erb</em>檔案，內容如下:</p>
+
+<pre><code>&lt;%= form_for @event, :url =&gt; { :controller =&gt; 'events', :action =&gt; 'update', :id =&gt; @event } do |f| %&gt;
+    &lt;%= f.label :name, "Name" %&gt;
+    &lt;%= f.text_field :name %&gt;
+
+    &lt;%= f.label :description, "Description" %&gt;
+    &lt;%= f.text_area :description %&gt;
+
+    &lt;%= f.submit "Update" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>這裡跟<em>new Action</em>很像，只是送出表單後，是前往<em>Controller</em>的<em>update Action</em>：</p>
+
+<pre><code>def update
+  @event = Event.find(params[:id])
+  @event.update(event_params)
+
+  redirect_to :action =&gt; :show, :id =&gt; @event
+end
+</code></pre>
+
+<p>在<em>update Action</em>裡，<em>Rails</em>一樣透過<code>params[:id]</code>參數找到要編輯的資料。接著<code>update</code>方法會根據表單傳進來的參數修改到資料上，這裡我們沿用<code>event_params</code>這個方法過濾使用者傳進來的資料。如果一切正常，使用者會被導向到活動的<em>show</em>頁面。</p>
+
+<h3 id="section-5">刪除資料</h3>
+
+<p>最後，點擊<em>Destroy</em>超連結會前往<em>destroy Action</em>，編輯<em>app/controllers/events_controller.rb</em>加入</p>
+
+<pre><code>def destroy
+  @event = Event.find(params[:id])
+  @event.destroy
+
+  redirect_to :action =&gt; :index
+end
+</code></pre>
+
+<p><code>destroy</code>方法會刪除對應的資料庫資料。完成之後，將使用者導向<em>index</em>頁面。</p>
+
+<blockquote>
+  <p><em>Rails</em>的程式風格非常注重變數命名的單數複數，像上述的<em>index Action</em>中是用<code>@events</code>複數命名，代表這是一個群集陣列。其他則是用<code>@event</code>單數命名。</p>
+</blockquote>
+
+<h2 id="layout">認識版型<em>(Layout)</em>
+</h2>
+
+<p><em>Layout</em>可以用來包裹樣板，讓不同樣板共用相同的<em>HTML</em>開頭和結尾部分。當<em>Rails</em>要顯示一個樣板給瀏覽器時，它會將樣板的<em>HTML</em>放到<em>Layout</em>的<em>HTML</em>之中。預設的<em>Layout</em>檔案是<em>app/views/layouts/application.html.erb</em>，其中<code>yield</code>就是會被替換成樣板的地方。所有的樣版預設都會套這個<em>Layout</em>。我們會再 <em>Action View</em>一章中介紹如何更換不同<em>Layout</em>。</p>
+
+<p>現在，讓我們修改<em>Layout</em>中的<code>&lt;title&gt;</code>：</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;&lt;%= @page_title || "Event application" %&gt;&lt;/title&gt;
+  &lt;%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' =&gt; true %&gt;
+  &lt;%= javascript_include_tag 'application', 'data-turbolinks-track' =&gt; true %&gt;
+  &lt;%= csrf_meta_tags %&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;%= yield %&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>如此我們可以在<em>show Action</em>中設定<code>@page_title</code>的值：</p>
+
+<pre><code>def show
+  @event = Event.find(params[:id])
+  @page_title = @event.name
+end
+</code></pre>
+
+<p>這樣的話，進去<em>show</em>頁面的<em>title</em>就會是活動名稱。其他頁面因為沒有設定<code>@page_title</code>，就會是”Event application”。</p>
+
+<h2 id="partial-template">認識局部樣板<em>(Partial Template)</em>
+</h2>
+
+<p>利用局部樣板<em>(Partial)</em>機制，我們可以將重複的樣板獨立出一個單獨的檔案，來讓其他樣板共享引用。例如<em>new.html.erb</em>和<em>edit.html.erb</em>都有以下相同的樣板程式：</p>
+
+<pre><code>&lt;%= f.label :name, "Name" %&gt;
+&lt;%= f.text_field :name %&gt;
+
+&lt;%= f.label :description, "Description" %&gt;
+&lt;%= f.text_area :description %&gt;
+</code></pre>
+
+<p>一般來說，新增和編輯時的表單欄位都是相同的，所以讓我們將這段樣板程式獨立出一個局部樣板，這樣要修改欄位的時候，只要修改一個檔案即可。局部樣板的命名都是底線<code>_</code>開頭，新增一個檔案叫做<code>_form.html.erb</code>，內容就如上。如此<em>new.html.erb</em>就可以變成：</p>
+
+<pre><code>&lt;%= form_for @event, :url =&gt; { :controller =&gt; 'events', :action =&gt; 'create' } do |f| %&gt;
+    &lt;%= render :partial =&gt; 'form', :locals =&gt; { :f =&gt; f } %&gt;
+    &lt;%= f.submit "Create" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>而<em>edit.html.erb</em>則是：</p>
+
+<pre><code>&lt;%= form_for @event, :url =&gt; { :controller =&gt; 'events', :action =&gt; 'update', :id =&gt; @event } do |f| %&gt;
+    &lt;%= render :partial =&gt; 'form', :locals =&gt; { :f =&gt; f } %&gt;
+    &lt;%= f.submit "Update" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>透過<code>&lt;%= render :partial =&gt; 'form', :locals =&gt; { :f =&gt; f } %&gt;</code>會引用<code>_form.html.erb</code>這個局部樣板，並將變數<code>f</code>傳遞進去變成區域變數。</p>
+
+<h2 id="beforeaction">
+<code>before_action</code>方法</h2>
+
+<p>透過<code>before_action</code>，我們可以將<em>Controller</em>中重複的程式獨立出來。</p>
+
+<p>在<em>events_controller.rb</em>上方新增</p>
+
+<pre><code>before_action :set_event, :only =&gt; [ :show, :edit, :update, :destroy]
+</code></pre>
+
+<p>在下方<code>private</code>後面新增一個方法如下：</p>
+
+<pre><code>def set_event
+  @event = Event.find(params[:id])
+end
+</code></pre>
+
+<blockquote>
+  <p><em>Controller</em>中的公開<em>(public)</em>方法都是<em>Action</em>，也就是可以讓瀏覽器呼叫使用的動作。使用<code>protected</code>或<code>private</code>可以避免內部方法被當做<em>Action</em>使用。</p>
+</blockquote>
+
+<p>刪除<em>show</em>、<em>edit</em>、<em>update</em>、<em>destroy</em>方法中的</p>
+
+<pre><code>@event = Event.find(params[:id])
+</code></pre>
+
+<h2 id="section-6">加入資料驗證</h2>
+
+<p>我們在資料驗證一節中，已經加入了<em>name</em>的必填驗證，因此當使用者送出沒有<em>name</em>的表單，就會無法儲存進資料庫。我們希望目前的程式能夠在驗證失敗後，提示使用者儲存失敗，並讓使用者有機會可以修改再送出。</p>
+
+<p>修改<em>app/controllers/events_controller.rb</em>的<em>create</em>和<em>update Action</em></p>
+
+<pre><code>def create
+  @event = Event.new(event_params)
+  if @event.save
+    redirect_to :action =&gt; :index
+  else
+    render :action =&gt; :new
+  end
+end
+</code></pre>
+
+<p>如果活動因為驗證錯誤而儲存失敗，這裡會回傳給使用者帶有錯誤訊息的<em>new Action</em>，好讓使用者可以修正問題再試一次。實際上，<code>render :action =&gt; "new"</code>會回傳<em>new Action</em>所使用的樣板，而不是執行<em>new action</em>這個方法。如果改成使用<code>redirect_to</code>會讓瀏覽器重新導向到<em>new Action</em>，但是如此一來<code>@event</code>就被重新建立而失去使用者剛輸入的資料。</p>
+
+<pre><code>def update
+  if @event.update(event_params)
+    redirect_to :action =&gt; :show, :id =&gt; @event
+  else
+    render :action =&gt; :edit
+  end
+end
+</code></pre>
+
+<p>更新時也是一樣，如果驗證有任何問題，它會顯示<em>edit</em>頁面好讓使用者可以修正資料。</p>
+
+<p>而為了可以在儲存失敗時顯示錯誤訊息，接著編輯<code>_form.html.erb</code>中加入</p>
+
+<pre><code>&lt;% if @event.errors.any? %&gt;
+      &lt;ul&gt;
+      &lt;% @event.errors.full_messages.each do |msg| %&gt;
+        &lt;li&gt;&lt;%= msg %&gt;&lt;/li&gt;
+      &lt;% end %&gt;
+      &lt;/ul&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h2 id="flash">認識<em>Flash</em>訊息</h2>
+
+<p>請在<em>app/views/layouts/application.html.erb</em> <em>Layout</em>檔案之中，<code>yield</code>之前加入：</p>
+
+<pre><code>&lt;p style="color: green"&gt;&lt;%= flash[:notice] %&gt;&lt;/p&gt;
+&lt;p style="color: red"&gt;&lt;%= flash[:alert] %&gt;&lt;/p&gt;
+</code></pre>
+
+<p>接著讓我們回到<em>app/controllers/events_controller.rb</em>，在<em>create Action</em>中加入</p>
+
+<pre><code>flash[:notice] = "event was successfully created"
+</code></pre>
+
+<p>在<em>update Action</em>中加入</p>
+
+<pre><code>flash[:notice] = "event was successfully updated"
+</code></pre>
+
+<p>在<em>destroy Action</em>中加入</p>
+
+<pre><code>flash[:alert] = "event was successfully deleted"
+</code></pre>
+
+<p>「event was successfully created」訊息會被儲存在<em>Rails</em>的特殊<em>flash</em>變數中，好讓訊息可以被帶到另一個 <em>action</em>，它提供使用者一些有用的資訊。在這個<em>create Action</em>中，使用者並沒有真的看到任何頁面，因為它馬上就被導向到新的活動頁面。而這個<em>flash</em>變數就帶著訊息到下一個<em>Action</em>，好讓使用者可以在<em>show Action</em>頁面看到 「event was successfully created.」這個訊息。</p>
+
+<h2 id="section-7">分頁外掛</h2>
+
+<p>上述的程式用<code>Event.all</code>一次抓出所有活動，這在資料量一大的時候非常浪費效能和記憶體。通常會用分頁機制來限制抓取資料的筆數。</p>
+
+<p>編輯<em>Gemfile</em>加入以下程式，這個檔案設定了此應用程式使用哪些套件。這裡我們使用<em><a href="https://github.com/amatsuda/kaminari">kaminari</a></em>這個分頁套件：</p>
+
+<pre><code>gem "kaminari"
+</code></pre>
+
+<p>執行<code>bundle install</code>就會安裝。裝好後需要重新啟動伺服器才會載入。</p>
+
+<p>修改<em>app/controllers/events_controller.rb</em>的<em>index Action</em>如下</p>
+
+<pre><code>def index
+  @events = Event.page(params[:page]).per(5)
+end
+</code></pre>
+
+<p>編輯<em>app/views/events/index.html.erb</em>，加入</p>
+
+<pre><code>&lt;%= paginate @events %&gt;
+</code></pre>
+
+<p>連往<em>http://localhost:3000/events/</em>，你可能需要多加幾筆資料就會看到分頁連結了。</p>
+
+        <p><a href="#">》回到頁首</a></p>
+	     </div>
+	</div>
+</div>
+
+<div class="footer">
+<div class="container">
+<p>
+<a href="./">Ruby on Rails 實戰聖經</a> | Copyright©2014 <a href="https://ihower.tw">Wen-Tien Chang</a>. All Rights Reserved.<br>
+除投影片使用<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/tw/">創用 CC 授權</a>釋出，文字及圖片等內容保留所有權利。<br>
+本網頁樣式來自 <a href="http://guide.couchdb.org/">CouchDB: The Definitive Guide</a>。<br>
+本網頁最後產生時間：05 Feb 2015
+</p>
+</div>
+</div>
+</body>
+</html>

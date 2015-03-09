@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-		<title>Ruby on Rails 实战圣经 | RESTful 应用程式</title>
+		<title>Ruby on Rails 实战圣经 | RESTful 应用程序</title>
 		<link rel="stylesheet" type="text/css" href="./style.css">
 		<link rel="canonical" href="https://ihower.tw/rails4/restful.html">
 	</head>
@@ -32,7 +32,7 @@
             <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
        </div>
        <div class="content body">
-	      <h1 id="restful-">RESTful 应用程式</h1>
+	      <h1 id="restful-">RESTful 应用程序</h1>
 
 <blockquote>
   <p>请注意本章内容衔接前一章，请先完成前一章内容。</p>
@@ -46,7 +46,7 @@
 
 <p><em>RESTful</em>路由设计是<em>Rails</em>的一项独到的发明，它使用了<em>REST</em>的概念来建立一整组的命名路由<em>(named routes)</em>。</p>
 
-<p>什么是<em>REST</em>呢？表象化状态转变<em>Representational State Transfer</em>，简称<em>REST</em>，是<em>Roy Fielding</em>博士在<em>2000</em>年他的博士论文中提出来的一种软件架构风格。相较于<em>SOAP</em>、<em>XML-RPC</em>更为简洁容易使用，也是眾多网络服务中最为普遍的<em>API</em>格式，像是<em>Amazon</em>、<em>Yahoo!</em>、<em>Google</em>等提供的<em>API</em>服务均有<em>REST</em>介面。</p>
+<p>什么是<em>REST</em>呢？表象化状态转变<em>Representational State Transfer</em>，简称<em>REST</em>，是<em>Roy Fielding</em>博士在<em>2000</em>年他的博士论文中提出来的一种软件架构风格。相较于<em>SOAP</em>、<em>XML-RPC</em>更为简洁容易使用，也是众多网络服务中最为普遍的<em>API</em>格式，像是<em>Amazon</em>、<em>Yahoo!</em>、<em>Google</em>等提供的<em>API</em>服务均有<em>REST</em>介面。</p>
 
 <p><em>REST</em>有主要有两个核心精神：1. 使用<em>Resource</em>来当做识别的资源，也就是使用一个<em>URL</em>网址来代表一个<em>Resource</em> 2. 同一个<em>Resource</em>则可以有不同的<em>Representations</em>格式变化。这一章的路由实作了<em>Resource</em>概念，而<em>Representation</em>则是用了<code>respond_to</code>方法来实作，稍候我们也会介绍如何使用。</p>
 
@@ -54,7 +54,7 @@
   <p>关于<em>REST</em>的理论可以参考笔者整理的<a href="http://ihower.tw/blog/archives/1542">什么是REST跟RESTful？</a>。不过，了解理论并不是在<em>Rails</em>中使用<em>RESTful</em>路由的前提条件，所以大可以跳过不甚理解没关係。我们只要知道它可以带来什么技术上的具体好处，以及如何使用就足够了。</p>
 </blockquote>
 
-<p><em>RESTful</em>带给<em>Rails</em>最大的好处是：它帮助我们用一种比较标準化的方式来命名跟组织<em>Controllers</em>和<em>Actions</em>。在没有<em>RESTful</em>之前，我们上一章介绍了典型路由设计方式，也就是一个个指定<em>Controller</em>和<em>Action</em>，虽然十分地简便，但是却没有什么準则。同一个<em>Action</em>让不同的开发者设计，就很可能放在不同的<em>Controller</em>之下，更常见的是让一个<em>Controller</em>放太多不相关的<em>Action</em>，造成单一<em>Controller</em>过于庞大。</p>
+<p><em>RESTful</em>带给<em>Rails</em>最大的好处是：它帮助我们用一种比较标准化的方式来命名跟组织<em>Controllers</em>和<em>Actions</em>。在没有<em>RESTful</em>之前，我们上一章介绍了典型路由设计方式，也就是一个个指定<em>Controller</em>和<em>Action</em>，虽然十分地简便，但是却没有什么準则。同一个<em>Action</em>让不同的开发者设计，就很可能放在不同的<em>Controller</em>之下，更常见的是让一个<em>Controller</em>放太多不相关的<em>Action</em>，造成单一<em>Controller</em>过于庞大。</p>
 
 <p>将<em>RESTful</em>带入<em>Rails</em>路由系统的点子，出自它对应了<em>HTTP</em>动词<em>POST</em>、<em>GET</em>、<em>PATCH/PUT</em>、<em>DELETE</em>到资料的新增、读取、更新、删除等四项操作。一旦将<em>HTTP</em>动词考虑进来，如此我们就将上一章手工打造<em>CRUD</em>的路由</p>
 
@@ -204,7 +204,7 @@ welcome_say_hello GET    /welcome/say_hello(.:format) welcome#say
 <h2 id="restfulcrud">修改成一个<em>RESTful</em>版本的<em>CRUD</em>
 </h2>
 
-<p>根据上一节所学到<em>RESTful</em>技巧，接续上一章的<em>CRUD</em>应用程式，来改造成<em>RESTful</em>应用程式，相信各位读者可以从中发现到<em>RESTful</em>所带来的简洁好处。让我们开始动手修改吧：</p>
+<p>根据上一节所学到<em>RESTful</em>技巧，接续上一章的<em>CRUD</em>应用程序，来改造成<em>RESTful</em>应用程序，相信各位读者可以从中发现到<em>RESTful</em>所带来的简洁好处。让我们开始动手修改吧：</p>
 
 <h3 id="step-1">Step. 1</h3>
 
@@ -436,7 +436,7 @@ end
 
 <h2 id="section-2">如何除错？</h2>
 
-<p>如果是<em>Model</em>中的程式，你可以在命令列下输入<em>rails console</em>，然后在<em>Console</em>中呼叫看看<em>Model</em>的方法看看正确与否。而除错<em>Controller</em>和<em>Views</em>一个简单的方法是你可以使用<em>debug</em>这个<em>Helper</em>方法，例如在<em>app/views/events/show.html.erb</em>中插入：</p>
+<p>如果是<em>Model</em>中的程式，你可以在命令行下输入<em>rails console</em>，然后在<em>Console</em>中呼叫看看<em>Model</em>的方法看看正确与否。而除错<em>Controller</em>和<em>Views</em>一个简单的方法是你可以使用<em>debug</em>这个<em>Helper</em>方法，例如在<em>app/views/events/show.html.erb</em>中插入：</p>
 
 <pre><code>&lt;%= debug(@event) %&gt;
 </code></pre>
@@ -461,7 +461,7 @@ end
 <pre><code>Rails.logger.debug("event: #{@event.inspect}")
 </code></pre>
 
-<p>接着开浏览器跑实际跑过这段程式，那么就会在<code>rails server</code>的标準输出中，看到这个除错信息。或是你也可以另开一个指令视窗执行<code>tail -f log/development.log</code>来观察<em>log</em>档案。</p>
+<p>接着开浏览器跑实际跑过这段程式，那么就会在<code>rails server</code>的标准输出中，看到这个除错信息。或是你也可以另开一个指令窗口执行<code>tail -f log/development.log</code>来观察<em>log</em>档案。</p>
 
 <blockquote>
   <p>在<em>Production</em>环境中，<em>log/production.log</em>会逐渐长大，可以<a href="http://ihower.tw/blog/archives/3565">使用 logrotate 定期整理 Rails Log 档案</a>。</p>

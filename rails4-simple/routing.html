@@ -252,7 +252,7 @@ end
 <h3 id="nested-resources">套叠<em>Nested Resources</em>
 </h3>
 
-<p>当一个<em>Resource</em>一定会依存另一个<em>Resource</em>时，我们可以套叠多层的<em>Resources</em>，例如以下是任务一定属于在专案底下：</p>
+<p>当一个<em>Resource</em>一定会依存另一个<em>Resource</em>时，我们可以套叠多层的<em>Resources</em>，例如以下是任务一定属于在项目底下：</p>
 
 <pre><code>resources :projects do
   resources :tasks
@@ -267,7 +267,7 @@ end
 
 <h3 id="controller">指定Controller</h3>
 
-<p><em>resource</em>预设採用同名的<em>controller</em>，我们可以改指定，例如</p>
+<p><em>resource</em>预设采用同名的<em>controller</em>，我们可以改指定，例如</p>
 
 <pre><code>resources :projects do
   resources :tasks, :controller =&gt; "project_tasks"

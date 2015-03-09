@@ -38,7 +38,7 @@
   <p>“Life’s too short to build something nobody wants” - Ash Maurya, Running Lean 作者</p>
 </blockquote>
 
-<p><em>Ruby on Rails</em>是一套非常有生产力、维护性高、容易部署的<em>Web</em>开发框架。从一开始不知名的玩具，到现在它已经成为全世界<em>Web</em>应用程式开发的首选框架之一。进入学习的旅程之前，我们先了解为什么它如此特别？</p>
+<p><em>Ruby on Rails</em>是一套非常有生产力、维护性高、容易部署的<em>Web</em>开发框架。从一开始不知名的玩具，到现在它已经成为全世界<em>Web</em>应用程序开发的首选框架之一。进入学习的旅程之前，我们先了解为什么它如此特别？</p>
 
 <h2 id="web-framework">什么是网站开发框架<em>(Web framework)</em>？</h2>
 
@@ -70,7 +70,7 @@ $num&lt;/font&gt;&lt;/b&gt;
 PRINTAREA
 </code></pre>
 
-<p>读者可以发现，这样的方式在<em>HTML</em>内容佔多数的情况，显著十分不容易维护及阅读。大约在2000年左右，<em>PHP</em>、<em>ASP</em>等以样板<em>(Template)</em>为主的程式语言出现了，同时期搭配著关联式数据库如<em>MySQL</em>一起流行起来。这种写法与上述的<em>Perl CGI</em>恰巧相反，是在<em>HTML</em>样板中内嵌入程式和<em>SQL</em>指令，例如以下是一个<em>PHP&amp;MySQL</em>程式，其中用<code>&lt;?php ... ?&gt;</code>括起来的部份，就是<em>PHP</em>程式：</p>
+<p>读者可以发现，这样的方式在<em>HTML</em>内容佔多数的情况，显著十分不容易维护及阅读。大约在2000年左右，<em>PHP</em>、<em>ASP</em>等以样板<em>(Template)</em>为主的编程语言出现了，同时期搭配著关联式数据库如<em>MySQL</em>一起流行起来。这种写法与上述的<em>Perl CGI</em>恰巧相反，是在<em>HTML</em>样板中内嵌入程式和<em>SQL</em>指令，例如以下是一个<em>PHP&amp;MySQL</em>程式，其中用<code>&lt;?php ... ?&gt;</code>括起来的部份，就是<em>PHP</em>程式：</p>
 
 <pre><code>&lt;?php
   $db = mysql_connect("localhost", "root", "password");
@@ -97,12 +97,12 @@ PRINTAREA
 
 <p>这种用法非常容易使用。特别像是讨论区、部落格<em>(Blog)</em>、内容管理系统<em>(CMS)</em>、<em>Wiki</em>这类系统，重点主要在资料的保存和显示，牵扯的复杂商业逻辑不多，特别适合这样的开发方式。程式只是数据库系统的糖衣介面，不需要<em>MVC</em>架构、不需要页面与程式逻辑分开、不需要对象导向技术，也可以开发的很好。</p>
 
-<p>但是近年来随著<em>Web 2.0</em>和云端风潮带来越来越多的<em>Web</em>应用程式开发需求，网站软件的规模开始增加，需要加入更多的商业逻辑和功能，这样的开发方式，导致了整个专案的结构变得十分混杂，不利于团队合作开发。要接手维护这样的网站，常常会不知道如何阅读及修改起，因为所有的商务逻辑与<em>HTML</em>混杂在一起，不同人开发就有不同的程式架构，缺乏程式文件是常有的事情，也不容易进行测试。</p>
+<p>但是近年来随著<em>Web 2.0</em>和云端风潮带来越来越多的<em>Web</em>应用程序开发需求，网站软件的规模开始增加，需要加入更多的商业逻辑和功能，这样的开发方式，导致了整个项目的结构变得十分混杂，不利于团队合作开发。要接手维护这样的网站，常常会不知道如何阅读及修改起，因为所有的商务逻辑与<em>HTML</em>混杂在一起，不同人开发就有不同的程式架构，缺乏程式文件是常有的事情，也不容易进行测试。</p>
 
 <p>于是我们有了<em>Web</em>开发框架的需求，引入完整的对象导向观念和技术。而所谓的框架就是制定好了一套规范和惯例，让开发者在该架构下来进行开发。</p>
 
 <blockquote>
-  <p>维基百科是这样定义的：「软件框架<em>(Software framework)</em>」是为了实现某个业界标準或完成特定基本任务的软件组件规范，也指为了实现某个软件组件规范时，提供规范所要求之基础功能的软件產品。框架的功能类似于基础设施，与具体的软件应用无关，但是提供并实现最为基础的软件架构和体系。软件开发者通常依据特定的框架实现更为复杂的商业运用和业务逻辑。这样的软件应用可以在支持同一种框架的软件系统中运行。</p>
+  <p>维基百科是这样定义的：「软件框架<em>(Software framework)</em>」是为了实现某个业界标准或完成特定基本任务的软件组件规范，也指为了实现某个软件组件规范时，提供规范所要求之基础功能的软件产品。框架的功能类似于基础设施，与具体的软件应用无关，但是提供并实现最为基础的软件架构和体系。软件开发者通常依据特定的框架实现更为复杂的商业运用和业务逻辑。这样的软件应用可以在支持同一种框架的软件系统中运行。</p>
 </blockquote>
 
 <p>非常多的<em>Web</em>框架都实践一个叫做<em>MVC</em>的软件架构设计模式，将软件分成三个部分：</p>
@@ -162,13 +162,13 @@ PRINTAREA
 
 <p>使用<em>Web</em>框架则没有这种问题，你拥有最大的弹性，您可以指定任意<em>URL</em>对应到任一个<em>Controller</em>的动作，跟档案位置是无关的。</p>
 
-<p>此外，<em>Web</em>框架也附带了非常多开发<em>Web</em>会用到的函式库，例如<em>Template</em>、<em>Email</em>、<em>Session</em>、快取、<em>JavaScript/Ajax</em>、测试等等。这也是为什么使用<em>Web</em>框架可以大大加速网站专案的开发时程，因为开发<em>Web</em>应用程式会用到的功能大部分都内建了，我们不需要重复开发轮子。</p>
+<p>此外，<em>Web</em>框架也附带了非常多开发<em>Web</em>会用到的函数库，例如<em>Template</em>、<em>Email</em>、<em>Session</em>、快取、<em>JavaScript/Ajax</em>、测试等等。这也是为什么使用<em>Web</em>框架可以大大加速网站项目的开发时程，因为开发<em>Web</em>应用程序会用到的功能大部分都内建了，我们不需要重复开发轮子。</p>
 
 <h2 id="ruby-on-rails">什么是<em>Ruby on Rails</em>？</h2>
 
-<p><em>Ruby on Rails</em>(官方简称为<em>Rails</em>，<em>RoR</em>非官方简称)是使用<em>Ruby</em>这套开放原始码(採用<em>MIT</em>授权)、对象导向程式语言所开发的<em>Web</em>开发框架，主要用于开发数据库网站应用程式。<em>Rails</em>是一套专业的开发框架，採用了<em>MVC(Model-View-Control)</em>模式、内建支持单元测试和整合测试、支持<em>Ajax</em>和<em>RESTful</em>介面、<em>ORM</em>机制，以及支持各种最新的业界标準像是<em>HTML5</em>、<em>JQuery</em>等等功能。它的发明人是<em>David Heinemeier Hanson(DHH)</em>，<em>DHH</em>是<em>2004</em>年将<em>Rails</em>从<em><a href="http://www.37signals.com/">37signals</a></em>商业產品中独立出来成为开源专案。</p>
+<p><em>Ruby on Rails</em>(官方简称为<em>Rails</em>，<em>RoR</em>非官方简称)是使用<em>Ruby</em>这套开放原始码(采用<em>MIT</em>授权)、对象导向编程语言所开发的<em>Web</em>开发框架，主要用于开发数据库网站应用程序。<em>Rails</em>是一套专业的开发框架，采用了<em>MVC(Model-View-Control)</em>模式、内建支持单元测试和整合测试、支持<em>Ajax</em>和<em>RESTful</em>介面、<em>ORM</em>机制，以及支持各种最新的业界标准像是<em>HTML5</em>、<em>JQuery</em>等等功能。它的发明人是<em>David Heinemeier Hanson(DHH)</em>，<em>DHH</em>是<em>2004</em>年将<em>Rails</em>从<em><a href="http://www.37signals.com/">37signals</a></em>商业产品中独立出来成为开源项目。</p>
 
-<p>它的设计目标是只要开发者熟悉它的惯例，它就可以让网站开发变的非常容易。而相对于其他程式语言和框架，<em>Rails</em>可以让你用更少的程式码达成更多的功能，它甚至让网站开发变得更有趣。</p>
+<p>它的设计目标是只要开发者熟悉它的惯例，它就可以让网站开发变的非常容易。而相对于其他编程语言和框架，<em>Rails</em>可以让你用更少的程式码达成更多的功能，它甚至让网站开发变得更有趣。</p>
 
 <p><em>Rails</em>的哲学包括以下指导原则：</p>
 
@@ -176,32 +176,32 @@ PRINTAREA
   <li>不要重复自己(<em>DRY: Don’t Repeat Yourself</em>) – 撰写出重复的程式码是件坏事</li>
   <li>惯例胜于设定(<em>Convention Over Configuration</em>) – <em>Rails</em>会预设各种好的设定跟惯例，而不是要求你设定每一个细节到设定档中。</li>
   <li>
-<em>REST</em>是网站应用程式的最佳模式 – 使用<em>Resources</em>和标準的<em>HTTP verbs</em>(动词)来组织你的应用程式是最快的方式(我们会在路径一章详细介绍这个强大的设计)</li>
+<em>REST</em>是网站应用程序的最佳模式 – 使用<em>Resources</em>和标准的<em>HTTP verbs</em>(动词)来组织你的应用程序是最快的方式(我们会在路径一章详细介绍这个强大的设计)</li>
 </ul>
 
 <h2 id="rails">为何选择<em>Rails</em>？</h2>
 
-<p>这是一个开发框架的时代，熟悉开发框架的人，可以很快的完成任务以及熟悉网站程式的架构。而各种程式语言要入门上手，其实都不会太困难。我认为重点会在于你不能够熟悉做事情的框架。</p>
+<p>这是一个开发框架的时代，熟悉开发框架的人，可以很快的完成任务以及熟悉网站程式的架构。而各种编程语言要入门上手，其实都不会太困难。我认为重点会在于你不能够熟悉做事情的框架。</p>
 
-<p>所以，撇开程式语言的偏好，<em>Ruby on Rails</em>是目前网站开发框架中做前端(提供动态<em>HTML</em>给浏览器)应用服务器最为成功和技术先进的。它的概念也深深影响了非常多其他程式语言的后进网站开发框架，例如<em>ASP.NET MVC</em>、<em>CakePHP</em>、<em>Grails</em>、<em>TurboGears</em>、<em>Pylons</em>、<em>web2py</em>、<em>catalyst</em>等等(模仿是最大的恭维)。我们可以用非常有效率的程式码开发出网站应用程式。另外，可能会让你感到意外的是，它也是目前动态语言中，生态圈最为丰富的网站开发框架，相关的书籍、研讨会、顾问公司、第三方服务、外掛套件等等十分丰富。因为使用<em>Rails</em>的人数眾多，所以在开发上各个方向都有人提供了最佳实务，像是如何写出好的程式码、网站安全性、网站性能、扩充性、全文搜寻、非同步处理等等，这是一个非常活跃的社群。</p>
+<p>所以，撇开编程语言的偏好，<em>Ruby on Rails</em>是目前网站开发框架中做前端(提供动态<em>HTML</em>给浏览器)应用服务器最为成功和技术先进的。它的概念也深深影响了非常多其他编程语言的后进网站开发框架，例如<em>ASP.NET MVC</em>、<em>CakePHP</em>、<em>Grails</em>、<em>TurboGears</em>、<em>Pylons</em>、<em>web2py</em>、<em>catalyst</em>等等(模仿是最大的恭维)。我们可以用非常有效率的程式码开发出网站应用程序。另外，可能会让你感到意外的是，它也是目前动态语言中，生态圈最为丰富的网站开发框架，相关的书籍、研讨会、顾问公司、第三方服务、外挂套件等等十分丰富。因为使用<em>Rails</em>的人数众多，所以在开发上各个方向都有人提供了最佳实务，像是如何写出好的程式码、网站安全性、网站性能、扩充性、全文搜寻、非同步处理等等，这是一个非常活跃的社群。</p>
 
-<p>当然，最重要的一个理由，就是採用<em>Rails</em>后生产力暴增：写新的应用程式、增加新功能变成容易地多。让你可以用更少程式码做更多的事情，而且程式也更容易维护。当然，学习新工具总是需要时间投资的，一开始可能没办法立刻见效。但是如果你有长期的开发工作，而且网站有一定的复杂性，那么一个短期学习<em>Ruby on Rails</em>的投资，长期来说将会是非常值得的。</p>
+<p>当然，最重要的一个理由，就是采用<em>Rails</em>后生产力暴增：写新的应用程序、增加新功能变成容易地多。让你可以用更少程式码做更多的事情，而且程式也更容易维护。当然，学习新工具总是需要时间投资的，一开始可能没办法立刻见效。但是如果你有长期的开发工作，而且网站有一定的复杂性，那么一个短期学习<em>Ruby on Rails</em>的投资，长期来说将会是非常值得的。</p>
 
 <h2 id="rails-">Rails 不是什么</h2>
 
 <ul>
-  <li>如上所述，<em>Rails</em>是一个打造网站应用程式的开发框架，如果你只需要静态的<em>HTML</em>，那是绝不需要用到<em>Rails</em>的。</li>
+  <li>如上所述，<em>Rails</em>是一个打造网站应用程序的开发框架，如果你只需要静态的<em>HTML</em>，那是绝不需要用到<em>Rails</em>的。</li>
   <li>
 <em>Rails</em>不是<em>CMS(Content Management System)</em>内容管理系统。<em>CMS</em>是一套写好的架站系统，可以让你不需要写程式就可以架站。市面上流行成熟的<em>CMS</em>系统多为<em>PHP</em>写成，例如<em>Drupal</em>、<em>WordPress</em>等。当然也有用<em>Ruby</em>写的，例如<em>Radiant</em>。如果这些架站系统刚好符合你的需求，那就不一定需要<em>Rails</em>。</li>
   <li>
-<em>Rails</em>是一套网站开发框架帮助你建立网站应用程式，它不是程式语言。</li>
+<em>Rails</em>是一套网站开发框架帮助你建立网站应用程序，它不是编程语言。</li>
 </ul>
 
 <h2 id="ruby">什么是<em>Ruby</em>？</h2>
 
 <p><em>Rails</em>是一套使用<em>Ruby</em>开发的网站框架。如果您对<em>Ruby</em>一无所知就一头栽进<em>Rails</em>，恐怕不是个好主意。</p>
 
-<p><em>Ruby</em>是一套开放原码、对象导向的动态直译式<em>(interpreted)</em>程式语言，它有著简单哲学、高生产力、精巧、自然的语法。他的创造者是来自日本的松本行弘(又名<em>Matz</em>)，设计的灵感来自于<em>Lisp</em>、<em>Perl</em>和<em>Smalltalk</em>，设计的目的是要让程式设计师能够快乐地写程式。</p>
+<p><em>Ruby</em>是一套开放原码、对象导向的动态直译式<em>(interpreted)</em>编程语言，它有著简单哲学、高生产力、精巧、自然的语法。他的创造者是来自日本的松本行弘(又名<em>Matz</em>)，设计的灵感来自于<em>Lisp</em>、<em>Perl</em>和<em>Smalltalk</em>，设计的目的是要让程式设计师能够快乐地写程式。</p>
 
 <p>让我们看一个非常简单的范例：</p>
 
@@ -212,22 +212,22 @@ PRINTAREA
 <p>这的范例就简单告诉我们有关<em>Ruby</em>的三件事情了：</p>
 
 <ul>
-  <li>动态分型<em>(typing)</em>，不需要宣告型态</li>
+  <li>动态分型<em>(typing)</em>，不需要声明类型</li>
   <li>每样东西都是对象，包括数字</li>
-  <li>匿名函式<em>(code block)</em>随处可见</li>
+  <li>匿名函数<em>(code block)</em>随处可见</li>
 </ul>
 
 <p>我们会在<em>Ruby</em>一章介绍基本的语法，让各位读者可以很快的入门。</p>
 
 <h2 id="section">动态语言的好处</h2>
 
-<p>为什么开发服务器端应用程式，使用动态语言(<em>Ruby</em>、<em>Python</em>、<em>PHP</em>、<em>Perl</em>等)比起静态语言(<em>Java</em>、<em>C++</em>等)有更好的优势呢？</p>
+<p>为什么开发服务器端应用程序，使用动态语言(<em>Ruby</em>、<em>Python</em>、<em>PHP</em>、<em>Perl</em>等)比起静态语言(<em>Java</em>、<em>C++</em>等)有更好的优势呢？</p>
 
 <blockquote>
-  <p>静态语言和动态语言的差别在于，前者的变数型别需要事前宣告，后者则是执行期才动态决定。实务上，就看程式需不需要事前编译这个动作了。</p>
+  <p>静态语言和动态语言的差别在于，前者的变数型别需要事前声明，后者则是执行期才动态决定。实务上，就看程式需不需要事前编译这个动作了。</p>
 </blockquote>
 
-<p>著名的”人月神话”一书作者<em>Fred Brooks</em>曾说：「一个程式设计师一天能产生的程式码行数是差不多的，无论什么程式语言」。因此一个具有表达能力的高阶程式语言，就会比低阶的程式语言能完成更多功能。相较于静态程式语言，使用更高阶的动态脚本语言可以帮助我们：</p>
+<p>著名的”人月神话”一书作者<em>Fred Brooks</em>曾说：「一个程式设计师一天能产生的程式码行数是差不多的，无论什么编程语言」。因此一个具有表达能力的高阶编程语言，就会比低阶的编程语言能完成更多功能。相较于静态编程语言，使用更高阶的动态脚本语言可以帮助我们：</p>
 
 <ol>
   <li>用更少程式码做更多事情，大大增加生产力</li>
@@ -241,7 +241,7 @@ PRINTAREA
   <li>没有编译期可以检查型别错误</li>
 </ol>
 
-<p>但是，我们知道现在的电脑越来越快、越来越便宜、上网越来越容易、内存越来越多、硬碟越来越大。另外，行动装置也越来越多，需要搭配的网络服务需求也增加了。这些趋势告诉我们有更多的软件的需求，另一方面由于硬件效能的增强，人力开发成本比起软件的执行期的效能，也越来越重要。同样一个程式，用动态语言执行的效能已经可以达到实用(例如每秒可以处理<em>50~500</em>个的<em>HTTP</em>请求，也可以通过增加服务器来扩展架构)，也许用静态语言后的执行速度可以再快一倍，但是却需要十倍以上的时间来开发，这件事情是不是值得呢？</p>
+<p>但是，我们知道现在的电脑越来越快、越来越便宜、上网越来越容易、内存越来越多、硬盘越来越大。另外，行动装置也越来越多，需要搭配的网络服务需求也增加了。这些趋势告诉我们有更多的软件的需求，另一方面由于硬件效能的增强，人力开发成本比起软件的执行期的效能，也越来越重要。同样一个程式，用动态语言执行的效能已经可以达到实用(例如每秒可以处理<em>50~500</em>个的<em>HTTP</em>请求，也可以通过增加服务器来扩展架构)，也许用静态语言后的执行速度可以再快一倍，但是却需要十倍以上的时间来开发，这件事情是不是值得呢？</p>
 
 <blockquote>
   <p>在硬件资源有限的行动装置及嵌入式系统上，仍是静态语言的天下，这一点需要更多时间才有动态语言的生存空间。</p>
@@ -251,9 +251,9 @@ PRINTAREA
 
 <h2 id="ruby-1">为何选择<em>Ruby</em>？</h2>
 
-<p>Ruby 是一套非常重视使用性(<em>Usability</em>)的对象导向程式语言，非常看重程式码的可读性及维护性。<em>Matz</em>在设计<em>Ruby</em>时，就特别考量一般人容不容易了解(他说我们都是凡人，像<em>Lisp</em>是给神人用的)。这也是为什么你常常会听到<em>Ruby</em>的程式码自然简洁又漂亮。您可以看看这份 <em>Ruby</em>创造者<em>Matz</em>的<a href="files/whyruby-matz-rubyconfchina.pdf"><em>Why Ruby?</em>投影片</a>或是<em>Matz</em>的演讲:<em><a href="http://rubyconf2008.confreaks.com/matzs-keynote.html">RubyConf 2008</a></em>、<em><a href="http://confreaks.net/videos/159-rubyconf2009-keynote-address">RubyConf 2009</a></em>、<em><a href="http://confreaks.net/videos/11-mwrc2010-ruby124c41">Mountain West Ruby Conference 2010</a></em>，相信您会更了解及喜爱<em>Ruby</em>的哲学。</p>
+<p>Ruby 是一套非常重视使用性(<em>Usability</em>)的对象导向编程语言，非常看重程式码的可读性及维护性。<em>Matz</em>在设计<em>Ruby</em>时，就特别考量一般人容不容易了解(他说我们都是凡人，像<em>Lisp</em>是给神人用的)。这也是为什么你常常会听到<em>Ruby</em>的程式码自然简洁又漂亮。您可以看看这份 <em>Ruby</em>创造者<em>Matz</em>的<a href="https://ihower.tw/rails4/files/whyruby-matz-rubyconfchina.pdf"><em>Why Ruby?</em>投影片</a>或是<em>Matz</em>的演讲:<em><a href="http://rubyconf2008.confreaks.com/matzs-keynote.html">RubyConf 2008</a></em>、<em><a href="http://confreaks.net/videos/159-rubyconf2009-keynote-address">RubyConf 2009</a></em>、<em><a href="http://confreaks.net/videos/11-mwrc2010-ruby124c41">Mountain West Ruby Conference 2010</a></em>，相信您会更了解及喜爱<em>Ruby</em>的哲学。</p>
 
-<p><em>Ruby</em>也是目前做<em>Domain-specific language(DSL)</em>，特别是<em>Internal DSL</em>最为成功的程式语言。通过<em>DSL</em>，程式不但可以拥有非常好的可读性，也可以大幅增加生产力。成功的<em>DSL</em>函式库例如有：<em>Rake</em>建构工具、<em>RSpec</em>测试工具、<em>Chef</em>服务器设定工具、<em>Cucumber</em>验收测试等。这些函式库正积极地影响我们对软件开发的想法。我们相信，还会有更多更有趣的<em>DSL</em>函式库出现。</p>
+<p><em>Ruby</em>也是目前做<em>Domain-specific language(DSL)</em>，特别是<em>Internal DSL</em>最为成功的编程语言。通过<em>DSL</em>，程式不但可以拥有非常好的可读性，也可以大幅增加生产力。成功的<em>DSL</em>函数库例如有：<em>Rake</em>建构工具、<em>RSpec</em>测试工具、<em>Chef</em>服务器设定工具、<em>Cucumber</em>验收测试等。这些函数库正积极地影响我们对软件开发的想法。我们相信，还会有更多更有趣的<em>DSL</em>函数库出现。</p>
 
 
         <p><a href="#">》回到页首</a></p>

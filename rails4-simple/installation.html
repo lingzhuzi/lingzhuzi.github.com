@@ -70,15 +70,15 @@
 
 <h2 id="section-1">数据库</h2>
 
-<p><em>Rails</em>支持的数据库包括<em>SQLite3</em>、<em>MySQL</em>、<em>Postgres</em>、<em><a href="http://programmingzen.com/category/databases/db2/">IBM DB2</a></em>、<em><a href="https://github.com/rsim/oracle-enhanced">Oracle</a></em>和<em><a href="http://www.engineyard.com/blog/2011/modern-sql-server-rails/">SQL Server</a></em>等。除了安装数据库软件，我们也需要安装搭配的<em>Ruby</em>函式库(称作<em>Adapter</em>或<em>Driver</em>)。作为新手的单机练习，使用<em>SQLite</em>就可以了，本章会先介绍<em>SQLite</em>的安装方式。<a href="advanced-installation.html">附录</a>则会介绍如何安装<em>MySQL</em>和<em>PostgreSQL</em>。</p>
+<p><em>Rails</em>支持的数据库包括<em>SQLite3</em>、<em>MySQL</em>、<em>Postgres</em>、<em><a href="http://programmingzen.com/category/databases/db2/">IBM DB2</a></em>、<em><a href="https://github.com/rsim/oracle-enhanced">Oracle</a></em>和<em><a href="http://www.engineyard.com/blog/2011/modern-sql-server-rails/">SQL Server</a></em>等。除了安装数据库软件，我们也需要安装搭配的<em>Ruby</em>函数库(称作<em>Adapter</em>或<em>Driver</em>)。作为新手的单机练习，使用<em>SQLite</em>就可以了，本章会先介绍<em>SQLite</em>的安装方式。<a href="advanced-installation.html">附录</a>则会介绍如何安装<em>MySQL</em>和<em>PostgreSQL</em>。</p>
 
 <h2 id="section-2">开发环境</h2>
 
-<h3 id="section-3">命令列视窗</h3>
+<h3 id="section-3">命令行窗口</h3>
 
 <p>有许多工作需要通过指令列介面<em>CLI (Command Line Interface)</em>完成，像是安装套件、执行<em>rails</em>指令、执行测试等等。虽然有一些<em>GUI</em>图型介面工具可以辅助，但是到头来你会发现还是直接在指令列输入最快最可靠，发生问题的时候也容易除错。</p>
 
-<p><em>Mac OS</em>下要进入命令列视窗，请打开<em>Go-&gt;Utilities</em>中的<em>Terminal</em>，或是笔者推荐可以安装<em><a href="http://iterm2.com/">iTerm2</a></em>。<em>Ubuntu Desktop</em>下是<em>Applications-&gt;Accessories</em>下的<em>Terminal</em>。<em>Windows</em>则是「开始-&gt;附属应用程式」中的「命令提示字元」。</p>
+<p><em>Mac OS</em>下要进入命令行窗口，请打开<em>Go-&gt;Utilities</em>中的<em>Terminal</em>，或是笔者推荐可以安装<em><a href="http://iterm2.com/">iTerm2</a></em>。<em>Ubuntu Desktop</em>下是<em>Applications-&gt;Accessories</em>下的<em>Terminal</em>。<em>Windows</em>则是「开始-&gt;附属应用程序」中的「命令提示字元」。</p>
 
 <p><em>Unix-like</em>的指令和<em>Windows</em>的指令很多是不同的，以下是一些常用的指令：</p>
 
@@ -135,7 +135,7 @@
 
 <h3 id="section-4">开发软件</h3>
 
-<p>在开始写点程式之前，让我们先介绍一下有什么推荐的编辑器。相较于静态语言如<em>C++、Java</em>喜欢功能丰富的<em>IDE(Integrated Development Environment)</em>软件，动态语言虽然也有一些<em>IDE</em>软件，但是更多人比较偏好简单的文字编辑器<em>(Editor)</em>加上命令列视窗就可以打遍天下。这是因为对表达能力强的动态语言来说，<em>IDE</em>提供的自动产生程式码、编译程式、复杂的浏览功能等等都不是这麼需要。</p>
+<p>在开始写点程式之前，让我们先介绍一下有什么推荐的编辑器。相较于静态语言如<em>C++、Java</em>喜欢功能丰富的<em>IDE(Integrated Development Environment)</em>软件，动态语言虽然也有一些<em>IDE</em>软件，但是更多人比较偏好简单的文字编辑器<em>(Editor)</em>加上命令行窗口就可以打遍天下。这是因为对表达能力强的动态语言来说，<em>IDE</em>提供的自动产生程式码、编译程式、复杂的浏览功能等等都不是这麼需要。</p>
 
 <h4 id="editor">
 <em>Editor</em>文字编辑器</h4>
@@ -175,7 +175,7 @@
 <pre><code>$ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 </code></pre>
 
-<p>过程中会跳出一个视窗询问是否安装<em>XCode</em>的命令列开发者工具<em>(Command Line Tools)</em>，请选择安装。完成后回到命令列继续<em>Homebrew</em>的安装。</p>
+<p>过程中会跳出一个窗口询问是否安装<em>XCode</em>的命令行开发者工具<em>(Command Line Tools)</em>，请选择安装。完成后回到命令行继续<em>Homebrew</em>的安装。</p>
 
 <p><em>Mac OS</em>虽然内建了<em>Ruby</em>，却是比较旧的版本，这里我们通过<em>Homebrew</em>安装最新版的<em>Ruby</em>：</p>
 
@@ -231,7 +231,7 @@ ruby 2.1.5p273 (2014-11-13 revision 48405) [x86_64-darwin13.0]
 
 <p>请至<em><a href="http://rubyinstaller.org/">RubyInstaller</a></em>下载<em>Ruby 2.1.5</em>安装包，如果<em>Windows 7</em>是64位元则下载<em>Ruby 2.1.5 (x64)</em>。安装过程中请点选将<em>Ruby</em>加入可执行的路径<em>(Add Ruby executables to your PATH)</em>。</p>
 
-<p>安装成功之后，打开「附属应用程式」的「命令提示字元」，输入以下指令可以看到安装的版本：</p>
+<p>安装成功之后，打开「附属应用程序」的「命令提示字元」，输入以下指令可以看到安装的版本：</p>
 
 <pre><code>$ ruby -v
 ruby 2.1.5p273 (2014-11-13 revision 48405) [x64-mingw32]
@@ -251,7 +251,7 @@ $ ruby dk.rb install
 <h2 id="rubygems">
 <em>RubyGems</em>简介</h2>
 
-<p><em>RubyGems</em>是<em>Ruby</em>的套件管理系统，让你轻易安装及管理<em>Ruby</em>函式库。你可以在<em><a href="http://rubygems.org">RubyGems</a></em>上找到所有的<em>Ruby</em>开源套件。另外，读者如果想找<em>Ruby</em>或<em>Rails</em>有哪些好用的套件，也可以浏览看看<em><a href="http://ruby-toolbox.com/">The Ruby Toolbox</a></em>，这个站依照套件的热门程度排序，非常方便。</p>
+<p><em>RubyGems</em>是<em>Ruby</em>的套件管理系统，让你轻易安装及管理<em>Ruby</em>函数库。你可以在<em><a href="http://rubygems.org">RubyGems</a></em>上找到所有的<em>Ruby</em>开源套件。另外，读者如果想找<em>Ruby</em>或<em>Rails</em>有哪些好用的套件，也可以浏览看看<em><a href="http://ruby-toolbox.com/">The Ruby Toolbox</a></em>，这个站依照套件的热门程度排序，非常方便。</p>
 
 <h3 id="section-6">常用指令</h3>
 
@@ -266,7 +266,7 @@ gem uninstall gem_name 反安装
 </code></pre>
 
 <blockquote>
-  <p>执行<code>gem install gem_name</code>的时候，它会在安装完之后，自动产生此套件的<em>RDoc</em>和<em>ri</em>文件。不过有鑑于目前网络发达，往往直接 <em>Google</em>或是在套件官网就可以查询到文件，所以其实不太需要在本地端机器产生文件，况且安装的时间耗时又佔硬碟空间。要省略这个步骤，有两种方式：</p>
+  <p>执行<code>gem install gem_name</code>的时候，它会在安装完之后，自动产生此套件的<em>RDoc</em>和<em>ri</em>文件。不过有鑑于目前网络发达，往往直接 <em>Google</em>或是在套件官网就可以查询到文件，所以其实不太需要在本地端机器产生文件，况且安装的时间耗时又佔硬盘空间。要省略这个步骤，有两种方式：</p>
 </blockquote>
 
 <p>每次安装时，加上以下参数：</p>

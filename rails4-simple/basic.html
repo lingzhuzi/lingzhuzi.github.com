@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-		<title>Ruby on Rails 实战圣经 | 手工打造 CRUD 应用程式</title>
+		<title>Ruby on Rails 实战圣经 | 手工打造 CRUD 应用程序</title>
 		<link rel="stylesheet" type="text/css" href="./style.css">
 		<link rel="canonical" href="./basic.html">
 	</head>
@@ -32,7 +32,7 @@
             <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
        </div>
        <div class="content body">
-	      <h1 id="crud-">手工打造 CRUD 应用程式</h1>
+	      <h1 id="crud-">手工打造 CRUD 应用程序</h1>
 
 <blockquote>
   <p>Much of the essence of building a program is in fact the debugging of the specification. - Fred Brooks, The Mythical Man-Month 作者</p>
@@ -42,7 +42,7 @@
   <p>请注意本章内容衔接后一章，请与后一章一起完成。</p>
 </blockquote>
 
-<p>初入门像<em>Rails</em>这样的功能丰富的开发框架，难处就像鸡生蛋、蛋生鸡的问题：要了解运作的原理，你必须了解其中的元件，但是如果个别学习其中的元件，又将耗费许多的时间而见树不见林。因此，为了能够让各位读者能够儘快建构出一个基本的应用程式，有个大局观。我们将从一个<em>CRUD</em>程式开始。所谓的<em>CRUD</em>即为<em>Create</em>、<em>Read</em>、<em>Update</em>、<em>Delete</em>等四项基本数据库操作，本章将示范如何做出这个基本的应用程式，以及几项<em>Rails</em>常用功能。细节的原理说明则待<em>Part 2</em>后续章节。</p>
+<p>初入门像<em>Rails</em>这样的功能丰富的开发框架，难处就像鸡生蛋、蛋生鸡的问题：要了解运作的原理，你必须了解其中的元件，但是如果个别学习其中的元件，又将耗费许多的时间而见树不见林。因此，为了能够让各位读者能够儘快建构出一个基本的应用程序，有个大局观。我们将从一个<em>CRUD</em>程式开始。所谓的<em>CRUD</em>即为<em>Create</em>、<em>Read</em>、<em>Update</em>、<em>Delete</em>等四项基本数据库操作，本章将示范如何做出这个基本的应用程序，以及几项<em>Rails</em>常用功能。细节的原理说明则待<em>Part 2</em>后续章节。</p>
 
 <h2 id="railsmvc">
 <em>Rails</em>的<em>MVC</em>元件</h2>
@@ -106,7 +106,7 @@
 </code></pre>
 
 <blockquote>
-  <p>这些指令必须要在<em>Rails</em>专案目录下执行，承第三章也就是<em>demo</em>目录下。</p>
+  <p>这些指令必须要在<em>Rails</em>项目目录下执行，承第三章也就是<em>demo</em>目录下。</p>
 </blockquote>
 
 <p>接着执行以下指令就会建立数据表(如果是使用<em>SQLite3</em>数据库话，会产生<em>db/development.sqlite3</em>这个档案)：</p>
@@ -121,7 +121,7 @@
 &gt; event.name = "Ruby course"
 &gt; event.description = "fooobarrr"
 &gt; event.capacity = 20
-&gt; event.save # 储存进数据库，读者可以观察另一个指令视窗
+&gt; event.save # 储存进数据库，读者可以观察另一个指令窗口
 &gt; event.id # 输出主键 1，在 Rails 中的主键皆为自动递增的整数 ID
 
 &gt; event = Event.new( :name =&gt; "another ruby course", :capacity =&gt; 30)
@@ -149,7 +149,7 @@
 
 <ul>
   <li>让数据库的修改也可以纳入版本控制系统，所有的变更都通过撰写<em>Migration</em>档案执行</li>
-  <li>方便应用程式更新升级，例如让软件从第三版更新到第五版，数据库更新只需要执行<code>rake db:migrate</code>
+  <li>方便应用程序更新升级，例如让软件从第三版更新到第五版，数据库更新只需要执行<code>rake db:migrate</code>
 </li>
   <li>跨数据库通用，不需修改程式就可以用在<em>SQLite3</em>、<em>MySQL</em>、<em>Postgres</em>等不同数据库</li>
 </ul>
@@ -206,7 +206,7 @@ end
 end
 </code></pre>
 
-<p>其中的<em>validates_presence_of</em>宣告了<em>name</em>这个属性是必填。我们按<em>Ctrl+Z</em>离开主控台重新进入，或是输入 <em>reload!</em>，这样才会重新载入。</p>
+<p>其中的<em>validates_presence_of</em>声明了<em>name</em>这个属性是必填。我们按<em>Ctrl+Z</em>离开主控台重新进入，或是输入 <em>reload!</em>，这样才会重新载入。</p>
 
 <pre><code>&gt; e = Event.new
 &gt; e.save # 回传 false
@@ -218,7 +218,7 @@ end
 
 <p>呼叫<em>save</em>时，<em>ActiveRecord</em>就会验证资料的正确性。而这里因为没有填入<em>name</em>，所以回传<em>false</em>表示储存失败。</p>
 
-<h2 id="crud">实做基本的<em>CRUD</em>应用程式</h2>
+<h2 id="crud">实做基本的<em>CRUD</em>应用程序</h2>
 
 <h3 id="section">典型路由</h3>
 
@@ -283,12 +283,12 @@ end
 &lt;% end %&gt;
 </code></pre>
 
-<p>这个<code>form_for</code>的程式码区块<em>(Code block)</em>被用来建立<em>HTML</em>表单。在区块中，你可以使用各种函式来建构表单。例如<code>f.text_field :name</code>建立出一个文字输入框，并填入<code>@event</code>的<em>name</em>属性资料。但这个表单只能基于这个<em>Model</em>有的属性(在这个例子是<em>name</em>跟<em>description</em>)。<em>Rails</em>偏好使用<code>form_for</code>而不是让你手写表单<em>HTML</em>，这是因为程式码可以更加简洁，而且可以明确地连结在<em>Model</em>对象上。</p>
+<p>这个<code>form_for</code>的程式码区块<em>(Code block)</em>被用来建立<em>HTML</em>表单。在区块中，你可以使用各种函数来建构表单。例如<code>f.text_field :name</code>建立出一个文字输入框，并填入<code>@event</code>的<em>name</em>属性资料。但这个表单只能基于这个<em>Model</em>有的属性(在这个例子是<em>name</em>跟<em>description</em>)。<em>Rails</em>偏好使用<code>form_for</code>而不是让你手写表单<em>HTML</em>，这是因为程式码可以更加简洁，而且可以明确地连结在<em>Model</em>对象上。</p>
 
 <p><code>form_for</code>区块也很聪明，<em>New Event</em>的表单跟<em>Edit Event</em>的表单，其中的送出网址跟按钮文字会不同的(根据<code>@event</code>的不同，前者是新建的，后者是已经建立过的)。</p>
 
 <blockquote>
-  <p>如果你需要建立任意栏位的<em>HTML</em>表单，而不绑在某一个<em>Model</em>上，你可以使用<code>form_tag</code>函式。它也提供了建构表单的函式而不需要绑在<em>Model</em>实例上。我们会在<em>Action View: Helpers</em>一章介绍。</p>
+  <p>如果你需要建立任意栏位的<em>HTML</em>表单，而不绑在某一个<em>Model</em>上，你可以使用<code>form_tag</code>函数。它也提供了建构表单的函数而不需要绑在<em>Model</em>实例上。我们会在<em>Action View: Helpers</em>一章介绍。</p>
 </blockquote>
 
 <p>当一个使用者点击表单的<em>Create</em>按钮时，浏览器就会送出资料到<em>Controller</em>的<em>create Action</em>。也是一样编辑<em>app/controllers/events_controller.rb</em>加入：</p>
@@ -554,11 +554,11 @@ end
 
 <p>「event was successfully created」信息会被储存在<em>Rails</em>的特殊<em>flash</em>变数中，好让信息可以被带到另一个 <em>action</em>，它提供使用者一些有用的信息。在这个<em>create Action</em>中，使用者并没有真的看到任何页面，因为它马上就被导向到新的活动页面。而这个<em>flash</em>变数就带著信息到下一个<em>Action</em>，好让使用者可以在<em>show Action</em>页面看到 「event was successfully created.」这个信息。</p>
 
-<h2 id="section-7">分页外掛</h2>
+<h2 id="section-7">分页外挂</h2>
 
 <p>上述的程式用<code>Event.all</code>一次抓出所有活动，这在资料量一大的时候非常浪费效能和内存。通常会用分页机制来限制抓取资料的笔数。</p>
 
-<p>编辑<em>Gemfile</em>加入以下程式，这个档案设定了此应用程式使用哪些套件。这里我们使用<em><a href="https://github.com/amatsuda/kaminari">kaminari</a></em>这个分页套件：</p>
+<p>编辑<em>Gemfile</em>加入以下程式，这个档案设定了此应用程序使用哪些套件。这里我们使用<em><a href="https://github.com/amatsuda/kaminari">kaminari</a></em>这个分页套件：</p>
 
 <pre><code>gem "kaminari"
 </code></pre>

@@ -38,7 +38,7 @@
   <p>Any fool can write code that a computer can understand. Good programmers write code that humans can understand. - Martin Fowler</p>
 </blockquote>
 
-<p>在这一章中我们将进入<em>MVC</em>架构中的<em>View</em>，也就是提供介面给用户操作，与我们的应用程式做互动。</p>
+<p>在这一章中我们将进入<em>MVC</em>架构中的<em>View</em>，也就是提供介面给用户操作，与我们的应用程序做互动。</p>
 
 <p><em>ActionView</em>是<em>Rails</em>中处理<em>View</em>的元件名称，而提供给用户的文件，我们会用<em>Template</em>样板来呈现。本章假设读者们都对<em>HTML</em>有基本的认识。</p>
 
@@ -123,7 +123,7 @@ end
 
 <h2 id="renderercontroller">使用<em>Renderer</em>在<em>Controller</em>中直接回传结果</h2>
 
-<p>有一些格式的本质其实不需要<em>Template</em>引擎，只需要再<em>Controller</em>中直接<em>render</em>其结果即可，例如<em>JSON</em>和<em>CSV</em>或是<em>XML</em>。<em>Rails</em>对<em>ActiveRecord model</em>提供了<code>to_xml</code>和<code>to_json</code>方法。而<em>CSV</em>则可以使用<em>FasterCSV</em>函式库。范例如下：</p>
+<p>有一些格式的本质其实不需要<em>Template</em>引擎，只需要再<em>Controller</em>中直接<em>render</em>其结果即可，例如<em>JSON</em>和<em>CSV</em>或是<em>XML</em>。<em>Rails</em>对<em>ActiveRecord model</em>提供了<code>to_xml</code>和<code>to_json</code>方法。而<em>CSV</em>则可以使用<em>FasterCSV</em>函数库。范例如下：</p>
 
 <pre><code>require 'csv'
 class PeopleController &lt; ApplicationController
@@ -208,7 +208,7 @@ end
 <p>其中的<code>&lt;%= yield %&gt;</code>会被替换成个别<code>Action</code>的样板。</p>
 
 <blockquote>
-  <p>开头的<code>&lt;!DOCTYPE html&gt;</code>说明了这是一份<em>HTML5</em>文件，这种宣告法向下相容于所有浏览器的<em>HTML4</em>。</p>
+  <p>开头的<code>&lt;!DOCTYPE html&gt;</code>说明了这是一份<em>HTML5</em>文件，这种声明法向下相容于所有浏览器的<em>HTML4</em>。</p>
 </blockquote>
 
 <p>如果需要指定<em>Controller</em>的<em>Layout</em>，可以这麼做：</p>

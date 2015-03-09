@@ -38,7 +38,7 @@
   <p>No code is faster than no code. - Merb core tenet</p>
 </blockquote>
 
-<p>关于快取，有句话是这样说的：<em>“There are only two hard things in Computer Science: cache invalidation and naming things” by Phil Karlton</em>。在电脑硬件和软件架构中，有非常多的设计都是围绕在快取系统上，越快的效能代表可用的空间越少，这是成本效益。例如个人电脑上的<em>CPU</em>的快取分成<em>L1</em>、<em>L2</em>、<em>L3</em>，然后是内存、最后是硬碟空间，这之间的存取速度和可用空间差了好几个数量级，前者对后者来说，就是一种快取层。而资料一旦被放到快取，就要去处理资料的<em>Consistent</em>一致性问题。设计网站应用程式也是一样的道理，将运算过后的结果快取起来，下次要用不计算直接读取就会比较快。但是什么时候快取资料过期了需要重新运算呢？这就是令人头痛的<em>cache invalidation</em>问题。</p>
+<p>关于快取，有句话是这样说的：<em>“There are only two hard things in Computer Science: cache invalidation and naming things” by Phil Karlton</em>。在电脑硬件和软件架构中，有非常多的设计都是围绕在快取系统上，越快的效能代表可用的空间越少，这是成本效益。例如个人电脑上的<em>CPU</em>的快取分成<em>L1</em>、<em>L2</em>、<em>L3</em>，然后是内存、最后是硬盘空间，这之间的存取速度和可用空间差了好几个数量级，前者对后者来说，就是一种快取层。而资料一旦被放到快取，就要去处理资料的<em>Consistent</em>一致性问题。设计网站应用程序也是一样的道理，将运算过后的结果快取起来，下次要用不计算直接读取就会比较快。但是什么时候快取资料过期了需要重新运算呢？这就是令人头痛的<em>cache invalidation</em>问题。</p>
 
 <p>我们在上一章努力避免缓慢的数据库<em>SQL</em>查询，但是如果效能需要再进一步提昇，就需要用到快取机制来减少读取数据库，以及利用<em>View</em>快取节省样板<em>rendering</em>时间。</p>
 
@@ -63,7 +63,7 @@
 <pre><code>$ brew install memcached
 </code></pre>
 
-<p>编辑<em>Gemfile</em>加上<em>memcached</em>的函式库</p>
+<p>编辑<em>Gemfile</em>加上<em>memcached</em>的函数库</p>
 
 <pre><code>gem "dalli"
 </code></pre>
@@ -102,7 +102,7 @@
 
 <h3 id="section-1">更新快取的策略</h3>
 
-<p>用了快取，就还要学会怎麼处理过期资料，也就是在资料过期之后，将对应的快取资料清除。<em>Rails</em>採用的策略非常聪明，就是利用<em>LRU</em>快取演算法的特性，根据当时情境来动态命名快取<em>Key</em>，从而避免手动清除快取的动作，反正快取内存一满，没用到的快取资料就会自动被清除掉。</p>
+<p>用了快取，就还要学会怎麼处理过期资料，也就是在资料过期之后，将对应的快取资料清除。<em>Rails</em>采用的策略非常聪明，就是利用<em>LRU</em>快取演算法的特性，根据当时情境来动态命名快取<em>Key</em>，从而避免手动清除快取的动作，反正快取内存一满，没用到的快取资料就会自动被清除掉。</p>
 
 <p>实际看看<em>Rails</em>产生出来的快取<em>Key</em>吧，例如<code>cache [@event]</code>会产生出以下的快取<em>Key</em></p>
 

@@ -158,7 +158,7 @@ end
 
 <h3 id="section-6">时区处理方法</h3>
 
-<p><em>Ruby</em>原生的<em>Time</em>类别对于时区的处理一律是参考唯一的系统环境变数<code>ENV['TZ']</code>，这在使用者多时区的应用程式中就显的见拙。因此在<em>Rails</em>中的时间类别使用的是<em>ActiveSupport::TimeWithZone</em>，我们已经知道可以使用<code>Time.zone</code>可以改变时区，其他的用法例如：</p>
+<p><em>Ruby</em>原生的<em>Time</em>类别对于时区的处理一律是参考唯一的系统环境变数<code>ENV['TZ']</code>，这在使用者多时区的应用程序中就显的见拙。因此在<em>Rails</em>中的时间类别使用的是<em>ActiveSupport::TimeWithZone</em>，我们已经知道可以使用<code>Time.zone</code>可以改变时区，其他的用法例如：</p>
 
 <pre><code>Time.zone = "Taipei"
 Time.zone.local(2011, 8, 3, 9, 0) # 建立一个Taipei当地时间
@@ -184,7 +184,7 @@ datetime.to_formatted_s(:rfc822)        # =&gt; "Tue, 04 Dec 2007 00:00:00 +0000
 datetime.to_formatted_s(:iso8601)       # =&gt; "2007-12-04T00:00:00+00:00"
 </code></pre>
 
-<p>也可以自行注册专案常用的格式在<em>config/initializers/time_formats.rb</em>裡：</p>
+<p>也可以自行注册项目常用的格式在<em>config/initializers/time_formats.rb</em>裡：</p>
 
 <pre><code>Time::DATE_FORMATS[:month_and_year] = '%B %Y'
 Time::DATE_FORMATS[:short_ordinal] = lambda { |time| time.strftime("%B #{time.day.ordinalize}") }

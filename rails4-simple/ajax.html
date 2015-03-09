@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-		<title>Ruby on Rails 实战圣经 | Ajax 应用程式</title>
+		<title>Ruby on Rails 实战圣经 | Ajax 应用程序</title>
 		<link rel="stylesheet" type="text/css" href="./style.css">
 		<link rel="canonical" href="./ajax.html">
 	</head>
@@ -32,7 +32,7 @@
             <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
        </div>
        <div class="content body">
-	      <h1 id="ajax-">Ajax 应用程式</h1>
+	      <h1 id="ajax-">Ajax 应用程序</h1>
 
 <blockquote>
   <p>It’s not a bug - it’s an undocumented feature. - Unknown</p>
@@ -52,7 +52,7 @@
 
 <h2 id="unobtrusive-javascript">Unobtrusive JavaScript</h2>
 
-<p>Rails 从 3.0 后将<em>Ajax</em>使用的<em>JavaScript</em>都改成<em>Unobtrusive JavaScript(UJS)</em>方式。什么是<em>Unobtrusive</em>呢？用个范例来说吧，它会将超连结改成用表单<em>DELETE</em>送出，并且用一个提示视窗来作确认：</p>
+<p>Rails 从 3.0 后将<em>Ajax</em>使用的<em>JavaScript</em>都改成<em>Unobtrusive JavaScript(UJS)</em>方式。什么是<em>Unobtrusive</em>呢？用个范例来说吧，它会将超连结改成用表单<em>DELETE</em>送出，并且用一个提示窗口来作确认：</p>
 
 <pre><code>link_to 'Remove', event_path(1), :method =&gt; :delete, :data =&gt; { :confirm =&gt; "Sure?" }
 </code></pre>
@@ -142,7 +142,7 @@ end
 
 <h2 id="json-">第三种方式：使用 JSON 资料格式</h2>
 
-<p><em>JavaScript Object Notation(JSON)</em>是一种源自<em>JavaScript</em>的资料格式，是目前<em>Web</em>应用程式之间的準标準资料交换格式，在<em>Rails</em>之中，每个对象都有<code>to_json</code>方法可以很方便的转换资料格式。</p>
+<p><em>JavaScript Object Notation(JSON)</em>是一种源自<em>JavaScript</em>的资料格式，是目前<em>Web</em>应用程序之间的準标准资料交换格式，在<em>Rails</em>之中，每个对象都有<code>to_json</code>方法可以很方便的转换资料格式。</p>
 
 <pre><code>&lt;%= link_to 'ajax show', event_path(event), :remote =&gt; true, :data =&gt; { :type =&gt; :json }, :class =&gt; "ajax_update" %&gt;
 </code></pre>
@@ -181,7 +181,7 @@ end
 <pre><code>Turbolinks.enableProgressBar();
 </code></pre>
 
-<p>最后，因为它会影响<em>JavaScript</em>的<em>Event Bindings</em>行为，所以在搭配一些<em>JavaScript</em>比较吃重的应用程式，例如使用<em>JavaScript Framework</em>如<em>Backbone</em>、<em>AngularJS</em>、<em>Ember</em>时会移除不用，以免互相影响。</p>
+<p>最后，因为它会影响<em>JavaScript</em>的<em>Event Bindings</em>行为，所以在搭配一些<em>JavaScript</em>比较吃重的应用程序，例如使用<em>JavaScript Framework</em>如<em>Backbone</em>、<em>AngularJS</em>、<em>Ember</em>时会移除不用，以免互相影响。</p>
 
 <h2 id="section">更多线上资源</h2>
 

@@ -38,23 +38,23 @@
   <p>There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies and the other way is to make it so complicated that there are no obvious deficiencies. - C.A.R. Hoare,</p>
 </blockquote>
 
-<p>在这一章中，我们将开始介绍如何建立一个最简单的<em>Hello, World!</em>程式，以及用最快速的方式製作<em>CRUD</em>应用。</p>
+<p>在这一章中，我们将开始介绍如何建立一个最简单的<em>Hello, World!</em>程式，以及用最快速的方式制作<em>CRUD</em>应用。</p>
 
 <blockquote>
   <p><em>CRUD</em>指的是<em>Create</em>(新增)、<em>Read</em>(读取)、<em>Update</em>(更新)、<em>Delete</em>(删除)四种操作资料的基本方式。</p>
 </blockquote>
 
-<p>在上一章安装<em>Rails</em>后，你会在命令列中得到一个<code>rails</code>的指令，这个指令可以初始一个<em>Rails</em>专案目录。</p>
+<p>在上一章安装<em>Rails</em>后，你会在命令行中得到一个<code>rails</code>的指令，这个指令可以初始一个<em>Rails</em>项目目录。</p>
 
-<h2 id="rails">开始建立第一个<em>Rails</em>应用程式</h2>
+<h2 id="rails">开始建立第一个<em>Rails</em>应用程序</h2>
 
-<p>首先请打开一个命令列视窗<em>(Terminal)</em>，然后找个目录适合放你的<em>Rails</em>专案，就说是<code>projects</code>好了：</p>
+<p>首先请打开一个命令行窗口<em>(Terminal)</em>，然后找个目录适合放你的<em>Rails</em>项目，就说是<code>projects</code>好了：</p>
 
 <pre><code>$ mkdir projects
 $ cd projects
 </code></pre>
 
-<p>接着，输入以下指令就会建立一个叫做<em>demo</em>的<em>Rails</em>专案：</p>
+<p>接着，输入以下指令就会建立一个叫做<em>demo</em>的<em>Rails</em>项目：</p>
 
 <pre><code>$ rails new demo --skip-test-unit
 </code></pre>
@@ -82,7 +82,7 @@ create  vendor/plugins/.gitkeep
 <pre><code>$ cd demo
 </code></pre>
 
-<p>这个目录下包含了一个<em>Rails</em>专案基本会用到的目录结构和档案，让我们简单走访一下，输入<code>ls</code><em>(Windows读者请输入dir)</em>显示出此目录下的档案：</p>
+<p>这个目录下包含了一个<em>Rails</em>项目基本会用到的目录结构和档案，让我们简单走访一下，输入<code>ls</code><em>(Windows读者请输入dir)</em>显示出此目录下的档案：</p>
 
 <table>
   <tr>
@@ -91,15 +91,15 @@ create  vendor/plugins/.gitkeep
   </tr>
   <tr>
     <td>Gemfile</td>
-    <td>设定Rails应用程式会使用哪些Gems套件</td>
+    <td>设定Rails应用程序会使用哪些Gems套件</td>
   </tr>
   <tr>
     <td><span class="caps">README</span></td>
-    <td>专案说明：你可以用来告诉其他人你的应用程式是做什么用的，如何使用等等。 </td>
+    <td>项目说明：你可以用来告诉其他人你的应用程序是做什么用的，如何使用等等。 </td>
   </tr>
   <tr>
     <td>Rakefile</td>
-    <td>用来载入可以被命令列执行的一些Rake任务</td>
+    <td>用来载入可以被命令行执行的一些Rake任务</td>
   </tr>
   <tr>
     <td>app/</td>
@@ -107,11 +107,11 @@ create  vendor/plugins/.gitkeep
   </tr>
   <tr>
     <td>config/</td>
-    <td>应用程式设定档、路由规则、数据库设定等等</td>
+    <td>应用程序设定档、路由规则、数据库设定等等</td>
   </tr>
   <tr>
     <td>config.ru</td>
-    <td>用来啟动应用程式的Rack服务器设定档</td>
+    <td>用来啟动应用程序的Rack服务器设定档</td>
   </tr>
   <tr>
     <td>db/</td>
@@ -127,7 +127,7 @@ create  vendor/plugins/.gitkeep
   </tr>
   <tr>
     <td>log/</td>
-    <td>应用程式的Log记录档</td>
+    <td>应用程序的Log记录档</td>
   </tr>
   <tr>
     <td>public/</td>
@@ -147,13 +147,13 @@ create  vendor/plugins/.gitkeep
   </tr>
   <tr>
     <td>vendor/</td>
-    <td>用来放第三方程式码外掛的目录</td>
+    <td>用来放第三方程式码外挂的目录</td>
   </tr>
 </table>
 
 <h2 id="section">啟动服务器</h2>
 
-<p><em>Rails</em>使用了一套叫做<em>Bundler</em>的工具可以帮助我们检查及安装这个<em>Rails</em>应用程式所有依存的套件，请输入：</p>
+<p><em>Rails</em>使用了一套叫做<em>Bundler</em>的工具可以帮助我们检查及安装这个<em>Rails</em>应用程序所有依存的套件，请输入：</p>
 
 <pre><code>$ bundle install
 </code></pre>
@@ -170,7 +170,7 @@ create  vendor/plugins/.gitkeep
 Your bundle is complete! Use `bundle show [gemname]` to see where a bundled gem is installed.
 </code></pre>
 
-<p>在开发用的电脑上，我们不需要安装如<em>Apache</em>、<em>IIS</em>的网站服务器。<em>Ruby</em>本身就有提供了<em>HTTP</em>服务器可以执行<em>Rails</em>，要啟动它，我们另开啟一个指令视窗，<em>cd</em>进到刚刚建立的<em>Rails</em>专案目录然后输入<em>bin/rails server</em>：</p>
+<p>在开发用的电脑上，我们不需要安装如<em>Apache</em>、<em>IIS</em>的网站服务器。<em>Ruby</em>本身就有提供了<em>HTTP</em>服务器可以执行<em>Rails</em>，要啟动它，我们另开啟一个指令窗口，<em>cd</em>进到刚刚建立的<em>Rails</em>项目目录然后输入<em>bin/rails server</em>：</p>
 
 <pre><code>$ cd projects/demo
 $ bin/rails server
@@ -232,7 +232,7 @@ end
 end
 </code></pre>
 
-<p>在<em>Controller</em>中，一个公开函式<em>(public method)</em>就代表一个<em>Action</em>，一个<em>Action</em>对应一个<em>HTTP</em>的请求和回应。接着我们打开浏览器浏览<em>http://localhost:3000/welcome/say_hello</em>，你会看到一个错误如下：</p>
+<p>在<em>Controller</em>中，一个公开函数<em>(public method)</em>就代表一个<em>Action</em>，一个<em>Action</em>对应一个<em>HTTP</em>的请求和回应。接着我们打开浏览器浏览<em>http://localhost:3000/welcome/say_hello</em>，你会看到一个错误如下：</p>
 
 <pre><code>Missing template welcome/say, application/say with {:locale=&gt;[:en], :formats=&gt;[:html], :variants=&gt;[], :handlers=&gt;[:erb, :builder, :raw, :ruby, :coffee, :jbuilder]}. Searched in: * "/Users/ihower/projects/demo/app/views"
 </code></pre>
@@ -302,7 +302,7 @@ end
 
 <h2 id="section-2">设定及建立数据库</h2>
 
-<p>操作数据库是动态网站非常基本的功能，在撰写<em>CRUD</em>应用程式之前，我们必须先设定好数据库。<em>Rails</em>的数据库设定档是<em>config/database.yml</em>，如果你打开这个档案，预设的设定是<em>SQLite3</em>。这个档案裡包含三段不同环境的设定，对应到三个<em>Rails</em>执行环境：</p>
+<p>操作数据库是动态网站非常基本的功能，在撰写<em>CRUD</em>应用程序之前，我们必须先设定好数据库。<em>Rails</em>的数据库设定档是<em>config/database.yml</em>，如果你打开这个档案，预设的设定是<em>SQLite3</em>。这个档案裡包含三段不同环境的设定，对应到三个<em>Rails</em>执行环境：</p>
 
 <ul>
   <li>
@@ -315,7 +315,7 @@ end
 
 <h3 id="sqlite">设定<em>SQLite</em>数据库</h3>
 
-<p><em>Rails</em>内建支持<em><a href="http://www.sqlite.org/">SQLite</a></em>这是一套非常轻量的非服务器型数据库程式，它的数据库就只是一个档案而已。流量大的正式上线环境虽然不适合<em>SQLite</em>，不过拿来开发和测试却非常好用。<em>Rails</em>预设也使用<em>SQLite</em>数据库来建立新的专案，以下是预设的设定资料<em>config/database.yml</em>：</p>
+<p><em>Rails</em>内建支持<em><a href="http://www.sqlite.org/">SQLite</a></em>这是一套非常轻量的非服务器型数据库程式，它的数据库就只是一个档案而已。流量大的正式上线环境虽然不适合<em>SQLite</em>，不过拿来开发和测试却非常好用。<em>Rails</em>预设也使用<em>SQLite</em>数据库来建立新的项目，以下是预设的设定资料<em>config/database.yml</em>：</p>
 
 <pre><code># SQLite version 3.x
 #   gem install sqlite3
@@ -364,7 +364,7 @@ production:
 <p>这将在<em>db/</em>目录下建立出<em>development</em>和<em>test</em>的<em>SQLite3</em>档案。</p>
 
 <blockquote>
-  <p><em>Rake</em>是一种<em>Ruby</em>的命令列工具，你可以输入<code>rake -T</code>列出所有可用的指令。我们会在稍后的章节中详细介绍<em>Rake</em>。</p>
+  <p><em>Rake</em>是一种<em>Ruby</em>的命令行工具，你可以输入<code>rake -T</code>列出所有可用的指令。我们会在稍后的章节中详细介绍<em>Rake</em>。</p>
 </blockquote>
 
 <h2 id="crud">你的第一个<em>CRUD</em>程式</h2>

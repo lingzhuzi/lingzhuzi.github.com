@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-		<title>Ruby on Rails 实战圣经 | ActiveSupport - 工具函式库</title>
+		<title>Ruby on Rails 实战圣经 | ActiveSupport - 工具函数库</title>
 		<link rel="stylesheet" type="text/css" href="./style.css">
 		<link rel="canonical" href="./activesupport.html">
 	</head>
@@ -32,13 +32,13 @@
             <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
        </div>
        <div class="content body">
-	      <h1 id="activesupport---">ActiveSupport - 工具函式库</h1>
+	      <h1 id="activesupport---">ActiveSupport - 工具函数库</h1>
 
 <blockquote>
   <p>I thought of objects being like biological cells and/or individual computers on a network, only able to communicate with messages — Alan Kay, creator of Smalltalk</p>
 </blockquote>
 
-<p>Active Support 是 Rails 裡的工具函式库，它也扩充了一些 Ruby 标準函式库。除了被用在 Rails 核心程式中，你也可以在你的程式中使用。本章介绍其中的一小部分较为常用的功能。</p>
+<p>Active Support 是 Rails 裡的工具函数库，它也扩充了一些 Ruby 标准函数库。除了被用在 Rails 核心程式中，你也可以在你的程式中使用。本章介绍其中的一小部分较为常用的功能。</p>
 
 <h3 id="blank--present">blank? 和 present?</h3>
 
@@ -156,7 +156,7 @@ current_user.to_query('user') # =&gt; user=357-john-smith
 
 <h4 id="classattribute">class_attribute</h4>
 
-<p><code>class_attribute</code>这个方法可以宣告一个或多个类别变数，且此类别变数是可以被继承的类别所覆写的：</p>
+<p><code>class_attribute</code>这个方法可以声明一个或多个类别变数，且此类别变数是可以被继承的类别所覆写的：</p>
 
 <pre><code>class A
   class_attribute :x

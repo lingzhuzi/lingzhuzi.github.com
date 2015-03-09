@@ -330,7 +330,7 @@ Category.sum(:position)
 
 <h2 id="scopes-">Scopes 作用域</h2>
 
-<p><em>Model Scopes</em>是一项非常酷的功能，它可以将常用的查询条件宣告起来，让程式变得乾净易读，更厉害的是可以串接使用。例如，我们编辑<em>app/models/event.rb</em>，加上两个<em>Scopes</em>：</p>
+<p><em>Model Scopes</em>是一项非常酷的功能，它可以将常用的查询条件声明起来，让程式变得乾净易读，更厉害的是可以串接使用。例如，我们编辑<em>app/models/event.rb</em>，加上两个<em>Scopes</em>：</p>
 
 <pre><code>class Event &lt; ActiveRecord::Base
     scope :open_public, -&gt; { where( :is_public =&gt; true ) }

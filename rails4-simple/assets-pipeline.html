@@ -40,7 +40,7 @@
 
 <p><em>Assets</em>指的是<em>JavaScript</em>、<em>Stylesheets</em>和图片等静态档案，这些档案并不会随<em>Requests</em>不同而有所不同。而在<em>Rails</em>目录中，只有<em>public</em>这个目录是公开读取的，所以通常我们会将静态档案都放在<em>public</em>这个目录下，好让浏览器可以直接读取。但是随着<em>JavaScript</em>和<em>Stylesheet</em>档案越来越多时，如何管理这些档案变为一项议题，为了加快浏览器的下载速度，我们会合并<em>JavaScript</em>和<em>Stylesheet</em>档案，来减少浏览器<em>Request</em>下载次数。更近一步的还会压缩这些档案来加速下载时间。像是<em>Yahoo!</em>和<em>Google</em>都有各自开源出自己的压缩工具<em><a href="http://developer.yahoo.com/yui/compressor/">YUI Compressor</a></em>和<em><a href="http://code.google.com/closure/compiler/">Closure Compiler</a></em>。</p>
 
-<p>而<em>Rails</em>的<em>Assets pipeline</em>可以让我们突破<em>public</em>目录限制，可以将静态档案依需求放在不同目录下，<em>Rails</em>会帮你组合并压缩起来。特别是有一些<em>Rails</em>的外掛套件需要使用<em>JavaScript</em>等静态档案，在没有这个功能之前，我们必须将<em>JavaScript</em>等档案复制放在<em>public</em>目录下，这样浏览器才能读取的到。</p>
+<p>而<em>Rails</em>的<em>Assets pipeline</em>可以让我们突破<em>public</em>目录限制，可以将静态档案依需求放在不同目录下，<em>Rails</em>会帮你组合并压缩起来。特别是有一些<em>Rails</em>的外挂套件需要使用<em>JavaScript</em>等静态档案，在没有这个功能之前，我们必须将<em>JavaScript</em>等档案复制放在<em>public</em>目录下，这样浏览器才能读取的到。</p>
 
 <p><em>Assets</em>的位置在<em>app/assets/</em>下，首先最重要的就是<em>app/assets/javascripts/application.js</em>和<em>app/assets/stylesheets/application.css</em>，这两个档案看起来充满註解，其实它是个<em>manifest</em>档案，列出了所有要载入的静态档案，这些档案的位置依照惯例放在<em>app/assets</em>或<em>vendor/assets</em>目录下。</p>
 
@@ -107,7 +107,7 @@
   <li>
 <code>require_self</code> [路径] : 告诉 Sprockets 再载入其他的档案前，先将自己的内容插入。</li>
   <li>
-<code>depend_on</code> [路径] : 宣告依赖于某支 js，在需要通知某支快取的 assets 过期时非常实用。</li>
+<code>depend_on</code> [路径] : 声明依赖于某支 js，在需要通知某支快取的 assets 过期时非常实用。</li>
   <li>
 <code>stub</code> [路径] : 将路径中的 assets 加入黑名单，所有其他的 require 都不会将他载入。</li>
 </ul>
@@ -178,16 +178,16 @@ asset-path("rails.png", image) # =&gt; "/assets/rails.png"
 
 <p>放在<em>app/assets</em>目录下的<em>Assets</em>，<em>Rails</em>支持使用不同的语法，例如使用<em><a href="http://sass-lang.com/">Sass</a></em>语法产生<em>CSS</em>、<em><a href="http://jashkenas.github.com/coffee-script/">CoffeeScript</a></em>产生<em>JavaScript</em>，或是用<em>ERb</em>样板也可以。使用的方法是将附档名命名成<em>.css.sass</em>、<em>.css.scss</em>、<em>.js.coffee</em>、<em>.css.erb</em>或<em>.js.erb</em>，<em>Rails</em>就会编译出结果给浏览器。</p>
 
-<p><em>Sass</em>是一种<em>CSS3</em>语法的扩充，可以使用巢状、变数、混入、选择子继承等等功能，可以更有效率有弹性的撰写<em>Stylesheet</em>。<em>Sass</em>最后会编译出合法的<em>CSS</em>让浏览器使用。使用上它区分成两种形式的语法<em>scss</em>和<em>sass</em>，前者可以与现有的<em>css</em>程式码直接混合在一起，后者则通过缩排来省略了大括号<code>{}</code>(就像<em>Python</em>用缩排一样)。<em>CoffeeScript</em>也是类似原理，它是一种迷你的程式语言，编译之后会输出可读性高、符合<em><a href="http://www.javascriptlint.com/">JavaScript Lint</a></em>规范的<em>JavaScript</em>程式码。</p>
+<p><em>Sass</em>是一种<em>CSS3</em>语法的扩充，可以使用巢状、变数、混入、选择子继承等等功能，可以更有效率有弹性的撰写<em>Stylesheet</em>。<em>Sass</em>最后会编译出合法的<em>CSS</em>让浏览器使用。使用上它区分成两种形式的语法<em>scss</em>和<em>sass</em>，前者可以与现有的<em>css</em>程式码直接混合在一起，后者则通过缩排来省略了大括号<code>{}</code>(就像<em>Python</em>用缩排一样)。<em>CoffeeScript</em>也是类似原理，它是一种迷你的编程语言，编译之后会输出可读性高、符合<em><a href="http://www.javascriptlint.com/">JavaScript Lint</a></em>规范的<em>JavaScript</em>程式码。</p>
 
-<p>学习这两种新语法需要额外的时间投入，但是对需要常常撰写<em>CSS</em>和<em>JavaScript</em>的设计师来说，应该是很不错的工具，读者可以自行斟酌是否採用。如果你不打算使用的话，可以编辑<em>Gemfile</em>拿掉以下：</p>
+<p>学习这两种新语法需要额外的时间投入，但是对需要常常撰写<em>CSS</em>和<em>JavaScript</em>的设计师来说，应该是很不错的工具，读者可以自行斟酌是否采用。如果你不打算使用的话，可以编辑<em>Gemfile</em>拿掉以下：</p>
 
 <pre><code>gem 'sass'
 gem 'coffee-script'
 </code></pre>
 
 <blockquote>
-  <p>如果採用<em>Sass</em>的话，推荐还可以採用<em><a href="http://compass-style.org/">Compass</a></em>这套<em>CSS</em>框架的框架。</p>
+  <p>如果采用<em>Sass</em>的话，推荐还可以采用<em><a href="http://compass-style.org/">Compass</a></em>这套<em>CSS</em>框架的框架。</p>
 </blockquote>
 
 <h2 id="section-1">编译出最后结果</h2>

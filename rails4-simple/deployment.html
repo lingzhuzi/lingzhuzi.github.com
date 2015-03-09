@@ -38,7 +38,7 @@
   <p>How long would it take your organization to deploy a change (to production) that involves just one single line of code? Do you do this on a repeatable, reliable basis? - Mary Poppendieck</p>
 </blockquote>
 
-<p>终于要脱离开发阶段，要把完成的<em>Ruby on Rails</em>应用程式拿来出上线见人了。在<code>rails server</code>指令中，其实是使用一套叫做<em>WEBrick</em>的服务器，这是一套纯<em>Ruby</em>实作的<em>HTTP</em>服务器。虽然开发时拿来用很方便，但是它的效能并不适合作为正式环境来使用。因此，我们在这一章将介绍几种在<em>Linux</em>上实际作为<em>Production</em>用途的部署方案。</p>
+<p>终于要脱离开发阶段，要把完成的<em>Ruby on Rails</em>应用程序拿来出上线见人了。在<code>rails server</code>指令中，其实是使用一套叫做<em>WEBrick</em>的服务器，这是一套纯<em>Ruby</em>实作的<em>HTTP</em>服务器。虽然开发时拿来用很方便，但是它的效能并不适合作为正式环境来使用。因此，我们在这一章将介绍几种在<em>Linux</em>上实际作为<em>Production</em>用途的部署方案。</p>
 
 <blockquote>
   <p>虽然<em>Rails</em>在<em>Windows</em>平台上也可以执行开发，但是如第二章作业系统一节所说，<em>Ruby</em>在<em>Windows</em>平台上资源较少，效能也不如在<em>Unix-like</em>系统上，因此很少人拿来当做<em>Production</em>服务器用途。</p>
@@ -69,7 +69,7 @@
 
 <h3 id="paas-platform-as-a-service">PaaS 类型(Platform as a Service)</h3>
 
-<p><em>PaaS</em>则是固定的执行环境，只支持特定的程式语言或框架，支持<em>Ruby</em>的有：</p>
+<p><em>PaaS</em>则是固定的执行环境，只支持特定的编程语言或框架，支持<em>Ruby</em>的有：</p>
 
 <ul>
   <li><a href="http://heroku.com/">Heroku</a></li>
@@ -117,7 +117,7 @@ CREATE DATABASE your_production_db_name CHARACTER SET utf8;
 
 <h2 id="nginx--passenger">Nginx + Passenger</h2>
 
-<p><em><a href="https://www.phusionpassenger.com/">Passenger</a></em>是目前部署<em>Ruby on Rails</em>最好用、设定最简单的方式，它是一套<em>Apache</em>和<em>Nginx</em>的扩充模组，可以直接支持<em>Rails</em>或任何<em>Rack</em>应用程式。</p>
+<p><em><a href="https://www.phusionpassenger.com/">Passenger</a></em>是目前部署<em>Ruby on Rails</em>最好用、设定最简单的方式，它是一套<em>Apache</em>和<em>Nginx</em>的扩充模组，可以直接支持<em>Rails</em>或任何<em>Rack</em>应用程序。</p>
 
 <blockquote>
   <p><em>Passenger</em>不支持<em>Windows</em>平台</p>
@@ -144,7 +144,7 @@ sudo /etc/init.d/nginx stop
 sudo /etc/init.d/nginx restart
 </code></pre>
 
-<p>要设定<em>Rails</em>应用程式请编辑<em>/opt/nginx/conf/nginx.conf</em>这个设定，将<em>server</em>那段改写成如下：</p>
+<p>要设定<em>Rails</em>应用程序请编辑<em>/opt/nginx/conf/nginx.conf</em>这个设定，将<em>server</em>那段改写成如下：</p>
 
 <pre><code>server {
     listen       80;
@@ -154,7 +154,7 @@ sudo /etc/init.d/nginx restart
 }
 </code></pre>
 
-<p>注意到<code>root </code>是指向<code>public</code>这个静态档案的目录。设定好之后，执行<code>sudo /etc/init.d/nginx restart</code>便会啟用。如果之后你的<em>Rails</em>有任何修改要重新载入，但是并不想把<em>Nginx</em>整个重开，请在你的<em>Rails</em>应用程式目录下执行<code>touch tmp/restart.txt</code>即可，这样<em>Passenger</em>就会知道要重新载入<em>Rails</em>，而不需要重开<em>Nginx</em>。</p>
+<p>注意到<code>root </code>是指向<code>public</code>这个静态档案的目录。设定好之后，执行<code>sudo /etc/init.d/nginx restart</code>便会啟用。如果之后你的<em>Rails</em>有任何修改要重新载入，但是并不想把<em>Nginx</em>整个重开，请在你的<em>Rails</em>应用程序目录下执行<code>touch tmp/restart.txt</code>即可，这样<em>Passenger</em>就会知道要重新载入<em>Rails</em>，而不需要重开<em>Nginx</em>。</p>
 
 <p>我们稍候会再回头来调整这个<em>Nginx</em>设定。</p>
 
@@ -164,11 +164,11 @@ sudo /etc/init.d/nginx restart
 
 <h2 id="section-1">自动化部署</h2>
 
-<p>决定应用程式服务器之后，接下来我们来讨论你要如何把程式部署上去？最常见的作法，不就是开个<em>FTP</em>或用<em>SFTP</em>上传上去不就好了？再不然<em>SSH</em>进去，从版本控制系统更新下来也可以。但是你有没有想过这部署的过程，其实是每次都重复一再执行的步骤(除非你部署完之后，就不需要再继续开发和升级)，随者时间的演进，这个过程常常会有各种定制的指令需要要执行，例如安装设定档、更新啟动某个<em>Daemon</em>、清除快取等等。因此，好的实务作法是自动化部署这个动作，只要执行一个指令，就自动更新上去并重新啟动服务器。这样也可以大大避免漏做了什么部署步骤的可能性。</p>
+<p>决定应用程序服务器之后，接下来我们来讨论你要如何把程式部署上去？最常见的作法，不就是开个<em>FTP</em>或用<em>SFTP</em>上传上去不就好了？再不然<em>SSH</em>进去，从版本控制系统更新下来也可以。但是你有没有想过这部署的过程，其实是每次都重复一再执行的步骤(除非你部署完之后，就不需要再继续开发和升级)，随者时间的演进，这个过程常常会有各种定制的指令需要要执行，例如安装设定档、更新啟动某个<em>Daemon</em>、清除快取等等。因此，好的实务作法是自动化部署这个动作，只要执行一个指令，就自动更新上去并重新啟动服务器。这样也可以大大避免漏做了什么部署步骤的可能性。</p>
 
 <h3 id="section-2">设定服务器部署使用者</h3>
 
-<p>习惯上我们会在服务器上开一个专门的帐号，用来放<em>Rails</em>应用程式，指令如下：</p>
+<p>习惯上我们会在服务器上开一个专门的帐号，用来放<em>Rails</em>应用程序，指令如下：</p>
 
 <pre><code>sudo adduser --disabled-password deploy
 sudo su deploy
@@ -193,7 +193,7 @@ chown deploy:deploy /home/deploy/.ssh/authorized_keys
 gem 'capistrano-passenger'', :group =&gt; :development
 </code></pre>
 
-<p>在你的<em>Rails</em>专案目录下执行：</p>
+<p>在你的<em>Rails</em>项目目录下执行：</p>
 
 <pre><code>cap install
 </code></pre>
@@ -335,13 +335,13 @@ http {
 
 <h2 id="reverse-proxy-apachenginx--thinunicornpuma">补充一：反向代理(Reverse proxy)模型 Apache/Nginx + Thin/Unicorn/Puma</h2>
 
-<p>除了<em>Passenger</em>之外，还有另一种反向代理<em>(Reverse proxy)</em>的运作方式，它分成<em>Web</em>服务器和应用程式服务器，图示如下：</p>
+<p>除了<em>Passenger</em>之外，还有另一种反向代理<em>(Reverse proxy)</em>的运作方式，它分成<em>Web</em>服务器和应用程序服务器，图示如下：</p>
 
 <p><img src="images/deployment-proxy-diagram.jpg" alt="Proxy diagram"></p>
 
-<p>其中<em>Web</em>服务器可以是<em>Apache</em>、<em>Nginx</em>，但是它除了提供静态档案之外，其餘的任务就只是做<em>reverse proxy</em>将<em>request</em>分发到应用程式服务器。</p>
+<p>其中<em>Web</em>服务器可以是<em>Apache</em>、<em>Nginx</em>，但是它除了提供静态档案之外，其餘的任务就只是做<em>reverse proxy</em>将<em>request</em>分发到应用程序服务器。</p>
 
-<p>而应用程式服务器负责执行<em>Ruby on Rails</em>程式，这有几个选择：</p>
+<p>而应用程序服务器负责执行<em>Ruby on Rails</em>程式，这有几个选择：</p>
 
 <ul>
   <li>Unicorn <a href="http://unicorn.bogomips.org/">http://unicorn.bogomips.org/</a> (Multi-processed 模型)</li>
@@ -353,15 +353,15 @@ http {
 
 <h2 id="eventmachine">补充二：EventMachine和多执行序模型</h2>
 
-<p><em>Passenger</em>和<em>Unicorn</em>都是属于<em>Multi-process</em>的模型，每一个<em>Process</em>是一个完整的<em>Rails app</em>使用一个<em>CPU core</em>。这种模型的优点是应用程式撰写容易，不用管执行序是否安全的问题(<em>Thread-safety</em>)问题，而且如果每个<em>Request</em>都没有<em>I/O blocking</em>，利用的<em>CPU</em>效率就是最好的，因为不像<em>Thread</em>有<em>Context switch</em>。但是，最大的缺点是如果碰到<em>I/O blocking</em>(太容易了，最基本的连接数据库就是一种相较于CPU是很慢的I/O操作)，能同时负担的连线就很容易受到限制。因此在这种模型下，开发都会建议你监控每个<em>HTTP request</em>的执行时间在某个ms标準以下(例如20ms)，太久的操作就会建议是改用<em>Background job</em>，这就是为了可以确定服务器的执行效率。因此虽然”同时”连线线就等于能用的<em>Process</em>数量(例如最基本512 mb的主机上，通常可以开3个<em>Rails process</em>，但是因为每个连线都控制在<em>20ms</em>以下，所以每秒鐘能处理的<em>requests</em>数量还是十分惊人，足以应用绝大部分的应用场景。</p>
+<p><em>Passenger</em>和<em>Unicorn</em>都是属于<em>Multi-process</em>的模型，每一个<em>Process</em>是一个完整的<em>Rails app</em>使用一个<em>CPU core</em>。这种模型的优点是应用程序撰写容易，不用管执行序是否安全的问题(<em>Thread-safety</em>)问题，而且如果每个<em>Request</em>都没有<em>I/O blocking</em>，利用的<em>CPU</em>效率就是最好的，因为不像<em>Thread</em>有<em>Context switch</em>。但是，最大的缺点是如果碰到<em>I/O blocking</em>(太容易了，最基本的连接数据库就是一种相较于CPU是很慢的I/O操作)，能同时负担的连线就很容易受到限制。因此在这种模型下，开发都会建议你监控每个<em>HTTP request</em>的执行时间在某个ms标准以下(例如20ms)，太久的操作就会建议是改用<em>Background job</em>，这就是为了可以确定服务器的执行效率。因此虽然”同时”连线线就等于能用的<em>Process</em>数量(例如最基本512 mb的主机上，通常可以开3个<em>Rails process</em>，但是因为每个连线都控制在<em>20ms</em>以下，所以每秒鐘能处理的<em>requests</em>数量还是十分惊人，足以应用绝大部分的应用场景。</p>
 
 <p>这个无法应用的场景，就是大量的<em>HTTP</em>持续连线需求了，例如聊天室，每个使用者连线持续占用<em>Process</em>，而大多时间都在等待，导致服务器能同时提供的连线非常有限。</p>
 
-<p>要对应这种需求，一般人可能直觉联想到的方案就是使用<em>Multi-threaded</em>了，虽然<em>Rails</em>本身有支持了<code>config.threadsafe!</code>模式，但是<em>Multi-threaded</em>的模型在<em>Rails</em>社群中其实并不流行，撇开<em>multi thread</em>程式的复杂性不谈，主因应是对付这种<em>concurrency</em>需求，最有效的方案不是<em>Multi-threaded</em>，而是<em>Evented-driven</em>的 <a href="http://en.wikipedia.org/wiki/Reactor_pattern">Reactor Pattern</a>。<em>Thread</em>再怎麼便宜，同时开成千上万个也是会痛的，而<em>Reactor pattern</em>是一个无穷<em>loop</em>，无论有多少连线，只有在有事件发生时，才会让CPU做事。<em>Ruby</em>中实作此模型最出名的函式库就叫做<em><a href="https://github.com/eventmachine/eventmachine">EventMachine</a></em>。</p>
+<p>要对应这种需求，一般人可能直觉联想到的方案就是使用<em>Multi-threaded</em>了，虽然<em>Rails</em>本身有支持了<code>config.threadsafe!</code>模式，但是<em>Multi-threaded</em>的模型在<em>Rails</em>社群中其实并不流行，撇开<em>multi thread</em>程式的复杂性不谈，主因应是对付这种<em>concurrency</em>需求，最有效的方案不是<em>Multi-threaded</em>，而是<em>Evented-driven</em>的 <a href="http://en.wikipedia.org/wiki/Reactor_pattern">Reactor Pattern</a>。<em>Thread</em>再怎麼便宜，同时开成千上万个也是会痛的，而<em>Reactor pattern</em>是一个无穷<em>loop</em>，无论有多少连线，只有在有事件发生时，才会让CPU做事。<em>Ruby</em>中实作此模型最出名的函数库就叫做<em><a href="https://github.com/eventmachine/eventmachine">EventMachine</a></em>。</p>
 
-<p>要让<em>Rails</em>採用<em>evented-driven</em>架构，除了要用<em>Thin server</em>(使用<em>EventMachine</em>)之外，所有有关<em>I/O</em>操作的函式库都要换用<em>evented</em>版本，例如<em>HTTP client</em>等等，不然也是功亏一簣。如何设定，可以参考这一个<em>Demo app</em> <a href="https://github.com/igrigorik/async-rails">https://github.com/igrigorik/async-rails</a></p>
+<p>要让<em>Rails</em>采用<em>evented-driven</em>架构，除了要用<em>Thin server</em>(使用<em>EventMachine</em>)之外，所有有关<em>I/O</em>操作的函数库都要换用<em>evented</em>版本，例如<em>HTTP client</em>等等，不然也是功亏一簣。如何设定，可以参考这一个<em>Demo app</em> <a href="https://github.com/igrigorik/async-rails">https://github.com/igrigorik/async-rails</a></p>
 
-<p>不过，因为<em>Rails</em>的设计并不是以<em>Evented</em>模型为最高指导原则，所以实务上比较多人会偏好採用更轻量，更以<em>Evented</em>为原则的框架来专门处理需要大量非同步连线的情景，例如：</p>
+<p>不过，因为<em>Rails</em>的设计并不是以<em>Evented</em>模型为最高指导原则，所以实务上比较多人会偏好采用更轻量，更以<em>Evented</em>为原则的框架来专门处理需要大量非同步连线的情景，例如：</p>
 
 <ul>
   <li>Goliath <a href="http://postrank-labs.github.com/goliath/">http://postrank-labs.github.com/goliath/</a>

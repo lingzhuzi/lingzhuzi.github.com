@@ -38,7 +38,7 @@
   <p>We should forget about small efficiencies, say about 97% of the time: premature optimization is the root of all evil - Donald Knuth</p>
 </blockquote>
 
-<p>即使程式的执行结果正确，但是如果你的网站效能不佳，载入页面需要花很久时间，那们网站的使用性就会变得很差，甚至慢到无法使用。硬件的进步虽然可以让我们不必再斤斤计较程式码的执行速度，但是开发者还是需要拥有合理的成本观念，要买快十倍的<em>CPU</em>或硬碟不只花十倍的钱也买不到，带来的效能差异还不如你平常就避免写出拖慢效能十倍甚至百倍的程式码。</p>
+<p>即使程式的执行结果正确，但是如果你的网站效能不佳，载入页面需要花很久时间，那们网站的使用性就会变得很差，甚至慢到无法使用。硬件的进步虽然可以让我们不必再斤斤计较程式码的执行速度，但是开发者还是需要拥有合理的成本观念，要买快十倍的<em>CPU</em>或硬盘不只花十倍的钱也买不到，带来的效能差异还不如你平常就避免写出拖慢效能十倍甚至百倍的程式码。</p>
 
 <p>效能问题其实可以分成两种，一种是完全没有意识到抽象化工具、开发框架的效能盲点，而写下了执行效能差劲的程式码。另一种则是对现有程式的效能不满意，研究如何最佳化，例如利用快取机制隔离执行速度较慢的高阶程式，来大幅提昇执行效能。</p>
 
@@ -109,7 +109,7 @@ SELECT * FROM `cars` WHERE (`cars`.`user_id` IN('1','2','3','4','5','6','7','8',
 </code></pre>
 
 <blockquote>
-  <p><em><a href="http://github.com/flyerhzm/bullet">Bullet</a></em>是一个外掛可以在开发时侦测<em>N+1 queries</em>问题。</p>
+  <p><em><a href="http://github.com/flyerhzm/bullet">Bullet</a></em>是一个外挂可以在开发时侦测<em>N+1 queries</em>问题。</p>
 </blockquote>
 
 <h3 id="indexes">索引<em>(Indexes)</em>
@@ -307,7 +307,7 @@ Rating::R
 
 <h3 id="de-normalization">逆正规化(de-normalization)</h3>
 
-<p>一般在设计关联式数据库的<em>table</em>时，思考的都是正规化的设计。通过正规化的设计，可以将资料不重复的储存，省空间，更新也不易出错。但是这对于复杂的查询有时候就力有未逮。因此必要时可以採用逆正规化的设计。牺牲空间，增加修改的麻烦，但是让读取这事件变得更快更简单。</p>
+<p>一般在设计关联式数据库的<em>table</em>时，思考的都是正规化的设计。通过正规化的设计，可以将资料不重复的储存，省空间，更新也不易出错。但是这对于复杂的查询有时候就力有未逮。因此必要时可以采用逆正规化的设计。牺牲空间，增加修改的麻烦，但是让读取这事件变得更快更简单。</p>
 
 <p>上述章节的<em>Counter cache</em>，其实就是一种逆正规化的应用，只是<em>Rails</em>帮你包装好了。如果你要自己实作的话，可以善用<em>Callback</em>或<em>Observer</em>来作更新。以下是一个应用的范例，<em>Event</em>的总金额，是通过<em>Invoice#amount</em>的总和得知。另外，我们也想知道该活动最后一笔<em>Invoice</em>的时间：</p>
 
@@ -383,7 +383,7 @@ end
 <ul>
   <li>
 <em><a href="http://github.com/wvanbergen/request-log-analyzer">request-log-analyzer</a></em>这套工具可以分析<em>Rails log</em>档案</li>
-  <li>通过商业<em>Monitor</em>產品：<a href="http://www.newrelic.com">New Relic</a>、<a href="http://www.scoutapp.com">Scout</a>
+  <li>通过商业<em>Monitor</em>产品：<a href="http://www.newrelic.com">New Relic</a>、<a href="http://www.scoutapp.com">Scout</a>
 </li>
   <li>Rack::Bug Rails middleware 可以在开发的时候，插入一个工具列分析每个<em>request</em>
 </li>
@@ -436,9 +436,9 @@ end
 
 <p>不过有时候「执行速度较快」的程式码不代表好维护、好除错的程式码，这一点需要多加注意。</p>
 
-<h2 id="ruby-1">使用更快的<em>Ruby</em>函式库</h2>
+<h2 id="ruby-1">使用更快的<em>Ruby</em>函数库</h2>
 
-<p>有<em>C Extension</em>的<em>Ruby</em>函式库总是比较快的，如果常用可以考虑安装：</p>
+<p>有<em>C Extension</em>的<em>Ruby</em>函数库总是比较快的，如果常用可以考虑安装：</p>
 
 <ul>
   <li>XML parser <a href="http://nokogiri.org/">http://nokogiri.org/</a>

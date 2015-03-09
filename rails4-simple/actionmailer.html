@@ -48,7 +48,7 @@
 <pre><code>config.action_mailer.delivery_method
 </code></pre>
 
-<p>支持的选项包括<code>:test</code>、<code>:sendmail</code>和<code>smtp</code>。在<em>config/environments/test.rb</em>中，预设是<code>:test</code>，也就是并不会实际寄信，而是将信件存在<code>ActionMailer::Base.deliveries</code>阵列中方便做功能测试。<code>sendmail</code>则是使用服务器的<em>/usr/bin/sendmail</em>程式，不过因为因为不是每台服务器都有适当安装<em>sendmail</em>，所以最推荐的方式是採用<code>:smtp</code>协定来寄信，例如以下是一个使用<em>Gmail</em>寄信的范例，请修改<em>config/environments/development.rb</em>或<em>config/environments/production.rb</em>：</p>
+<p>支持的选项包括<code>:test</code>、<code>:sendmail</code>和<code>smtp</code>。在<em>config/environments/test.rb</em>中，预设是<code>:test</code>，也就是并不会实际寄信，而是将信件存在<code>ActionMailer::Base.deliveries</code>阵列中方便做功能测试。<code>sendmail</code>则是使用服务器的<em>/usr/bin/sendmail</em>程式，不过因为因为不是每台服务器都有适当安装<em>sendmail</em>，所以最推荐的方式是采用<code>:smtp</code>协定来寄信，例如以下是一个使用<em>Gmail</em>寄信的范例，请修改<em>config/environments/development.rb</em>或<em>config/environments/production.rb</em>：</p>
 
 <pre><code>config.action_mailer.delivery_method = :smtp
 config.action_mailer.default_url_options = { host: "http://localhost:3000" }

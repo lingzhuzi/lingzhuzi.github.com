@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-		<title>Ruby on Rails 实战圣经 | Ruby 程式语言入门</title>
+		<title>Ruby on Rails 实战圣经 | Ruby 编程语言入门</title>
 		<link rel="stylesheet" type="text/css" href="./style.css">
 		<link rel="canonical" href="https://ihower.tw/rails4/ruby.html">
 	</head>
@@ -32,13 +32,13 @@
             <p>本书的原作者是ihower，原为繁体版本，详见<a href="https://ihower.tw/rails4/index.html">这里</a>。我只是改成了简体。谢谢ihower的努力，写出了这么优秀的教程！</p>
        </div>
        <div class="content body">
-	      <h1 id="ruby-">Ruby 程式语言入门</h1>
+	      <h1 id="ruby-">Ruby 编程语言入门</h1>
 
 <blockquote>
   <p>Actually, I’m trying to make Ruby natural, not simple. Ruby is simple in appearance, but is very complex inside, just like our human body. - Matz, Ruby 发明人</p>
 </blockquote>
 
-<p><em>Ruby</em>是个美丽、灵巧而且方便又实用的程式语言，而<em>Ruby on Rails</em>正是 Ruby 程式语言爆发成长的催化剂。在了解<em>Ruby on Rails</em>的程式之前，学习<em>Ruby</em>程式语言是最重要的基础功课之一，我们在这一章节将快速带过一些基本的语法，网络上也有<em>Ruby Taiwan</em>社群所翻译的文章可以一读：</p>
+<p><em>Ruby</em>是个美丽、灵巧而且方便又实用的编程语言，而<em>Ruby on Rails</em>正是 Ruby 编程语言爆发成长的催化剂。在了解<em>Ruby on Rails</em>的程式之前，学习<em>Ruby</em>编程语言是最重要的基础功课之一，我们在这一章节将快速带过一些基本的语法，网络上也有<em>Ruby Taiwan</em>社群所翻译的文章可以一读：</p>
 
 <ul>
   <li>
@@ -48,7 +48,7 @@
 <em>Ruby</em>中文官方网站：<a href="http://www.ruby-lang.org/zh_TW/documentation/quickstart/">二十分鐘Ruby体验</a>
 </li>
   <li>
-<em>Ruby</em>中文官方网站：<a href="http://www.ruby-lang.org/zh_TW/documentation/ruby-from-other-languages/">从其他程式语言到Ruby</a>
+<em>Ruby</em>中文官方网站：<a href="http://www.ruby-lang.org/zh_TW/documentation/ruby-from-other-languages/">从其他编程语言到Ruby</a>
 </li>
   <li><a href="http://guides.ruby.tw/ruby/">Ruby使用手册</a></li>
 </ul>
@@ -66,7 +66,7 @@
 
 <h2 id="ruby">各种<em>Ruby</em>实作</h2>
 
-<p>除了用<em>C</em>语言实作的官方版本<a href="http://ruby-lang.org/"><em>Ruby</em></a>(又叫做<em>CRuby</em>或<em>MRI, Matz’s Ruby Interpreter</em>)，也有其他不同实作的<em>Ruby</em>环境。这些实作都以<em><a href="http://rubyspec.org/">RubySpec</a></em>作为其语法的标準：</p>
+<p>除了用<em>C</em>语言实作的官方版本<a href="http://ruby-lang.org/"><em>Ruby</em></a>(又叫做<em>CRuby</em>或<em>MRI, Matz’s Ruby Interpreter</em>)，也有其他不同实作的<em>Ruby</em>环境。这些实作都以<em><a href="http://rubyspec.org/">RubySpec</a></em>作为其语法的标准：</p>
 
 <ul>
   <li>
@@ -100,9 +100,9 @@ irb(main):001:0&gt; 1 + 1
 
 <p>就会执行这个脚本了，它会在萤幕上输出<em>Hello, World!!</em>。</p>
 
-<h2 id="section">程式语言分类</h2>
+<h2 id="section">编程语言分类</h2>
 
-<p>根据需不需要事先宣告变数型别，我们可以分类出静态分型<em>(Static typing</em>)与动态分型<em>(Dynamic typing)</em>程式语言，前者例如<em>Java</em>、<em>C</em>、<em>C++</em>，后者例如<em>Ruby</em>、<em>Perl</em>、<em>Python</em>和<em>PHP</em>。根据会不会隐性自动转换型别，又可以区分出不会自动转换型别的强分型<em>(Strong typing)</em>与自动转换型别的弱分型<em>(Weak typing)</em>，前者例如<em>Ruby</em>、<em>Perl</em>、<em>Python</em>、<em>Java</em>，后者例如<em>PHP</em>、<em>C</em>、<em>C++</em>是弱分型。让我们举个例吧：</p>
+<p>根据需不需要事先声明变数型别，我们可以分类出静态分型<em>(Static typing</em>)与动态分型<em>(Dynamic typing)</em>编程语言，前者例如<em>Java</em>、<em>C</em>、<em>C++</em>，后者例如<em>Ruby</em>、<em>Perl</em>、<em>Python</em>和<em>PHP</em>。根据会不会隐性自动转换型别，又可以区分出不会自动转换型别的强分型<em>(Strong typing)</em>与自动转换型别的弱分型<em>(Weak typing)</em>，前者例如<em>Ruby</em>、<em>Perl</em>、<em>Python</em>、<em>Java</em>，后者例如<em>PHP</em>、<em>C</em>、<em>C++</em>是弱分型。让我们举个例吧：</p>
 
 <pre><code>/* PHP */
 $i = 1;
@@ -125,7 +125,7 @@ puts "Value is " + i
 #   from (irb):2
 </code></pre>
 
-<p>另外，通常动态分型的程式语言多半也是直译式<em>(interpreted)</em>程式语言，也就是不需要事先编译，通过直译器<em>(interpreter)</em>执行即可，当然<em>Ruby</em>也不例外。相对的，编译式<em>(compiled)</em>语言则是事先编译成执行档才行执行。总结以上，<em>Ruby</em>是个动态强分型的直译式程式语言。</p>
+<p>另外，通常动态分型的编程语言多半也是直译式<em>(interpreted)</em>编程语言，也就是不需要事先编译，通过直译器<em>(interpreter)</em>执行即可，当然<em>Ruby</em>也不例外。相对的，编译式<em>(compiled)</em>语言则是事先编译成执行档才行执行。总结以上，<em>Ruby</em>是个动态强分型的直译式编程语言。</p>
 
 <h2 id="integer">整数<em>Integer</em>
 </h2>
@@ -234,7 +234,7 @@ puts "I #{verb} at the #{where}" # 输出 I work at the office
 <h2 id="ruby-1">
 <em>Ruby</em>完全地对象导向</h2>
 
-<p>你可能已经注意到，在<em>Ruby</em>裡每样东西都是对象，包括字串和数字。所有的方法都是对对象呼叫，你不会看到全域函式，例如<em>PHP</em>的<code>strlen("test")</code>用法，在<em>Ruby</em>中是<code>"test".length</code>。</p>
+<p>你可能已经注意到，在<em>Ruby</em>裡每样东西都是对象，包括字串和数字。所有的方法都是对对象呼叫，你不会看到全域函数，例如<em>PHP</em>的<code>strlen("test")</code>用法，在<em>Ruby</em>中是<code>"test".length</code>。</p>
 
 <pre><code># 输出「UPPER」
 puts "upper".upcase
@@ -710,7 +710,7 @@ p
 
 <h3 id="class">类别<code>Class</code>定义范围内也可以执行程式</h3>
 
-<p>跟其他程式语言不太一样，<em>Ruby</em>的类别层级内也可以执行程式，例如以下：</p>
+<p>跟其他编程语言不太一样，<em>Ruby</em>的类别层级内也可以执行程式，例如以下：</p>
 
 <pre><code>class Demo
   puts "foobar"
@@ -743,7 +743,7 @@ p
 
 <h3 id="section-8">方法封装</h3>
 
-<p>类别中的方法预设是<code>public</code>的，宣告<code>private</code>或<code>protected</code>的话，该行以下的方法就会套用：</p>
+<p>类别中的方法预设是<code>public</code>的，声明<code>private</code>或<code>protected</code>的话，该行以下的方法就会套用：</p>
 
 <pre><code>class MyClass
 
@@ -766,7 +766,7 @@ p
 end
 </code></pre>
 
-<p><em>Ruby</em>的<em>private</em>和<em>protected</em>定义和其他程式语言不同，都是可以在整个继承体系内呼叫。两著差别在于<em>private</em>只有在对象内部才能呼叫，预设的接收者<em>(receiver)</em>就是对象本身，也就是<em>self</em>。而<em>protected</em>方法除了可以在本身内部呼叫以外，还可以被子类别的对象、或是另一个相同类别的对象呼叫。</p>
+<p><em>Ruby</em>的<em>private</em>和<em>protected</em>定义和其他编程语言不同，都是可以在整个继承体系内呼叫。两著差别在于<em>private</em>只有在对象内部才能呼叫，预设的接收者<em>(receiver)</em>就是对象本身，也就是<em>self</em>。而<em>protected</em>方法除了可以在本身内部呼叫以外，还可以被子类别的对象、或是另一个相同类别的对象呼叫。</p>
 
 <blockquote>
   <p>在对象导向的术语中，<code>object.call_method</code>的意思是<em>object</em>收到执行<em>call_method</em>的指令，也就是<em>object</em>是<em>call_method</em>方法的接受者<em>(receiver)</em>。因此，你甚至可以改写成<code>object.__send__(:call_method)</code></p>
@@ -1016,7 +1016,7 @@ call_block { |i| puts "#{i}: Blocks are cool!" }
 # "2: Blocks are cool!"
 # "3: Blocks are cool!"
 
-# 或是先宣告出 proc object
+# 或是先声明出 proc object
 proc_1 = Proc.new { |i| puts "#{i}: Blocks are cool!" }
 proc_2 = lambda { |i| puts "#{i}: Blocks are cool!" }
 
@@ -1132,7 +1132,7 @@ Object.respond_to? :name
 
 <h2 id="ruby--1">Ruby 应用</h2>
 
-<p>除了本书介绍的<em>Ruby on Rails</em>之外，<em>Ruby</em>也有各式各样的应用，以下兹举一些使用<em>Ruby</em>发展的专案：</p>
+<p>除了本书介绍的<em>Ruby on Rails</em>之外，<em>Ruby</em>也有各式各样的应用，以下兹举一些使用<em>Ruby</em>发展的项目：</p>
 
 <ul>
   <li>
@@ -1178,7 +1178,7 @@ Object.respond_to? :name
     </ul>
   </li>
   <li>
-<a href="http://www.redmine.org/">Redmine</a>：专案管理系统</li>
+<a href="http://www.redmine.org/">Redmine</a>：项目管理系统</li>
 </ul>
 
 

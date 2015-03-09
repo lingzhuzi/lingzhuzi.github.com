@@ -119,24 +119,24 @@ ActiveSupport::JSON.decode( "[{\"a\":1,\"b\":2},\"c\",\"d\"]" )
 =&gt; [{"a"=&gt;1, "b"=&gt;2}, "c", "d"]
 </code></pre>
 
-<p><a href="http://github.com/brianmario/yajl-ruby">yajl-ruby</a> 则是一套底层用C，比较快很多的 JSON parser，建议可以让<em>Rails</em>底层改用这套函式库，请在<code>Gemfile</code>档案中加入</p>
+<p><a href="http://github.com/brianmario/yajl-ruby">yajl-ruby</a> 则是一套底层用C，比较快很多的 JSON parser，建议可以让<em>Rails</em>底层改用这套函数库，请在<code>Gemfile</code>档案中加入</p>
 
 <pre><code>gem 'yajl-ruby', :require =&gt; 'yajl'
 </code></pre>
 
 <h2 id="xml">XML</h2>
 
-<p>Rails 内建使用 Ruby 的 XML 函式库 <a href="http://builder.rubyforge.org/">Builder</a></p>
+<p>Rails 内建使用 Ruby 的 XML 函数库 <a href="http://builder.rubyforge.org/">Builder</a></p>
 
-<p><a href="http://github.com/tenderlove/nokogiri">Nokogiri</a> 是一套基于 <a href="http://xmlsoft.org/">libxml2</a> 的函式库，效能较佳。可参考 <a href="http://www.engineyard.com/blog/2010/getting-started-with-nokogiri/">Getting Started with Nokogiri</a> 一文介绍用法。</p>
+<p><a href="http://github.com/tenderlove/nokogiri">Nokogiri</a> 是一套基于 <a href="http://xmlsoft.org/">libxml2</a> 的函数库，效能较佳。可参考 <a href="http://www.engineyard.com/blog/2010/getting-started-with-nokogiri/">Getting Started with Nokogiri</a> 一文介绍用法。</p>
 
-<p>如果要替换 Rails 内建的 XML 函式库，请在<code>Gemfile</code>档案中加入	</p>
+<p>如果要替换 Rails 内建的 XML 函数库，请在<code>Gemfile</code>档案中加入	</p>
 
 <pre><code>gem 'nokogiri'
 </code></pre>
 
 <blockquote>
-  <p>有些函式库为了执行效率，底层会改用 C 的函式库，适合于正式上线环境，缺点是需要编译，在一些特殊环境可能无法运作，例如最新版的 Nokogiri 就不支持 Windows 了。而纯 Ruby 实作的版本就没有这个问题。</p>
+  <p>有些函数库为了执行效率，底层会改用 C 的函数库，适合于正式上线环境，缺点是需要编译，在一些特殊环境可能无法运作，例如最新版的 Nokogiri 就不支持 Windows 了。而纯 Ruby 实作的版本就没有这个问题。</p>
 </blockquote>
 
 <h2 id="http">处理 HTTP</h2>
@@ -156,7 +156,7 @@ ActiveSupport::JSON.decode( "[{\"a\":1,\"b\":2},\"c\",\"d\"]" )
 
 <h2 id="csv">CSV</h2>
 
-<p><em>Ruby</em>就有内建这个函式库了，只需要<code>require "csv"</code>即可使用。</p>
+<p><em>Ruby</em>就有内建这个函数库了，只需要<code>require "csv"</code>即可使用。</p>
 
 <h2 id="admin-">Admin 介面</h2>
 
@@ -199,7 +199,7 @@ ActiveSupport::JSON.decode( "[{\"a\":1,\"b\":2},\"c\",\"d\"]" )
   <li>
 <a href="http://github.com/rails/acts_as_tree">ActsAsTree</a> 帮 ActiveRecord 加上树状操作功能。</li>
   <li>
-<a href="http://github.com/mbleigh/acts-as-taggable-on">acts-as-taggable-on</a> 製作 Tag 功能。</li>
+<a href="http://github.com/mbleigh/acts-as-taggable-on">acts-as-taggable-on</a> 制作 Tag 功能。</li>
   <li><a href="http://asciicasts.com/episodes/262-trees-with-ancestry">http://asciicasts.com/episodes/262-trees-with-ancestry</a></li>
 </ul>
 

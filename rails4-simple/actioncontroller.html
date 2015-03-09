@@ -159,7 +159,7 @@ end
 
 <ul>
   <li>
-<code>:template</code> 指定<em>Template</em>，这也是预设採用的参数，例如<code>render "/events/index.html.erb"</code>
+<code>:template</code> 指定<em>Template</em>，这也是预设采用的参数，例如<code>render "/events/index.html.erb"</code>
 </li>
   <li>
 <code>:action</code> 指定同一个<em>Controller</em>中另一个<em>Action</em>的<em>Template</em>(注意到只是使用它的<em>Template</em>，而不会执行该<em>Action</em>内的程式)</li>
@@ -233,7 +233,7 @@ end
 
 <h2 id="respondto">respond_to</h2>
 
-<p>我们在第六章<em>RESTful</em>应用程式中曾经示范过用法，<code>respond_to</code>可以用来回应不同的资料格式。<em>Rails</em>内建支持格式包括有<code>:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json</code>等。如果需要扩充，可以编辑<em>config/initializers/mime_types.rb</em>这个档案。</p>
+<p>我们在第六章<em>RESTful</em>应用程序中曾经示范过用法，<code>respond_to</code>可以用来回应不同的资料格式。<em>Rails</em>内建支持格式包括有<code>:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json</code>等。如果需要扩充，可以编辑<em>config/initializers/mime_types.rb</em>这个档案。</p>
 
 <p>如果你想要设定一个<em>else</em>的情况，你可以用<code>:any</code>：</p>
 
@@ -257,7 +257,7 @@ end
 
 <h3 id="session-storage">Session storage</h3>
 
-<p><em>Rails</em>预设採用<em>Cookies session storage</em>来储存<em>Session</em>资料，它是将<em>Session</em>资料通过<em>config/secrets.yml</em>的<code>secret_key_base</code>编码后放到浏览器的<em>Cookie</em>之中，最大的好处是对服务器的效能负担很低，缺点是大小最多<em>4Kb</em>，以及资料还是可以通过反编码后看出来，只是无法进行修改。因此安全性较低，不适合存放机密资料。</p>
+<p><em>Rails</em>预设采用<em>Cookies session storage</em>来储存<em>Session</em>资料，它是将<em>Session</em>资料通过<em>config/secrets.yml</em>的<code>secret_key_base</code>编码后放到浏览器的<em>Cookie</em>之中，最大的好处是对服务器的效能负担很低，缺点是大小最多<em>4Kb</em>，以及资料还是可以通过反编码后看出来，只是无法进行修改。因此安全性较低，不适合存放机密资料。</p>
 
 <p>除了<em>Cookies session storage</em>，<em>Rails</em>也支持其他方式，你可以修改<em>config/initializers/session_store.rb</em>：</p>
 
@@ -270,7 +270,7 @@ end
 
 <p>一般来说使用预设的<em>Cookies session storage</em>即可，如果对安全性较高要求，可以使用数据库。如果希望兼顾效能，可以考虑使用<em>Memcached</em>。</p>
 
-<p>採用<code>:active_record_store</code>的话，必须安装<em>activerecord-session_store gem</em>，然后产生<em>sessions</em>数据表：</p>
+<p>采用<code>:active_record_store</code>的话，必须安装<em>activerecord-session_store gem</em>，然后产生<em>sessions</em>数据表：</p>
 
 <pre><code>$ rails g active_record:session_migration
 $ rake db:migrate
@@ -392,7 +392,7 @@ end
 
 <h2 id="rescuefrom">rescue_from</h2>
 
-<p><code>rescue_from</code>可以在<em>Controller</em>中宣告救回例外，例如：</p>
+<p><code>rescue_from</code>可以在<em>Controller</em>中声明救回例外，例如：</p>
 
 <pre><code>class ApplicationController &lt; ActionController::Base
 

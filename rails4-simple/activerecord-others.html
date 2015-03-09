@@ -45,7 +45,7 @@
 
 <p>如何将对象导向中的继承概念，对应到关联式数据库的设计，是个大哉问。<em>Rails</em>内建了其中最简单的一个解法，只用一个数据表储存继承体系中的对象，搭配一个<code>type</code>栏位用来指名这笔资料的类别名称。</p>
 
-<p>要开啟<em>STI</em>功能，依照惯例只要有一个栏位叫做<code>type</code>，型态字串即可。假设以下的<code>posts</code>数据表有栏位叫做<code>type</code>，那么这三个<em>Models</em>实际上就会共用<code>posts</code>一个数据表，当然，还有这两个子类别也都继承到父类别的<code>validates_presence_of :subject</code>：</p>
+<p>要开啟<em>STI</em>功能，依照惯例只要有一个栏位叫做<code>type</code>，类型字串即可。假设以下的<code>posts</code>数据表有栏位叫做<code>type</code>，那么这三个<em>Models</em>实际上就会共用<code>posts</code>一个数据表，当然，还有这两个子类别也都继承到父类别的<code>validates_presence_of :subject</code>：</p>
 
 <pre><code>class Post &lt; ActiveRecord::Base
     validates_presence_of :subject
@@ -155,7 +155,7 @@ person.changes        # =&gt; { 'name' =&gt; ['Bill', 'Bob'] }
 <h2 id="serialize">序列化<em>Serialize</em>
 </h2>
 
-<p>序列化(<em>Serialize</em>)通常指的是将一个对象转换成一个可被数据库储存及传输的纯文字形态，反之将这笔资料从数据库读出后转回对象的动作我们就称之为反序列(<em>Deserialize</em>)，<em>Rails</em>提供了<code>serialize</code>让你指定需要序列化资料的栏位，任何对象在存入数据库时就会自动序列化成<em>YAML</em>格式，而当从数据库取出时就会自动帮你反序列成原先的对象。这个栏位通常用<em>text</em>型态，有比较大的空间可以储存资料，然后将一个<em>Hash</em>对象序列化之后存进去。</p>
+<p>序列化(<em>Serialize</em>)通常指的是将一个对象转换成一个可被数据库储存及传输的纯文字形态，反之将这笔资料从数据库读出后转回对象的动作我们就称之为反序列(<em>Deserialize</em>)，<em>Rails</em>提供了<code>serialize</code>让你指定需要序列化资料的栏位，任何对象在存入数据库时就会自动序列化成<em>YAML</em>格式，而当从数据库取出时就会自动帮你反序列成原先的对象。这个栏位通常用<em>text</em>类型，有比较大的空间可以储存资料，然后将一个<em>Hash</em>对象序列化之后存进去。</p>
 
 <p>常用的情境例如杂七杂八的使用者<em>settings</em>：</p>
 

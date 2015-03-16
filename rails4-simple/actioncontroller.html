@@ -49,7 +49,7 @@
 end
 </code></pre>
 
-<p>其中的<code>protect_from_forgery</code>方法啟动了<em>CSRF</em>安全性功能，所有非<em>GET</em>的<em>HTTP request</em>都必须带有一个<em>Token</em>参数才能存取，<em>Rails</em>会自动在所有表单中帮你插入<em>Token</em>参数，预设的<em>Layout</em>中也有一行<code>&lt;%= csrf_meta_tag %&gt;</code>标籤可以让<em>JavaScript</em>读取到这个<em>Token</em>。会需要关闭这个功能的时机是，你需要开放<em>API</em>给非浏览器客户端，这时候你会需要取消它：</p>
+<p>其中的<code>protect_from_forgery</code>方法启动了<em>CSRF</em>安全性功能，所有非<em>GET</em>的<em>HTTP request</em>都必须带有一个<em>Token</em>参数才能存取，<em>Rails</em>会自动在所有表单中帮你插入<em>Token</em>参数，预设的<em>Layout</em>中也有一行<code>&lt;%= csrf_meta_tag %&gt;</code>标籤可以让<em>JavaScript</em>读取到这个<em>Token</em>。会需要关闭这个功能的时机是，你需要开放<em>API</em>给非浏览器客户端，这时候你会需要取消它：</p>
 
 <pre><code>class ApisController &lt; ApplicationController
   skip_before_action :verify_authenticity_token

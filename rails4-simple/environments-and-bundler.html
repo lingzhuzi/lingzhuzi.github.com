@@ -124,7 +124,7 @@
 <h3 id="section-1">其他根目录下的档案</h3>
 
 <ul>
-  <li>config.ru	 用来啟动应用程序的 Rack 设定档</li>
+  <li>config.ru	 用来启动应用程序的 Rack 设定档</li>
   <li>Gemfile	 设定你的 Rails 应用程序会使用哪些 Gems</li>
   <li>README.rdoc	 你的应用程序使用手册。你可以用来告诉其他人你的应用程序是做什么用的，如何使用等等。</li>
   <li>Rakefile	 用来载入可以被命令行执行的 Rake 任务</li>
@@ -175,7 +175,7 @@ rails g controller people
 
 <h3 id="console--c">console 可缩写为 c</h3>
 
-<p>开啟一个 Rails 主控台</p>
+<p>开启一个 Rails 主控台</p>
 
 <pre><code>rails console
 rails c
@@ -195,7 +195,7 @@ rails c
 
 <h3 id="server--s">server 可缩写为 s</h3>
 
-<p>开啟一个 Rails 服务器</p>
+<p>开启一个 Rails 服务器</p>
 
 <pre><code>rails s
 </code></pre>
@@ -229,13 +229,13 @@ rails c
   <li>runner       在 Rails 环境中执行一段程式，例如 rails runner “puts Person.count”</li>
 </ul>
 
-<h2 id="rails--1">Rails 啟动与应用程序设定</h2>
+<h2 id="rails--1">Rails 启动与应用程序设定</h2>
 
 <blockquote>
   <p>不同的 Rails 版本产生的设定档可能会略有差异，这些设定档也没有列出所有<em>Rails</em>设定，只有列出比较常用的。</p>
 </blockquote>
 
-<p>啟动整个 Rails 程序(包括 rails server, rails runner, rails console 等) 时，会执行 application.rb 的应用程序设定，让我们来看看这个档案一些比较重要的部分吧。如果你对这个档案有修改，无论在什么模式下，都必须重新啟动 Rails 设定才会生效。</p>
+<p>启动整个 Rails 程序(包括 rails server, rails runner, rails console 等) 时，会执行 application.rb 的应用程序设定，让我们来看看这个档案一些比较重要的部分吧。如果你对这个档案有修改，无论在什么模式下，都必须重新启动 Rails 设定才会生效。</p>
 
 <pre><code># Custom directories with classes and modules you want to be autoloadable.
 # config.autoload_paths += %W(#{config.root}/extras)
@@ -287,7 +287,7 @@ config.active_record.whitelist_attributes = true
 
 <h3 id="initialzers">其他初始设定档(initialzers)</h3>
 
-<p>如果将所有的设定都放到 application.rb 就太混乱了，所以非 Rails 核心的设定，我们会放在 config/initializers 目录下。这个目录下的所有.rb档案会在Rails啟动时都会自动载入执行。预设产生的档案有五个：</p>
+<p>如果将所有的设定都放到 application.rb 就太混乱了，所以非 Rails 核心的设定，我们会放在 config/initializers 目录下。这个目录下的所有.rb档案会在Rails启动时都会自动载入执行。预设产生的档案有五个：</p>
 
 <h4 id="filterparameterlogging">filter_parameter_logging</h4>
 
@@ -435,7 +435,7 @@ production:
 config.cache_classes = false
 </code></pre>
 
-<p>使用 Rails 开发可以快速的原因之一，就是当你修改一个小东西，只要重新整理浏览器就可以马上看到修改后的结果。这个秘诀就在于  cache_classes = false 会让每一次的 HTTP 请求都重新载入类别档案。更仔细的说，当这个值是 false 的时候，Rails 会改用 Ruby 的 load 方法，每次执行都会重新载入一次。相反地，如果这个值是 true，则会用 Ruby 的 require 方法，只会在第一次碰到的时候载入，之后碰到 require 相同的档案，就会自动忽略，也就是说如果你啟动 Rails 后，档案有修改想看到结果，必须重新啟动 Rails 才行，否则无法立即看到结果。</p>
+<p>使用 Rails 开发可以快速的原因之一，就是当你修改一个小东西，只要重新整理浏览器就可以马上看到修改后的结果。这个秘诀就在于  cache_classes = false 会让每一次的 HTTP 请求都重新载入类别档案。更仔细的说，当这个值是 false 的时候，Rails 会改用 Ruby 的 load 方法，每次执行都会重新载入一次。相反地，如果这个值是 true，则会用 Ruby 的 require 方法，只会在第一次碰到的时候载入，之后碰到 require 相同的档案，就会自动忽略，也就是说如果你启动 Rails 后，档案有修改想看到结果，必须重新启动 Rails 才行，否则无法立即看到结果。</p>
 
 <pre><code># Show full error reports and disable caching
 config.consider_all_requests_local = true
@@ -628,7 +628,7 @@ test:
 
 <h2 id="bundler--gemfile-">Bundler 与 Gemfile 设定档</h2>
 
-<p>Bundler <a href="http://gembundler.com/">http://gembundler.com/</a> 是管理应用程序 Gem 依存性(dependencies)管理工具，它会根据 Gemfile 的设定自动下载及安装 Gem 套件，并且帮你解决不同套件之间的依存关係，更重要的是，它可以让不同开发者之间和部署时，所有依存套件的版本都能够一致。</p>
+<p>Bundler <a href="http://gembundler.com/">http://gembundler.com/</a> 是管理应用程序 Gem 依赖性(dependencies)管理工具，它会根据 Gemfile 的设定自动下载及安装 Gem 套件，并且帮你解决不同套件之间的依赖关係，更重要的是，它可以让不同开发者之间和部署时，所有依赖套件的版本都能够一致。</p>
 
 <p>在 Rails3 中 (Bundler 不只用在 Rails3，其他例如 Sinatra 或是 Rails2 也都可以使用) 要使用的 Gems，都必须声明在 Gemfile 设定档中，没写在裡面的话，就算手动 require 也找不到。这跟 Rails2 以前可以直接 require 任意 rubygems 不同，在使用 Bundler 的环境中，要 require 什么 rubygems 必须通过 Gemfile 管理。</p>
 
@@ -786,7 +786,7 @@ test:
 
 <h3 id="active-record">Active Record</h3>
 
-<p>Active Record 是 Rails 应用程序中的 Models 基础。它不依存特定的数据库系统，提供了 CRUD 功能、先进的查询能力以及可以跟其他 Models 关联的本事。</p>
+<p>Active Record 是 Rails 应用程序中的 Models 基础。它不依赖特定的数据库系统，提供了 CRUD 功能、先进的查询能力以及可以跟其他 Models 关联的本事。</p>
 
 <h3 id="active-support">Active Support</h3>
 

@@ -52,20 +52,20 @@
   <p><em><a href="http://jruby.org/">JRuby</a></em>与<em>Ruby</em>最大的差异在于一些需要编译的<em>RubyGem</em>套件：有些因为效能要求而用<em>C</em>语言撰写的<em>RubyGem</em>在<em>JRuby</em>上不一定能够安装使用。所幸这些多半都有替代的套件可以使用，但不在本书介绍范围。</p>
 </blockquote>
 
-<p>以上差不多就是最基本的开发需求。如果需要部署到正式上线环境，则至少还需要一个专门的网站服务器(<em>Apache</em>或<em>Nginx</em>等)，我们会在部署一章再详细说明。接下来我们会根据不同作业系统来说明如何安装<em>Rails</em>开发环境。</p>
+<p>以上差不多就是最基本的开发需求。如果需要部署到正式上线环境，则至少还需要一个专门的网站服务器(<em>Apache</em>或<em>Nginx</em>等)，我们会在部署一章再详细说明。接下来我们会根据不同操作系统来说明如何安装<em>Rails</em>开发环境。</p>
 
-<h2 id="section">作业系统</h2>
+<h2 id="section">操作系统</h2>
 
-<p><em>Ruby</em>可以运行在<em>Windows</em>、<em>Linux</em>、<em>Mac OS X</em>、<em>BSD</em>和<em>Solaris</em>上。虽然<em>Rails</em>可以在<em>Windows</em>上执行，但是有些套件只有支持<em>Unix-like</em>作业系统，以及<em>Ruby</em>程式在<em>Unix-like</em>系统上执行起来也比较快速及稳定。这是因为绝大多数的<em>Ruby</em>和<em>Rails</em>开发人员都是使用<em>Mac</em>和<em>Linux</em>系统。</p>
+<p><em>Ruby</em>可以运行在<em>Windows</em>、<em>Linux</em>、<em>Mac OS X</em>、<em>BSD</em>和<em>Solaris</em>上。虽然<em>Rails</em>可以在<em>Windows</em>上执行，但是有些套件只有支持<em>Unix-like</em>操作系统，以及<em>Ruby</em>程式在<em>Unix-like</em>系统上执行起来也比较快速及稳定。这是因为绝大多数的<em>Ruby</em>和<em>Rails</em>开发人员都是使用<em>Mac</em>和<em>Linux</em>系统。</p>
 
 <blockquote>
   <p><em>Unix-like</em>泛指各种传统的<em>Unix</em>系统，比如<em>FreeBSD</em>、<em>OpenBSD</em>、<em>Solaris</em>，以及各种与<em>Unix</em>类似的系统，例如<em>Linux</em>、<em>Mac OS X</em>等等。有的是自由软件，有的是商业软件，但都相当程度地保留了原始<em>Unix</em>系统的特性，以及有许多相似之处。</p>
 </blockquote>
 
-<p>因此，<em>Rails</em>的正式上线环境中都会强烈建议使用<em>Unix-like</em>作业系统。作为开发人员，拥有良好使用者介面、底层又与<em>Unix</em>类似的<em>Mac</em>作业系统就变成了首选的开发平台，大部分的专业<em>Ruby</em>工作者，也都是使用<em>Mac</em>电脑。不过，使用<em>Windows</em>的朋友也别担心，本书的内容一样都适用，入门学习绝对没问题。只是如果读者的每日工作就是进行<em>Web</em>网站开发，那么我会建议您考虑使用<em><a href="https://www.apple.com/osx/">Mac OS</a></em>系统或试试<em><a href="http://www.ubuntu.com/desktop">Ubuntu Desktop</a></em>作业系统。和学习<em>Ruby</em>一样，从 <em>Windows</em>转换到<em>Mac</em>也是非常有趣的事情，可以获得不少乐趣。</p>
+<p>因此，<em>Rails</em>的正式上线环境中都会强烈建议使用<em>Unix-like</em>操作系统。作为开发人员，拥有良好使用者介面、底层又与<em>Unix</em>类似的<em>Mac</em>操作系统就变成了首选的开发平台，大部分的专业<em>Ruby</em>工作者，也都是使用<em>Mac</em>电脑。不过，使用<em>Windows</em>的朋友也别担心，本书的内容一样都适用，入门学习绝对没问题。只是如果读者的每日工作就是进行<em>Web</em>网站开发，那么我会建议您考虑使用<em><a href="https://www.apple.com/osx/">Mac OS</a></em>系统或试试<em><a href="http://www.ubuntu.com/desktop">Ubuntu Desktop</a></em>操作系统。和学习<em>Ruby</em>一样，从 <em>Windows</em>转换到<em>Mac</em>也是非常有趣的事情，可以获得不少乐趣。</p>
 
 <blockquote>
-  <p>这是使用开源软件需要考虑的因素：开源软件是靠社群维护的，因此较多人使用的主流平台(作业系统、数据库等)就会支持较佳，而越少人用的平台就会地雷较多。</p>
+  <p>这是使用开源软件需要考虑的因素：开源软件是靠社群维护的，因此较多人使用的主流平台(操作系统、数据库等)就会支持较佳，而越少人用的平台就会地雷较多。</p>
 </blockquote>
 
 <h2 id="section-1">数据库</h2>
@@ -166,7 +166,7 @@
 
 <h2 id="ruby">安装<em>Ruby</em>及数据库</h2>
 
-<p>以下是分别在<em>Mac OSX</em>、<em>Ubuntu Desktop</em>作业系统上，安装<em>Ruby</em>最快速方便的方式。在上手<em>Rails</em>的开发之后，可以再参考<a href="advanced-installation.html">附录</a>，依需求安装不同开发环境。</p>
+<p>以下是分别在<em>Mac OSX</em>、<em>Ubuntu Desktop</em>操作系统上，安装<em>Ruby</em>最快速方便的方式。在上手<em>Rails</em>的开发之后，可以再参考<a href="advanced-installation.html">附录</a>，依需求安装不同开发环境。</p>
 
 <h3 id="mac-os-x-yosemite-1010">Mac OS X Yosemite (10.10)</h3>
 

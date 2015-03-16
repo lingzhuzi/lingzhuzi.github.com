@@ -562,7 +562,7 @@ end
   <p>SQL 的 like 查询会比对数据表的所有资料，如果资料量很大效能影响很大，请改用全文搜寻机制。</p>
 </blockquote>
 
-<p>连结的 helper 是 search_events_path，例如我们可以在 app/views/events/index.html.erb 上方加入：</p>
+<p>链接的 helper 是 search_events_path，例如我们可以在 app/views/events/index.html.erb 上方加入：</p>
 
 <pre><code>&lt;%= form_tag search_events_path, :method =&gt; :get do %&gt;
     &lt;%= text_field_tag "keyword" %&gt;
@@ -594,7 +594,7 @@ end
 
 <p>这个样板档案是 app/views/events/dashboard.html.erb，我们可以在这一页提供不同于 index.html.erb 的内容。</p>
 
-<p>连结的 helper 是 dashboard_event_path(event)，例如我们可以在 app/views/events/index.html.erb 的迴圈中加入：</p>
+<p>链接的 helper 是 dashboard_event_path(event)，例如我们可以在 app/views/events/index.html.erb 的迴圈中加入：</p>
 
 <pre><code>&lt;%= link_to 'Dashboard', dashboard_event_path(event) %&gt;
 </code></pre>
@@ -626,7 +626,7 @@ end
   <p>注意到我们必须先检查 params[:order] 的内容，而不应该直接 order(params[:order])。这会导致有 SQL Injection 安全问题。</p>
 </blockquote>
 
-<p>在 index.html.erb 中加入排序的超连结：</p>
+<p>在 index.html.erb 中加入排序的超链接：</p>
 
 <pre><code>&lt;%= link_to 'Sort by Name', events_path( :order =&gt; "name") %&gt;
 &lt;%= link_to 'Sort by Default', events_path %&gt;

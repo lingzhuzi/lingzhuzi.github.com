@@ -111,7 +111,7 @@ create  vendor/plugins/.gitkeep
   </tr>
   <tr>
     <td>config.ru</td>
-    <td>用来啟动应用程序的Rack服务器设定档</td>
+    <td>用来启动应用程序的Rack服务器设定档</td>
   </tr>
   <tr>
     <td>db/</td>
@@ -151,9 +151,9 @@ create  vendor/plugins/.gitkeep
   </tr>
 </table>
 
-<h2 id="section">啟动服务器</h2>
+<h2 id="section">启动服务器</h2>
 
-<p><em>Rails</em>使用了一套叫做<em>Bundler</em>的工具可以帮助我们检查及安装这个<em>Rails</em>应用程序所有依存的套件，请输入：</p>
+<p><em>Rails</em>使用了一套叫做<em>Bundler</em>的工具可以帮助我们检查及安装这个<em>Rails</em>应用程序所有依赖的套件，请输入：</p>
 
 <pre><code>$ bundle install
 </code></pre>
@@ -170,7 +170,7 @@ create  vendor/plugins/.gitkeep
 Your bundle is complete! Use `bundle show [gemname]` to see where a bundled gem is installed.
 </code></pre>
 
-<p>在开发用的电脑上，我们不需要安装如<em>Apache</em>、<em>IIS</em>的网站服务器。<em>Ruby</em>本身就有提供了<em>HTTP</em>服务器可以执行<em>Rails</em>，要啟动它，我们另开啟一个指令窗口，<em>cd</em>进到刚刚建立的<em>Rails</em>项目目录然后输入<em>bin/rails server</em>：</p>
+<p>在开发用的电脑上，我们不需要安装如<em>Apache</em>、<em>IIS</em>的网站服务器。<em>Ruby</em>本身就有提供了<em>HTTP</em>服务器可以执行<em>Rails</em>，要启动它，我们另开启一个指令窗口，<em>cd</em>进到刚刚建立的<em>Rails</em>项目目录然后输入<em>bin/rails server</em>：</p>
 
 <pre><code>$ cd projects/demo
 $ bin/rails server
@@ -193,14 +193,14 @@ $ bin/rails server
 </blockquote>
 
 <blockquote>
-  <p>使用<em>Ubuntu</em>作业系统的朋友，如果啟动服务器时出现<em>Could not find a JavaScript runtime</em>的错误，请编辑<em>Gemfile</em>这个档案加上一行<code>gem 'therubyracer'</code>，输入<code>bundle install</code>安装这个套件，然后再啟动一次<code>rails server</code>即可。这是因为在<em>Ubuntu</em>作业系统上预设没有任何<em>JavaScript</em>直译器可以给<em>Rails</em>使用。你可以装<em>Node.js</em>或是安装<em>therubyracer</em>这个<em>Ruby</em>套件来获得<em>JavaScript</em>直译器。</p>
+  <p>使用<em>Ubuntu</em>操作系统的朋友，如果启动服务器时出现<em>Could not find a JavaScript runtime</em>的错误，请编辑<em>Gemfile</em>这个档案加上一行<code>gem 'therubyracer'</code>，输入<code>bundle install</code>安装这个套件，然后再启动一次<code>rails server</code>即可。这是因为在<em>Ubuntu</em>操作系统上预设没有任何<em>JavaScript</em>直译器可以给<em>Rails</em>使用。你可以装<em>Node.js</em>或是安装<em>therubyracer</em>这个<em>Ruby</em>套件来获得<em>JavaScript</em>直译器。</p>
 </blockquote>
 
-<p>接着打开你的浏览器前往<em><a href="http://localhost:3000">http://localhost:3000</a></em>，我们可以看到<em>Rails</em>的预设首页。这个<em>Welcome Aboard</em>的画面可以确认设定无误，点选<em>About your application’s environment</em>超连结可以看到更多环境信息。</p>
+<p>接着打开你的浏览器前往<em><a href="http://localhost:3000">http://localhost:3000</a></em>，我们可以看到<em>Rails</em>的预设首页。这个<em>Welcome Aboard</em>的画面可以确认设定无误，点选<em>About your application’s environment</em>超链接可以看到更多环境信息。</p>
 
 <p><img src="images/firststep-welcome-screenshot.png" alt="Welcome screenshot"></p>
 
-<p>要中断服务器的话，请按<em>Ctrl+C</em>(若不灵光请改试<em>Ctrl+Z</em>)。在<em>development</em>开发模式的话，除了修改<em>config</em>或<em>vender</em>目录下的档案需要重新啟动之外，其他修改通常不需要重新啟动，修改的档案会自动重新载入。如果是 <em>production</em>正式上线模式的话，修改任何档案都必须重新啟动服务器才会有效果。</p>
+<p>要中断服务器的话，请按<em>Ctrl+C</em>(若不灵光请改试<em>Ctrl+Z</em>)。在<em>development</em>开发模式的话，除了修改<em>config</em>或<em>vender</em>目录下的档案需要重新启动之外，其他修改通常不需要重新启动，修改的档案会自动重新载入。如果是 <em>production</em>正式上线模式的话，修改任何档案都必须重新启动服务器才会有效果。</p>
 
 <h2 id="hello-world">第一个<em>Hello World!!</em>
 </h2>
@@ -244,7 +244,7 @@ end
 
 <p>这时再重新整理一次浏览器，你就会看到<em>Hello, World!</em>了。</p>
 
-<p>让我们再新增一个页面并加入超连结。再次编辑路由档案<em>config/routes.rb</em>加入一个路由，变成这样：</p>
+<p>让我们再新增一个页面并加入超链接。再次编辑路由档案<em>config/routes.rb</em>加入一个路由，变成这样：</p>
 
 <pre><code>Rails::Application.routes.draw do
   get "welcome/say_hello" =&gt; "welcome#say"
@@ -271,7 +271,7 @@ end
 &lt;p&gt;&lt;%= link_to 'Hello!', welcome_say_hello_path %&gt;&lt;/p&gt;
 </code></pre>
 
-<p><code>Time</code>是<em>Ruby</em>内建的时间类别，<code>Time.now</code>会输出目前时间。<code>link_to</code>是<em>Rails</em>内建的方法可以输出超连结，而<em>welcome_say_hello_path</em>会输出<code>/welcome/say_hello</code>这个网址。这种出现在<em>View</em>中的辅助方法统称作<em>Helper</em>。浏览<em>http://localhost:3000/welcome</em>，将看到<em>Hola!</em>及<em>Hello!</em>超连结。</p>
+<p><code>Time</code>是<em>Ruby</em>内建的时间类别，<code>Time.now</code>会输出目前时间。<code>link_to</code>是<em>Rails</em>内建的方法可以输出超链接，而<em>welcome_say_hello_path</em>会输出<code>/welcome/say_hello</code>这个网址。这种出现在<em>View</em>中的辅助方法统称作<em>Helper</em>。浏览<em>http://localhost:3000/welcome</em>，将看到<em>Hola!</em>及<em>Hello!</em>超链接。</p>
 
 <p><img src="images/firststep-hello-screenshot.png" alt="Hello screenshot"></p>
 
@@ -292,13 +292,13 @@ end
   <p><em>Ruby</em>的单行註解是用<code>#</code>井号</p>
 </blockquote>
 
-<p>这一行的意思是，将网站根目录导引至<em>welcome Controller</em>的<em>index Action</em>。那在<em>View</em>中要怎麼建立回首页的连结呢？编辑<em>app/views/welcome/say.html.erb</em>在Hello, World!下一行加入：</p>
+<p>这一行的意思是，将网站根目录导引至<em>welcome Controller</em>的<em>index Action</em>。那在<em>View</em>中要怎麼建立回首页的链接呢？编辑<em>app/views/welcome/say.html.erb</em>在Hello, World!下一行加入：</p>
 
 <pre><code>&lt;h1&gt;Hello, World!&lt;/h1&gt;
 &lt;p&gt;&lt;%= link_to "Home", root_path %&gt;&lt;/p&gt;
 </code></pre>
 
-<p>如此一来，网页的首页就会显示Hola!和时间，连到<em>http://localhost:3000/welcome/say_hello</em>的时候也会在底下显示一个「Home」的连结，点下去就会回到首页了。</p>
+<p>如此一来，网页的首页就会显示Hola!和时间，连到<em>http://localhost:3000/welcome/say_hello</em>的时候也会在底下显示一个「Home」的链接，点下去就会回到首页了。</p>
 
 <h2 id="section-2">设定及建立数据库</h2>
 

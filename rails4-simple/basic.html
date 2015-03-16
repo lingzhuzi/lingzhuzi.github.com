@@ -253,13 +253,13 @@ end
 &lt;%= link_to 'New Event', :controller =&gt; 'events', :action =&gt; 'new' %&gt;
 </code></pre>
 
-<p>这个<em>View</em>迭代了<code>@events</code>阵列并显示内容跟超连结，有几件值得注意的事情：</p>
+<p>这个<em>View</em>迭代了<code>@events</code>阵列并显示内容跟超链接，有几件值得注意的事情：</p>
 
 <p><code>&lt;%</code>和<code>&lt;%=</code>不太一样，前者只执行不输出，像用来迭代的<code>each</code>和<code>end</code>这两行就不需要输出。而后者<code>&lt;%=</code> 裡的结果会输出给浏览器。</p>
 
-<p><code>link_to</code>建立超连结到一个特定的位置，这里为浏览、编辑和删除都提供了超连结。</p>
+<p><code>link_to</code>建立超链接到一个特定的位置，这里为浏览、编辑和删除都提供了超链接。</p>
 
-<p>连往<em>http://localhost:3000/events</em>就会看到这一页。目前还没有任何资料，让我们继续实作点击<em>New Event</em>超连结之后的动作。</p>
+<p>连往<em>http://localhost:3000/events</em>就会看到这一页。目前还没有任何资料，让我们继续实作点击<em>New Event</em>超链接之后的动作。</p>
 
 <h3 id="section-2">新增资料</h3>
 
@@ -283,7 +283,7 @@ end
 &lt;% end %&gt;
 </code></pre>
 
-<p>这个<code>form_for</code>的程式码区块<em>(Code block)</em>被用来建立<em>HTML</em>表单。在区块中，你可以使用各种函数来建构表单。例如<code>f.text_field :name</code>建立出一个文字输入框，并填入<code>@event</code>的<em>name</em>属性资料。但这个表单只能基于这个<em>Model</em>有的属性(在这个例子是<em>name</em>跟<em>description</em>)。<em>Rails</em>偏好使用<code>form_for</code>而不是让你手写表单<em>HTML</em>，这是因为程式码可以更加简洁，而且可以明确地连结在<em>Model</em>对象上。</p>
+<p>这个<code>form_for</code>的程式码区块<em>(Code block)</em>被用来建立<em>HTML</em>表单。在区块中，你可以使用各种函数来建构表单。例如<code>f.text_field :name</code>建立出一个文字输入框，并填入<code>@event</code>的<em>name</em>属性资料。但这个表单只能基于这个<em>Model</em>有的属性(在这个例子是<em>name</em>跟<em>description</em>)。<em>Rails</em>偏好使用<code>form_for</code>而不是让你手写表单<em>HTML</em>，这是因为程式码可以更加简洁，而且可以明确地链接在<em>Model</em>对象上。</p>
 
 <p><code>form_for</code>区块也很聪明，<em>New Event</em>的表单跟<em>Edit Event</em>的表单，其中的送出网址跟按钮文字会不同的(根据<code>@event</code>的不同，前者是新建的，后者是已经建立过的)。</p>
 
@@ -329,7 +329,7 @@ end
 
 <h3 id="section-3">显示个别资料</h3>
 
-<p>当你在<em>index</em>页面点击<em>show</em>的活动连结，就会前往<em>http://localhost:3000/events/show/1</em>这个网址。<em>Rails</em>会呼叫<em>show action</em>并设定<code>params[:id]</code>为<code>1</code>。以下是<em>show Action</em>：</p>
+<p>当你在<em>index</em>页面点击<em>show</em>的活动链接，就会前往<em>http://localhost:3000/events/show/1</em>这个网址。<em>Rails</em>会呼叫<em>show action</em>并设定<code>params[:id]</code>为<code>1</code>。以下是<em>show Action</em>：</p>
 
 <p>编辑<em>app/controllers/events_controller.rb</em>加入</p>
 
@@ -384,7 +384,7 @@ end
 
 <h3 id="section-5">删除资料</h3>
 
-<p>最后，点击<em>Destroy</em>超连结会前往<em>destroy Action</em>，编辑<em>app/controllers/events_controller.rb</em>加入</p>
+<p>最后，点击<em>Destroy</em>超链接会前往<em>destroy Action</em>，编辑<em>app/controllers/events_controller.rb</em>加入</p>
 
 <pre><code>def destroy
   @event = Event.find(params[:id])
@@ -563,7 +563,7 @@ end
 <pre><code>gem "kaminari"
 </code></pre>
 
-<p>执行<code>bundle install</code>就会安装。装好后需要重新啟动服务器才会载入。</p>
+<p>执行<code>bundle install</code>就会安装。装好后需要重新启动服务器才会载入。</p>
 
 <p>修改<em>app/controllers/events_controller.rb</em>的<em>index Action</em>如下</p>
 
@@ -577,7 +577,7 @@ end
 <pre><code>&lt;%= paginate @events %&gt;
 </code></pre>
 
-<p>连往<em>http://localhost:3000/events/</em>，你可能需要多加几笔资料就会看到分页连结了。</p>
+<p>连往<em>http://localhost:3000/events/</em>，你可能需要多加几笔资料就会看到分页链接了。</p>
 
         <p><a href="#">》回到页首</a></p>
 	     </div>

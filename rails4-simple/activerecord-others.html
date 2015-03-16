@@ -45,7 +45,7 @@
 
 <p>如何将对象导向中的继承概念，对应到关联式数据库的设计，是个大哉问。<em>Rails</em>内建了其中最简单的一个解法，只用一个数据表储存继承体系中的对象，搭配一个<code>type</code>栏位用来指名这笔资料的类别名称。</p>
 
-<p>要开啟<em>STI</em>功能，依照惯例只要有一个栏位叫做<code>type</code>，类型字串即可。假设以下的<code>posts</code>数据表有栏位叫做<code>type</code>，那么这三个<em>Models</em>实际上就会共用<code>posts</code>一个数据表，当然，还有这两个子类别也都继承到父类别的<code>validates_presence_of :subject</code>：</p>
+<p>要开启<em>STI</em>功能，依照惯例只要有一个栏位叫做<code>type</code>，类型字串即可。假设以下的<code>posts</code>数据表有栏位叫做<code>type</code>，那么这三个<em>Models</em>实际上就会共用<code>posts</code>一个数据表，当然，还有这两个子类别也都继承到父类别的<code>validates_presence_of :subject</code>：</p>
 
 <pre><code>class Post &lt; ActiveRecord::Base
     validates_presence_of :subject

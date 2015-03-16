@@ -52,7 +52,7 @@
 
 <h2 id="unobtrusive-javascript">Unobtrusive JavaScript</h2>
 
-<p>Rails 从 3.0 后将<em>Ajax</em>使用的<em>JavaScript</em>都改成<em>Unobtrusive JavaScript(UJS)</em>方式。什么是<em>Unobtrusive</em>呢？用个范例来说吧，它会将超连结改成用表单<em>DELETE</em>送出，并且用一个提示窗口来作确认：</p>
+<p>Rails 从 3.0 后将<em>Ajax</em>使用的<em>JavaScript</em>都改成<em>Unobtrusive JavaScript(UJS)</em>方式。什么是<em>Unobtrusive</em>呢？用个范例来说吧，它会将超链接改成用表单<em>DELETE</em>送出，并且用一个提示窗口来作确认：</p>
 
 <pre><code>link_to 'Remove', event_path(1), :method =&gt; :delete, :data =&gt; { :confirm =&gt; "Sure?" }
 </code></pre>
@@ -75,14 +75,14 @@
 
 <h3 id="ajax--1">Ajax 表单</h3>
 
-<p>除了超连结 link_to 加上 :remote 可以变成 Ajax 之外，表单 form_for 也可以加上<code>:remote</code>变成 Ajax。</p>
+<p>除了超链接 link_to 加上 :remote 可以变成 Ajax 之外，表单 form_for 也可以加上<code>:remote</code>变成 Ajax。</p>
 
 <pre><code>form_for @user, :remote =&gt; true
 </code></pre>
 
 <h3 id="ajax--2">Ajax 按钮</h3>
 
-<p>同理于超连结 link_to，按钮 button_to 加上<code>:remote =&gt; true</code>参数也会变成 Ajax。</p>
+<p>同理于超链接 link_to，按钮 button_to 加上<code>:remote =&gt; true</code>参数也会变成 Ajax。</p>
 
 <p>除了已经看过的<code> :data =&gt; { :confirm =&gt; "Are you Sure?" }</code>之外，<code>disable_with</code>可以避免使用者连续按下送出：</p>
 
@@ -107,7 +107,7 @@
 &lt;/script&gt;
 </code></pre>
 
-<p>如此点下超连结后，就会把回传的<em>HTML</em>置入到<code>&lt;div id="content"&gt;</code>裡面。</p>
+<p>如此点下超链接后，就会把回传的<em>HTML</em>置入到<code>&lt;div id="content"&gt;</code>裡面。</p>
 
 <h2 id="javascript-">第二种方式：使用 JavaScript 脚本</h2>
 
@@ -172,7 +172,7 @@ end
 
 <p>事实上，<em>Rails</em>预设让每个换页都用上了<em>Ajax</em>技巧，这一招叫做<em><a href="https://github.com/rails/turbolinks">Turbolinks</a></em>，在预设的<em>Gemfile</em>中可以看到<code>gem "turbolinks"</code>，以及<em>Layout</em>中的<code>data-turbolinks-track</code>。</p>
 
-<p>它的作用是让每一个超连结都只用<em>Ajax</em>的方式将整个<code>body</code>内容替换掉，这样换页时就不需要重新载入<code>head</code>部份的标籤，包括<em>JavaScript</em>和<em>CSS</em>等等，目的是可以改善换页时的速度。</p>
+<p>它的作用是让每一个超链接都只用<em>Ajax</em>的方式将整个<code>body</code>内容替换掉，这样换页时就不需要重新载入<code>head</code>部份的标籤，包括<em>JavaScript</em>和<em>CSS</em>等等，目的是可以改善换页时的速度。</p>
 
 <p>要特别注意因为它没有整页重新载入，所以如果有放在<em>application.js</em>裡面的<code>$(document).ready</code>程式就变成只有第一次载入页面才执行到，换页时就失效了。这时候必须改成<code>$(document).on("page:change", function(){ ...})</code>。</p>
 

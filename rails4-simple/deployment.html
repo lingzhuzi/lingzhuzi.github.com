@@ -41,7 +41,7 @@
 <p>终于要脱离开发阶段，要把完成的<em>Ruby on Rails</em>应用程序拿来出上线见人了。在<code>rails server</code>指令中，其实是使用一套叫做<em>WEBrick</em>的服务器，这是一套纯<em>Ruby</em>实作的<em>HTTP</em>服务器。虽然开发时拿来用很方便，但是它的效能并不适合作为正式环境来使用。因此，我们在这一章将介绍几种在<em>Linux</em>上实际作为<em>Production</em>用途的部署方案。</p>
 
 <blockquote>
-  <p>虽然<em>Rails</em>在<em>Windows</em>平台上也可以执行开发，但是如第二章作业系统一节所说，<em>Ruby</em>在<em>Windows</em>平台上资源较少，效能也不如在<em>Unix-like</em>系统上，因此很少人拿来当做<em>Production</em>服务器用途。</p>
+  <p>虽然<em>Rails</em>在<em>Windows</em>平台上也可以执行开发，但是如第二章操作系统一节所说，<em>Ruby</em>在<em>Windows</em>平台上资源较少，效能也不如在<em>Unix-like</em>系统上，因此很少人拿来当做<em>Production</em>服务器用途。</p>
 </blockquote>
 
 <h2 id="ruby-on-rails-">Ruby on Rails 主机代管服务</h2>
@@ -129,7 +129,7 @@ CREATE DATABASE your_production_db_name CHARACTER SET utf8;
 $ sudo passenger-install-nginx-module
 </code></pre>
 
-<p>这是因为<em>Passenger</em>必须与<em>Nginx</em>一起编译的关係，所以<em>Passenger</em>的安装指令就包括了安装<em>Nginx</em>。接着我们设定 Nginx 啟动脚本：</p>
+<p>这是因为<em>Passenger</em>必须与<em>Nginx</em>一起编译的关係，所以<em>Passenger</em>的安装指令就包括了安装<em>Nginx</em>。接着我们设定 Nginx 启动脚本：</p>
 
 <pre><code>wget -O init-deb.sh http://www.linode.com/docs/assets/1139-init-deb.sh
 sudo mv init-deb.sh /etc/init.d/nginx
@@ -137,9 +137,9 @@ sudo chmod +x /etc/init.d/nginx
 sudo /usr/sbin/update-rc.d -f nginx defaults
 </code></pre>
 
-<p><em>Nginx</em>啟动用法：</p>
+<p><em>Nginx</em>启动用法：</p>
 
-<pre><code>sudo /etc/init.d/nginx start 啟动Nginx，打开浏览器指向 Server IP 可以看到 Welcome to nginx!
+<pre><code>sudo /etc/init.d/nginx start 启动Nginx，打开浏览器指向 Server IP 可以看到 Welcome to nginx!
 sudo /etc/init.d/nginx stop
 sudo /etc/init.d/nginx restart
 </code></pre>
@@ -164,7 +164,7 @@ sudo /etc/init.d/nginx restart
 
 <h2 id="section-1">自动化部署</h2>
 
-<p>决定应用程序服务器之后，接下来我们来讨论你要如何把程式部署上去？最常见的作法，不就是开个<em>FTP</em>或用<em>SFTP</em>上传上去不就好了？再不然<em>SSH</em>进去，从版本控制系统更新下来也可以。但是你有没有想过这部署的过程，其实是每次都重复一再执行的步骤(除非你部署完之后，就不需要再继续开发和升级)，随者时间的演进，这个过程常常会有各种定制的指令需要要执行，例如安装设定档、更新啟动某个<em>Daemon</em>、清除快取等等。因此，好的实务作法是自动化部署这个动作，只要执行一个指令，就自动更新上去并重新啟动服务器。这样也可以大大避免漏做了什么部署步骤的可能性。</p>
+<p>决定应用程序服务器之后，接下来我们来讨论你要如何把程式部署上去？最常见的作法，不就是开个<em>FTP</em>或用<em>SFTP</em>上传上去不就好了？再不然<em>SSH</em>进去，从版本控制系统更新下来也可以。但是你有没有想过这部署的过程，其实是每次都重复一再执行的步骤(除非你部署完之后，就不需要再继续开发和升级)，随者时间的演进，这个过程常常会有各种定制的指令需要要执行，例如安装设定档、更新启动某个<em>Daemon</em>、清除快取等等。因此，好的实务作法是自动化部署这个动作，只要执行一个指令，就自动更新上去并重新启动服务器。这样也可以大大避免漏做了什么部署步骤的可能性。</p>
 
 <h3 id="section-2">设定服务器部署使用者</h3>
 

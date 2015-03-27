@@ -1,0 +1,64 @@
+<html>
+<head>
+  <title>阳光电影Android客户端下载</title>
+</head>
+<body>
+
+  <div style="text-align: center;">
+    <h2>阳光电影Android客户端下载</h2>
+
+    <p id="notice">
+      请点击右上角的菜单，选择“在浏览器中打开”，之后就可以下载啦！
+    </p>
+
+    <p>这是电影天堂的非官方Android客户端，通过解析其网页获取影片数据，提供了自定义菜单、搜索、收藏影片等功能。项目源代码托管于<a href="https://github.com/lingzhuzi/MovieHeaven/">Github</a>。</p>
+
+    <h2 id="btn_download"><a href="https://raw.githubusercontent.com/lingzhuzi/MovieHeaven/master/release/MovieHeaven.apk">立即下载</a></h2>
+
+    <p id="erweima">
+      <p>
+        <label>或扫描下方的二维码下载到手机</label>
+      </p>
+      <img src="download_address.png">
+    </p>
+  </div>
+
+  <script type="text/javascript" src="../javascripts/jquery-2.1.3.min.js"></script>
+  <script type="text/javascript">
+    $(function(){
+      if(isWeixin()){
+        $("#notice").show();
+        $("#btn_download").hide();
+      } else {
+        $("#notice").hide();
+        $("#btn_download").show();
+      }
+
+      if(isMobile()){
+        $("#erweima").hide();
+      }
+
+      function isMobile(){
+        var mobileAgent = ["iphone", "ipod", "ipad", "android", "mobile", "blackberry", "webos", "incognito", "webmate", "bada", "nokia", "lg", "ucweb", "skyfire", "micromessenger"];
+
+        var browser = navigator.userAgent.toLowerCase();
+        for (var i=0; i<mobileAgent.length; i++){
+          if (browser.indexOf(mobileAgent[i])!=-1){
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function isWeixin(){
+        var ua = navigator.userAgent.toLowerCase();
+        if(ua.match(/MicroMessenger/i)=="micromessenger") {
+            return true;
+        } else {
+            return false;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

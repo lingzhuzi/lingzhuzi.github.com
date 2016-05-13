@@ -12,7 +12,9 @@
     <title>Lingzhuzi的GitHub</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="./assets/bootstrap-3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./bootstrap-3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./stylesheets/navbar.css" rel="stylesheet">
+    <link href="./stylesheets/index.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -23,14 +25,34 @@
 
   <body>
 
-    <div class="nav-bar"></div>
+    <!-- Static navbar -->
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Lingzhuzi</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">首页</a></li>
+            <li><a href="/projects.html">项目</a></li>
+            <li><a href="/articles.html">文章</a></li>
+            <li><a href="/about.html">关于</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 
     <div class="container">
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
         <h1>Lingzhuzi</h1>
-        <p><img src="./assets/img/logo.jpeg"></p>
         <p>北京</p>
         <p>Ruby on Rails 爱好者，开发者</p>
         <p>掌握Ruby Rails Android JavaScript CSS HTML等</p>
@@ -39,8 +61,25 @@
         </p>
       </div>
 
+      <div class="content">
+        <h2><a href="./rails4-simple/index.html">Ruby on Rails 实战圣经（简体中文）</a></h2>
+        <p>本书的原作者是<a href="http://ihower.tw/blog/">ihower</a>，来自台湾新竹，<a href="https://ihower.tw/rails4/">原书</a>为繁体字，为了方便阅读，我翻译（其实也不能叫翻译）成了简体，并没有做内容上的修改，时间及水平有限，纰漏或错误在所难免，如有意见建议或者勘误，请<a href="mailto:qdu_yanghui@126.com">来信给我</a>，或者在<a href="https://github.com/lingzhuzi/lingzhuzi.github.com/issues/new">GitHub上提Issues给我</a>。</p>
+      </div>
+
+
+      <div class="content alt">
+        <h2><a href="./MovieHeaven/index.html">阳光电影Android客户端</a></h2>
+        <p>本应用是<a href="http://ygdy8.com">阳光电影</a>的非官方Android客户端，通过解析网页获取影片数据，提供了自定义菜单、搜索、收藏影片等功能。<a href="https://github.com/lingzhuzi/MovieHeaven">项目源码</a>&nbsp;&nbsp;<a href="./MovieHeaven/download.html">下载APK安装包</a></p>
+      </div>
+
+
+      <div class="content">
+        <h2><a href="./scroll_page_helper/index.html">翻屏小助手</a></h2>
+        <p>这是一个google chrome浏览器扩展，提供了一键返回顶部、翻到底部、向上翻屏、向下翻屏、自动滚动的功能；提供黑名单和白名单，用来自定义在哪些网页上是否启用该扩展；按住S按钮可以拖动组件，右击S按钮弹出的菜单中提供了一些快捷操作，例如：关闭、保存位置等；点击S按钮进入设置页面，可设置组件在页面中的位置，是否自动保存组件移动后的位置，自动滚动的速度，黑名单及白名单等。安装方法：<a href="https://github.com/lingzhuzi/scroll_page_helper/blob/master/release/scroll_page_helper.crx?raw=true">下载</a>完成后拖到扩展程序页面即可。</p>
+      </div>
     </div> <!-- /container -->
 
+    <div class="footer"></div>
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -48,11 +87,7 @@
     <script src="http://cdn.bootcss.com/jquery/1.11.2/jquery.min.js"></script>
     <script src="http://cdn.bootcss.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
-    <script type="text/javascript">
-      (function(){
-        $('.nav-bar').load('header.html');
-      })();
-    </script>
+    <script src="./javascripts/ie10-viewport-bug-workaround.js"></script>
+
   </body>
 </html>

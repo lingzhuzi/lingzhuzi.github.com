@@ -1,0 +1,9 @@
+
+.content {
+  border-bottom: 1px dashed #888;
+  padding: 5px;
+}
+
+.content.alt {
+  background-color: #eee;
+}

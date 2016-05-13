@@ -1,0 +1,42 @@
+body {
+  background-color: #f2f2f2;
+}
+
+.header {
+  margin-top: -20px;
+  margin-bottom: 60px;
+  padding: 138px 0;
+  position: relative;
+  height: 350px;
+  background-position: center 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.logo_img {
+  text-align: center;
+  margin-top: 110px;
+}
+
+.logo_txt {
+  text-align: center;
+}
+
+.logo_txt h1 {
+  color: white;
+}
+
+.post {
+  padding: 15px;
+  margin-bottom: 30px;
+  background-color: white;
+}
+
+.post-img img {
+  width: 100%;
+  height: 100%;
+}
+
+.post-title {
+  text-align: center;
+}
